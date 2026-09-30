@@ -1,0 +1,118 @@
+---
+import {
+  buildJsonLdGraph,
+  getGlobalConfig,
+  type SchemaProps,
+  serializeJsonLd,
+} from '@unschema-graph/core';
+
+export interface Props extends SchemaProps {
+  /** Add an HTML debug comment and log a development summary. */
+  debug?: boolean;
+}
+
+const {
+  data,
+  item,
+  items,
+  pretty = false,
+  indent = 2,
+  context = 'https://schema.org',
+  graph = true,
+  baseUrl,
+  debug = false,
+  inLanguage,
+} = Astro.props;
+
+// Determine effective locale: Prop > Astro.currentLocale
+const effectiveLocale = inLanguage ?? Astro.currentLocale;
+
+// Determine effective base URL: Prop > Astro.site > Global Config
+const globalConfig = getGlobalConfig();
+const astroSiteStr = Astro.site
+  ? typeof Astro.site === 'string'
+    ? Astro.site
+    : (Astro.site as URL).href
+  : undefined;
+
+const effectiveBaseUrl = baseUrl ?? astroSiteStr ?? globalConfig.baseUrl;
+
+// Gather all items from data, item, and items aliases
+const rawItems: unknown[] = [];
+if (item) {
+  rawItems.push(item);
+}
+if (items && Array.isArray(items)) {
+  rawItems.push(...items);
+}
+if (data) {
+  if (Array.isArray(data)) {
+    rawItems.push(...data);
+  } else {
+    rawItems.push(data);
+  }
+}
+
+const languageAwareTypes = new Set([
+  'Article',
+  'BlogPosting',
+  'NewsArticle',
+  'WebSite',
+  'WebPage',
+  'ProfilePage',
+  'Book',
+  'Course',
+  'Movie',
+  'VideoObject',
+]);
+
+// Enrich copies so callers can safely reuse the same entity across locales/renders
+const preparedItems = rawItems.map((rawItem) => {
+  if (!effectiveLocale || !rawItem || typeof rawItem !== 'object') {
+    return rawItem;
+  }
+
+  const entity = rawItem as Record<string, unknown>;
+  const rawType = entity['@type'];
+  const types = Array.isArray(rawType) ? rawType : [rawType];
+  const isLanguageAware = types.some(
+    (type) => typeof type === 'string' && languageAwareTypes.has(type)
+  );
+
+  if (!isLanguageAware || 'inLanguage' in entity) {
+    return rawItem;
+  }
+
+  return { ...entity, inLanguage: effectiveLocale };
+});
+
+const graphPayload = buildJsonLdGraph(preparedItems, {
+  graph,
+  context,
+  baseUrl: effectiveBaseUrl,
+});
+const jsonLdOutput = graphPayload ? serializeJsonLd(graphPayload, { pretty, indent }) : null;
+
+let debugComment: string | null = null;
+if (debug && jsonLdOutput) {
+  const entityCount =
+    graphPayload &&
+    typeof graphPayload === 'object' &&
+    '@graph' in graphPayload &&
+    Array.isArray((graphPayload as Record<string, unknown>)['@graph'])
+      ? ((graphPayload as Record<string, unknown>)['@graph'] as unknown[]).length
+      : 1;
+
+  debugComment = `<!--\n  [@unschema-graph/astro debug]\n  - Entities in graph: ${entityCount}\n  - Base URL:          ${effectiveBaseUrl ?? 'none'}\n  - Locale:            ${effectiveLocale ?? 'none'}\n-->`;
+
+  if (import.meta.env?.DEV) {
+    console.log(`\n[@unschema-graph/astro] Debug Structured Data:`);
+    console.log(`  - Entities in graph: ${entityCount}`);
+    console.log(`  - Base URL:          ${effectiveBaseUrl ?? 'none'}`);
+    console.log(`  - Locale:            ${effectiveLocale ?? 'none'}\n`);
+  }
+}
+---
+
+{debugComment && <Fragment set:html={debugComment} />}
+{jsonLdOutput && <script type="application/ld+json" set:html={jsonLdOutput} />}

@@ -1,0 +1,379 @@
+---
+import { Schema } from '@unschema-graph/astro';
+import {
+  AggregateRating,
+  Article,
+  BreadcrumbList,
+  Event,
+  FAQPage,
+  JobPosting,
+  Offer,
+  Organization,
+  Person,
+  Product,
+  WebSite,
+} from '@unschema-graph/core';
+
+// 1. WebSite with Sitelinks Searchbox
+const website = WebSite({
+  '@id': '#website',
+  name: 'Rootage Media',
+  url: 'https://example.com',
+  searchUrl: 'https://example.com/search?q={search_term_string}',
+  publisher: '#organization',
+});
+
+// 2. Identity & Publisher
+const publisher = Organization({
+  '@id': '#organization',
+  name: 'Rootage Media',
+  url: 'https://example.com',
+  logo: 'https://example.com/logo.png',
+  foundingDate: '2024-01-15',
+});
+
+// 3. Author
+const author = Person({
+  '@id': '#author',
+  name: 'Johan Ledoux',
+  url: 'https://example.com/team/johan',
+  jobTitle: 'Lead Software Architect',
+});
+
+// 4. Article with magic @id publisher & author + speakable for Voice/AI
+const article = Article({
+  '@id': '#article',
+  headline: 'Architecture et SEO moderne avec Astro 5 et JSON-LD',
+  description: 'Guide complet pour structurer vos données avec Schema.org.',
+  image: 'https://example.com/images/astro-seo-guide.webp',
+  datePublished: 'today',
+  dateModified: 'now',
+  author: '#author',
+  publisher: '#organization',
+  keywords: ['astro', 'seo', 'json-ld', 'schema-org'],
+  speakable: ['h1', '.subtitle'],
+});
+
+// 5. Event with automatic endDate calculation from duration
+const event = Event({
+  '@id': '#event',
+  name: 'Astro Paris Meetup 2026',
+  description: 'Soirée de talks et démos sur Astro, SEO et performances web.',
+  location: 'Station F, 5 Parvis Alan Turing, 75013 Paris',
+  startDate: '2026-10-15T18:30:00+02:00',
+  duration: '2h30', // endDate sera auto-calculé: '2026-10-15T21:00:00+02:00'
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+});
+
+// 6. JobPosting with relative validThrough
+const job = JobPosting({
+  '@id': '#job',
+  title: 'Senior Frontend Engineer (Astro & TypeScript)',
+  description: 'Rejoignez notre équipe pour construire la nouvelle génération de web apps Astro.',
+  datePosted: 'today',
+  validThrough: '+30d', // Valide 30 jours à partir d'aujourd'hui
+  hiringOrganization: '#organization',
+  employmentType: 'FULL_TIME',
+  jobLocationType: 'TELECOMMUTE',
+});
+
+// 7. E-commerce Product with Offer & Rating
+const product = Product({
+  '@id': '#product',
+  name: 'Astro Pro Mechanical Keyboard',
+  image: 'https://example.com/images/keyboard.webp',
+  description: 'Clavier ergonomique customisé pour développeurs Astro.',
+  brand: 'AstroGear',
+  offers: Offer({
+    price: 189.99,
+    priceCurrency: 'EUR',
+    priceValidUntil: '+1y',
+    availability: 'https://schema.org/InStock',
+  }),
+  aggregateRating: AggregateRating({
+    ratingValue: 4.9,
+    reviewCount: 128,
+  }),
+});
+
+// 8. Breadcrumbs with relative paths
+const breadcrumbs = BreadcrumbList({
+  itemListElement: [
+    { name: 'Accueil', item: '/' },
+    { name: 'Blog', item: '/blog' },
+    { name: 'Guide Astro 5 SEO' }, // Nœud feuille sans URL
+  ],
+});
+
+// 9. FAQPage
+const faq = FAQPage({
+  questions: [
+    {
+      question: 'Quels sont les avantages de unschema-graph ?',
+      answer:
+        'Validation stricte Zod au build, 0 KB JavaScript côté client, déduplication @graph unifiée, intégration Dev Toolbar et protection anti-XSS.',
+    },
+    {
+      question: 'Comment fonctionnent les durées et dates ?',
+      answer:
+        'Vous pouvez écrire des durées naturelles (1h30, 45m) et des dates relatives (+30d, today, now) qui sont automatiquement converties en ISO 8601.',
+    },
+    {
+      question: 'Comment auditer le JSON-LD en intégration continue ?',
+      answer:
+        'Exécutez npx @unschema-graph/core audit dist dans vos pipelines CI/CD pour bloquer tout déploiement contenant une erreur de schéma.',
+    },
+  ],
+});
+
+const allEntities = [website, publisher, author, article, event, job, product, breadcrumbs, faq];
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playground — unschema-graph</title>
+
+    <!-- Injection JSON-LD avec inLanguage="fr", pretty et debug -->
+    <Schema data={allEntities} inLanguage="fr" pretty debug />
+
+    <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #151c2c;
+      --border: #232f48;
+      --primary: #a855f7;
+      --primary-hover: #9333ea;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #070a12;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1.5rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f472b6, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge {
+      font-size: 0.75rem;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+    li {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    li strong {
+      display: block;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    li span {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .grid-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .feature-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .feature-box h3 {
+      font-size: 1rem;
+      color: #f8fafc;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .feature-box p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #f472b6;
+    }
+    .tip {
+      background: rgba(168, 85, 247, 0.1);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      border-radius: 4px;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>unschema-graph</h1>
+        <p class="subtitle">Playground interactif & Démonstration en direct</p>
+      </header>
+
+      <section class="card">
+        <h2>5 Fonctionnalités Avancées <span class="badge">Nouveau</span></h2>
+        <div class="grid-features">
+          <div class="feature-box">
+            <h3>Dev Toolbar App</h3>
+            <p>
+              Inspecteur natif dans la DA Astro avec compteurs d'entités, détails complets de chaque
+              schéma et copie 1-clic du JSON-LD.
+            </p>
+          </div>
+          <div class="feature-box">
+            <h3>Héritage Astro i18n</h3>
+            <p>
+              Propagation automatique de <code>Astro.currentLocale</code> ou
+              <code>inLanguage="fr"</code>
+              sur toutes les entités de contenu.
+            </p>
+          </div>
+          <div class="feature-box">
+            <h3>Sitelinks Searchbox</h3>
+            <p>
+              Raccourci <code>searchUrl</code> sur <code>WebSite</code> créant automatiquement un
+              <code>SearchAction</code>
+              / <code>EntryPoint</code>.
+            </p>
+          </div>
+          <div class="feature-box">
+            <h3>AI & Voice Search</h3>
+            <p>
+              Attribut <code>speakable: ['h1', '.subtitle']</code> ciblant les sélecteurs CSS lus
+              par Google Assistant et IA vocales.
+            </p>
+          </div>
+          <div class="feature-box">
+            <h3>Audit CLI Build</h3>
+            <p>
+              Commande <code>npx @unschema-graph/core audit dist</code> pour valider statiquement
+              100% du JSON-LD en pipeline CI/CD.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>
+          Entités Schema.org injectées sur cette page
+          <span class="badge">9 entités liées via @graph</span>
+        </h2>
+        <ul>
+          <li>
+            <strong>WebSite & SearchAction</strong>
+            <span>Rootage Media avec Searchbox sitelinks</span>
+          </li>
+          <li>
+            <strong>Article</strong>
+            <span>Headline, dates relatives, speakable CSS</span>
+          </li>
+          <li>
+            <strong>Organization</strong>
+            <span>Rootage Media (#organization)</span>
+          </li>
+          <li>
+            <strong>Person</strong>
+            <span>Johan Ledoux (#author)</span>
+          </li>
+          <li>
+            <strong>Event</strong>
+            <span>Durée '2h30' &rarr; endDate calculé</span>
+          </li>
+          <li>
+            <strong>JobPosting</strong>
+            <span>Validité '+30d' & date 'today'</span>
+          </li>
+          <li>
+            <strong>Product & Offer</strong>
+            <span>Prix, devise EUR, validité '+1y'</span>
+          </li>
+          <li>
+            <strong>BreadcrumbList</strong>
+            <span>Chemins relatifs ('/', '/blog')</span>
+          </li>
+          <li>
+            <strong>FAQPage</strong>
+            <span>Questions & réponses enrichies</span>
+          </li>
+        </ul>
+
+        <div class="tip">
+          <strong>Comment inspecter le JSON-LD :</strong><br>
+          1. Ouvrez l'icône <strong>Schema Graph</strong> dans la barre Astro en bas de votre écran.<br>
+          2. Faites un clic-droit &gt; <em>Afficher le code source</em> (ou <code>Ctrl+U</code> /
+          <code>Cmd+Option+U</code>) pour voir le bloc
+          <code>&lt;script type="application/ld+json"&gt;</code>
+          complet, échappé anti-XSS et parfaitement unifié sous <code>@graph</code>.
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

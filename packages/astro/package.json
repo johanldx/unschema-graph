@@ -1,0 +1,59 @@
+{
+  "name": "@unschema-graph/astro",
+  "version": "0.1.0",
+  "description": "Astro integration, Schema component, content helpers, and dev toolbar for unschema-graph.",
+  "type": "module",
+  "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johanldx/unschema-graph.git",
+    "directory": "packages/astro"
+  },
+  "keywords": [
+    "astro",
+    "astro-component",
+    "seo",
+    "json-ld",
+    "schema-org",
+    "structured-data"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./integration": {
+      "types": "./dist/integration.d.ts",
+      "import": "./dist/integration.js",
+      "default": "./dist/integration.js"
+    },
+    "./content": {
+      "types": "./dist/content.d.ts",
+      "import": "./dist/content.js",
+      "default": "./dist/content.js"
+    },
+    "./Schema.astro": "./dist/Schema.astro"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-component.mjs",
+    "typecheck": "astro check",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "@unschema-graph/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "astro": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  }
+}
