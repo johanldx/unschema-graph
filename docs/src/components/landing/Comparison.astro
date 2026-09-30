@@ -1,0 +1,256 @@
+---
+import { Code } from 'astro:components';
+import type { LandingCopy } from '../../data/landing';
+import SectionHeader from './SectionHeader.astro';
+
+interface Props {
+  copy: LandingCopy['comparison'];
+}
+
+const { copy } = Astro.props;
+---
+
+<section id="comparison" aria-labelledby="comparison-title">
+  <SectionHeader id="comparison-title" title={copy.title} subtitle={copy.subtitle} />
+
+  <div class="comparison-grid">
+    <article class="pane pane-manual">
+      <header>
+        <span class="file"><i aria-hidden="true"></i><code>manual-schema.ts</code></span>
+        <span class="badge">{copy.without.badge}</span>
+      </header>
+      <div class="code-viewport">
+        <Code code={copy.without.code} lang="ts" theme="css-variables" class="syntax-code" />
+      </div>
+      <div class="result">
+        <strong>{copy.without.subtitle}</strong>
+        <ul>
+          {copy.without.points.map((point) => (
+  <li>
+    <span aria-hidden="true">×</span>
+    {point}
+  </li>
+))}
+        </ul>
+      </div>
+    </article>
+
+    <article class="pane pane-recommended">
+      <header>
+        <span class="file"><i aria-hidden="true"></i><code>schema.ts</code></span>
+        <span class="badge">{copy.with.badge}</span>
+      </header>
+      <div class="code-viewport">
+        <Code code={copy.with.code} lang="ts" theme="css-variables" class="syntax-code" />
+      </div>
+      <div class="result">
+        <p class="resolved">
+          <span class="resolved-icon" aria-hidden="true">✓</span>{copy.statusResolved}
+        </p>
+        <ul>
+          {copy.with.points.map((point) => (
+  <li>
+    <span aria-hidden="true">✓</span>
+    {point}
+  </li>
+))}
+        </ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+section {
+  padding-block: clamp(3.5rem, 7vw, 5.5rem);
+  border-bottom: var(--ug-border);
+  scroll-margin-top: 5rem;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-md);
+  background: var(--ug-line);
+  overflow: hidden;
+}
+
+.pane {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--ug-paper-raised);
+  overflow: hidden;
+}
+
+.pane-recommended {
+  background: var(--ug-paper-raised);
+}
+
+header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--ug-line);
+}
+
+.file {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ug-graphite);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.file i {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.pane-recommended .file i {
+  background: #10b981;
+}
+
+.badge {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--ug-radius-sm);
+  background: var(--ug-line-subtle);
+  color: var(--ug-muted);
+  font-family: var(--ug-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.pane-recommended .badge {
+  border: 1px solid var(--ug-pastel-lavender-border);
+  background: var(--ug-pastel-lavender);
+  color: var(--ug-pastel-lavender-ink);
+}
+
+.code-viewport {
+  --astro-code-color-text: #e6edf3;
+  --astro-code-color-background: var(--ug-code);
+  --astro-code-token-constant: #79c0ff;
+  --astro-code-token-string: #a5d6ff;
+  --astro-code-token-comment: #8b949e;
+  --astro-code-token-keyword: #ff7b72;
+  --astro-code-token-parameter: #ffa657;
+  --astro-code-token-function: #d2a8ff;
+  --astro-code-token-string-expression: #a5d6ff;
+  --astro-code-token-punctuation: #c9d1d9;
+  --astro-code-token-link: #a5d6ff;
+  height: 18rem;
+  min-width: 0;
+  background: var(--ug-code);
+  overflow: hidden;
+}
+
+.code-viewport :global(.syntax-code) {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  padding: 1.4rem 1.5rem;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--ug-font-mono);
+  font-size: clamp(0.76rem, 1.05vw, 0.86rem);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+}
+
+.code-viewport :global(.syntax-code > code) {
+  display: block;
+  font-size: 0;
+  line-height: 0;
+}
+
+.code-viewport :global(.syntax-code .line) {
+  display: block;
+  min-height: 1.45em;
+  font-size: clamp(0.76rem, 1.05vw, 0.86rem);
+  line-height: 1.45;
+}
+
+.result {
+  padding: 1.35rem;
+}
+
+.result strong {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--ug-graphite);
+  font-size: 0.95rem;
+}
+
+.resolved {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--ug-pastel-mint-border);
+  border-radius: var(--ug-radius-sm);
+  background: var(--ug-pastel-mint);
+  color: var(--ug-pastel-mint-ink);
+  font-family: var(--ug-font-mono);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+ul {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  gap: 0.5rem;
+  color: var(--ug-muted);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+li span {
+  color: #dc2626;
+  font-family: var(--ug-font-mono);
+  font-weight: 700;
+}
+
+.resolved-icon {
+  margin-inline-end: 0.45rem;
+}
+
+.pane-recommended li span {
+  color: var(--ug-pastel-mint-ink);
+}
+
+@media (max-width: 58rem) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .code-viewport {
+    height: auto;
+  }
+
+  .code-viewport :global(.syntax-code) {
+    padding: 1.1rem 1rem;
+  }
+}
+</style>

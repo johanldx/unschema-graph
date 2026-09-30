@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" role="img" aria-labelledby="title">
+  <title id="title">unschema-graph</title>
+  <g transform="translate(0)">
+    <path
+      d="M18 11H9v42h9M46 11h9v42h-9"
+      fill="none"
+      stroke="#7057ff"
+      stroke-width="5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <rect x="19" y="18" width="13" height="12" rx="2" fill="#ff795c" />
+    <rect x="32" y="34" width="13" height="12" rx="2" fill="#12bfae" />
+    <path d="M29 29l7 7" fill="none" stroke="#242033" stroke-width="4" stroke-linecap="round" />
+  </g>
+  <text
+    x="76"
+    y="41"
+    fill="#242033"
+    font-family="Instrument Sans,Arial,sans-serif"
+    font-size="27"
+    font-weight="650"
+    letter-spacing="-1"
+  >
+    unschema-graph
+  </text>
+</svg>

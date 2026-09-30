@@ -1,0 +1,149 @@
+---
+title: Installation
+description: Install unschema-graph packages for Astro, Svelte 5, or universal TypeScript projects.
+---
+
+Choose the package that renders your HTML. If you are unsure, [compare Astro, Svelte,
+and Core first](/getting-started/choose-your-environment/).
+
+## Requirements
+
+- **Node.js** 22.12 or newer
+- **Zod** 4 (peer dependency)
+- For Astro: Astro 5, 6, or 7
+- For Svelte: Svelte 5 (with runes support) or SvelteKit 2
+
+---
+
+## Astro Installation
+
+The `@unschema-graph/astro` package includes the Astro integration, the `<Schema />` component, Dev Toolbar inspector, and Content Collections helpers.
+
+### Option A: Automatic Setup (Recommended)
+
+Use the official Astro CLI to install and configure the integration in one step:
+
+```bash
+npx astro add @unschema-graph/astro
+```
+
+### Option B: Manual Installation
+
+Install the package and peer dependencies:
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/astro zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/astro zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/astro zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/astro zod
+```
+
+
+Add `schemaGraph()` to your `astro.config.mjs`:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import { schemaGraph } from '@unschema-graph/astro';
+
+export default defineConfig({
+  site: 'https://example.com',
+  integrations: [schemaGraph()],
+});
+```
+
+---
+
+## Svelte 5 & SvelteKit Installation
+
+The `@unschema-graph/svelte` package includes the native `<Schema />` Svelte 5 component and re-exports the complete Core builder catalog.
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/svelte zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/svelte zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/svelte zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/svelte zod
+```
+
+
+No build plugin or Vite configuration is required! Import components and builders directly in your `.svelte` files.
+
+---
+
+## Universal TypeScript / Core Installation
+
+For Node.js scripts, Nitro, Fastify, Next.js, Remix, or custom build pipelines:
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/core zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/core zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/core zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/core zod
+```
+
+
+---
+
+## Package Entry Points
+
+| Package / Import | Description |
+| --- | --- |
+| `@unschema-graph/astro` | Astro integration, `<Schema />` component, complete builder catalog, and utilities |
+| `@unschema-graph/astro/content` | Content collections mapping helpers (`toArticle`, `toBlogPosting`, `toNewsArticle`) *(also re-exported from `@unschema-graph/astro`)* |
+| `@unschema-graph/svelte` | Svelte 5 `<Schema />` component with complete re-export of all builders |
+| `@unschema-graph/core` | Universal TypeScript engine: builders, graph composition, serialization, and durations |
+| `@unschema-graph/core/audit` | Programmatic HTML JSON-LD audit engine |
+
+Continue with your first schema in [Astro](/getting-started/quick-start/astro/),
+[Svelte](/getting-started/quick-start/svelte/), or
+[Core](/getting-started/quick-start/core/).

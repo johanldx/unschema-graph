@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">unschema-graph concept A — linked JSON blocks</title>
+  <path
+    d="M18 13H9v38h9M46 13h9v38h-9"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path d="M20 22h11v9H20zm13 11h11v9H33z" fill="currentColor" />
+  <path d="m29 29 7 7" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+</svg>

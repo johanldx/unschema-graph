@@ -1,0 +1,175 @@
+---
+title: Graphs & Entity References
+description: Connect, reference, resolve, and deduplicate Schema.org entities in a unified JSON-LD graph.
+---
+
+A single **`@graph`** lets related entities reference shared nodes without repeating
+their properties across several JSON-LD documents. `unschema-graph` builds that graph,
+resolves relative identities, and merges nodes that share an `@id`.
+
+---
+
+## 1. Why use a unified `@graph`?
+
+When search crawlers (like Googlebot) inspect a web page, they need to understand how entities relate to each other:
+- Is this `Article` published by this `Organization`?
+- Is this `Person` the author of this content?
+- How does the `BreadcrumbList` relate to the `WebPage`?
+
+Scattering multiple `<script type="application/ld+json">` tags makes it harder for bots to correlate data. A unified `@graph` array bundles all nodes into a coherent knowledge graph for the page.
+
+---
+
+## 2. Assigning stable `@id` identifiers
+
+To reference an entity from another, assign it an `@id`:
+
+```ts title="src/lib/schema.ts"
+import { Article, Organization, Person } from '@unschema-graph/core';
+
+// 1. Shared organization node with fragment identifier
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme Publishing',
+  url: 'https://example.com',
+});
+
+// 2. Author with path fragment
+const author = Person({
+  '@id': '/authors/ada#person',
+  name: 'Ada Lovelace',
+  url: 'https://example.com/authors/ada',
+});
+
+// 3. Article referencing both via @id strings
+const article = Article({
+  '@id': '#article',
+  headline: 'Graphs & References Guide',
+  image: 'https://example.com/cover.jpg',
+  datePublished: 'today',
+  author: '/authors/ada#person',    // References Person
+  publisher: '#organization',        // References Organization
+});
+```
+
+### Identifier String Shorthands
+
+Any string starting with `#`, `/`, `http://`, `https://`, or `urn:` is automatically recognized as an entity reference and transformed into an `{ "@id": "..." }` pointer:
+
+```ts
+// Both of these produce identical JSON-LD:
+publisher: '#organization'
+publisher: { '@id': '#organization' }
+```
+
+If a string does not begin with an identifier prefix, `unschema-graph` uses the property's known fallback type to create a nested named entity:
+- `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
+- `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
+
+---
+
+## 3. Canonical URL Resolution
+
+In development or across multiple environments (staging, production), you often want to write relative identifiers like `#organization` or `/about#organization`.
+
+When you provide a `baseUrl` (or set `site` in Astro's `astro.config.mjs`), `unschema-graph` resolves all relative identifiers recursively:
+
+| Input `@id` or URL | Configured `baseUrl` | Output in `@graph` |
+| --- | --- | --- |
+| `#organization` | `https://example.com` | `https://example.com/#organization` |
+| `/about#organization` | `https://example.com` | `https://example.com/about#organization` |
+| `/blog/first-post` | `https://example.com` | `https://example.com/blog/first-post` |
+| `https://external.com/id` | `https://example.com` | `https://external.com/id` *(unchanged)* |
+
+:::tip
+Input entity objects are **never mutated**. Resolution creates a fresh graph payload;
+HTML-safe escaping happens later during serialization.
+:::
+
+---
+
+## 4. Automatic Deduplication & Node Merging
+
+If multiple parts of your application declare entities sharing the same resolved `@id`, `unschema-graph` merges them into a single graph node instead of generating duplicates.
+
+```ts title="Example: Global Layout + Local Page"
+// In Global Layout:
+const baseOrg = Organization({
+  '@id': '#organization',
+  name: 'Acme',
+  url: 'https://example.com',
+});
+
+// In Specific Page:
+const richOrg = Organization({
+  '@id': '#organization',
+  logo: 'https://example.com/logo.png',
+  sameAs: ['https://twitter.com/acme'],
+});
+
+// When passed together:
+<Schema items={[baseOrg, richOrg]} />
+```
+
+The resulting `@graph` contains only **one** `Organization` node with all properties merged: `name`, `url`, `logo`, and `sameAs`.
+
+```json title="Merged node"
+{
+  "@type": "Organization",
+  "@id": "https://example.com/#organization",
+  "name": "Acme",
+  "url": "https://example.com",
+  "logo": { "@type": "ImageObject", "url": "https://example.com/logo.png" },
+  "sameAs": ["https://twitter.com/acme"]
+}
+```
+
+---
+
+## 5. Multiple Schema.org Types
+
+Some entities represent multiple Schema.org types simultaneously (e.g. an `Article` that is also a `TechArticle` or `CreativeWork`).
+
+Use the `withAdditionalTypes()` helper to attach secondary types while preserving the primary builder type:
+
+```ts title="src/pages/docs/[slug].astro"
+import { Article, withAdditionalTypes } from '@unschema-graph/astro';
+
+const techGuide = withAdditionalTypes(
+  Article({
+    headline: 'Advanced TypeScript Architecture',
+    image: 'https://example.com/cover.jpg',
+    datePublished: 'today',
+    author: 'Ada Lovelace',
+  }),
+  ['TechArticle', 'CreativeWork']
+);
+```
+
+The output `@type` becomes an array: `["Article", "TechArticle", "CreativeWork"]`.
+
+---
+
+## 6. Standalone Flat Output (`graph={false}`)
+
+By default, `<Schema />` always wraps entities inside a root `@graph` array. If you are rendering an isolated single entity and need flat output without `@graph`, set `graph={false}`:
+
+```astro
+<Schema item={article} graph={false} />
+```
+
+Output:
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Advanced TypeScript Architecture",
+  ...
+}
+```
+
+:::note
+If more than one entity is passed to `<Schema />`, the `graph` prop is automatically forced to `true` to ensure valid JSON-LD.
+:::
+
+Next: learn [when validation happens and how to handle failures](/guides/validation/).

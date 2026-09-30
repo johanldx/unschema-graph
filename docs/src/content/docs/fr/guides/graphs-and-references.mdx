@@ -1,0 +1,177 @@
+---
+title: Graphes et références d'entités
+description: Relier, référencer, résoudre et dédupliquer vos entités Schema.org au sein d'un graphe JSON-LD unifié.
+---
+
+Un **`@graph`** unique permet aux entités reliées de référencer des nœuds partagés sans
+répéter leurs propriétés dans plusieurs documents JSON-LD. `unschema-graph` construit
+ce graphe, résout les identités relatives et fusionne les nœuds qui partagent un `@id`.
+
+---
+
+## 1. Pourquoi utiliser un `@graph` unifié ?
+
+Lorsqu'un robot d'indexation (comme Googlebot) analyse une page web, il doit comprendre comment les différentes entités s'articulent :
+- Cet `Article` est-il publié par cette `Organization` ?
+- Cette `Person` est-elle bien l'auteur de ce contenu ?
+- Comment le fil d'Ariane (`BreadcrumbList`) se rattache-t-il à la page (`WebPage`) ?
+
+Multiplier les balises `<script type="application/ld+json">` complique la corrélation sémantique pour les algorithmes. Un tableau racine `@graph` réunit toutes vos entités en un véritable graphe de connaissances pour chaque page.
+
+---
+
+## 2. Définir des identifiants stables avec `@id`
+
+Pour référencer une entité depuis une autre, assignez-lui un `@id` :
+
+```ts title="src/lib/schema.ts"
+import { Article, Organization, Person } from '@unschema-graph/core';
+
+// 1. Organisation partagée avec identifiant fragment
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme Publishing',
+  url: 'https://mon-site.fr',
+});
+
+// 2. Auteur avec chemin et fragment
+const author = Person({
+  '@id': '/auteurs/ada#person',
+  name: 'Ada Lovelace',
+  url: 'https://mon-site.fr/auteurs/ada',
+});
+
+// 3. Article référençant les deux entités via leur @id
+const article = Article({
+  '@id': '#article',
+  headline: 'Guide des graphes et références',
+  image: 'https://mon-site.fr/couverture.jpg',
+  datePublished: 'today',
+  author: '/auteurs/ada#person',    // Référence la Person
+  publisher: '#organization',        // Référence l'Organization
+});
+```
+
+### Raccourcis de chaînes d'identification
+
+Toute chaîne commençant par `#`, `/`, `http://`, `https://` ou `urn:` est automatiquement reconnue comme une référence d'entité et transformée en pointeur `{ "@id": "..." }` :
+
+```ts
+// Ces deux syntaxes produisent exactement le même JSON-LD :
+publisher: '#organization'
+publisher: { '@id': '#organization' }
+```
+
+Si la chaîne n'utilise aucun préfixe d'identifiant, `unschema-graph` utilise le type par défaut de la propriété pour instancier un objet nommé :
+- `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
+- `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
+
+---
+
+## 3. Résolution des URLs canoniques
+
+En cours de développement ou entre différents environnements (préproduction, production), il est courant d'écrire des identifiants relatifs comme `#organization` ou `/a-propos#person`.
+
+Lorsque vous configurez `baseUrl` (ou la propriété `site` dans l'`astro.config.mjs` d'Astro), `unschema-graph` résout récursivement tous les identifiants relatifs :
+
+| Entrée `@id` ou URL | `baseUrl` configurée | Sortie dans `@graph` |
+| --- | --- | --- |
+| `#organization` | `https://mon-site.fr` | `https://mon-site.fr/#organization` |
+| `/a-propos#person` | `https://mon-site.fr` | `https://mon-site.fr/a-propos#person` |
+| `/blog/premier-post` | `https://mon-site.fr` | `https://mon-site.fr/blog/premier-post` |
+| `https://externe.com/id` | `https://mon-site.fr` | `https://externe.com/id` *(inchangé)* |
+
+:::tip
+Les objets d'entités passés en entrée ne sont **jamais modifiés**. La résolution crée
+une nouvelle charge de graphe ; l'échappement HTML intervient ensuite pendant la
+sérialisation.
+:::
+
+---
+
+## 4. Déduplication et fusion automatique
+
+Si plusieurs composants ou layouts déclarent des entités partageant le même `@id` résolu, `unschema-graph` les fusionne automatiquement en un nœud unique au lieu de créer des doublons.
+
+```ts title="Exemple : Layout global + Page spécifique"
+// Dans le layout global :
+const baseOrg = Organization({
+  '@id': '#organization',
+  name: 'Acme',
+  url: 'https://mon-site.fr',
+});
+
+// Dans la page locale :
+const richOrg = Organization({
+  '@id': '#organization',
+  logo: 'https://mon-site.fr/logo.png',
+  sameAs: ['https://twitter.com/acme'],
+});
+
+// Passés ensemble au composant :
+<Schema items={[baseOrg, richOrg]} />
+```
+
+Le graphe final ne contiendra qu'un **seul** nœud `Organization` combinant l'ensemble des propriétés : `name`, `url`, `logo` et `sameAs`.
+
+```json title="Nœud fusionné"
+{
+  "@type": "Organization",
+  "@id": "https://mon-site.fr/#organization",
+  "name": "Acme",
+  "url": "https://mon-site.fr",
+  "logo": { "@type": "ImageObject", "url": "https://mon-site.fr/logo.png" },
+  "sameAs": ["https://twitter.com/acme"]
+}
+```
+
+---
+
+## 5. Types Schema.org multiples
+
+Certaines entités relèvent de plusieurs types Schema.org à la fois (par exemple un `Article` qui est également un `TechArticle` ou une `CreativeWork`).
+
+Utilisez le helper `withAdditionalTypes()` pour déclarer des types secondaires tout en conservant le type principal du builder :
+
+```ts title="src/pages/docs/[slug].astro"
+import { Article, withAdditionalTypes } from '@unschema-graph/astro';
+
+const techGuide = withAdditionalTypes(
+  Article({
+    headline: 'Architecture TypeScript avancée',
+    image: 'https://mon-site.fr/cover.jpg',
+    datePublished: 'today',
+    author: 'Ada Lovelace',
+  }),
+  ['TechArticle', 'CreativeWork']
+);
+```
+
+Le champ `@type` résultant sera un tableau : `["Article", "TechArticle", "CreativeWork"]`.
+
+---
+
+## 6. Sortie plate sans graphe (`graph={false}`)
+
+Par défaut, `<Schema />` enveloppe systématiquement vos entités dans un tableau `@graph`. Si vous ne rendez qu'une seule entité et exigez une structure plate sans `@graph`, désactivez l'option avec `graph={false}` :
+
+```astro
+<Schema item={article} graph={false} />
+```
+
+Sortie générée :
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Architecture TypeScript avancée",
+  ...
+}
+```
+
+:::note
+Si plusieurs entités sont transmises au composant `<Schema />`, la propriété `graph` repasse automatiquement à `true` pour garantir la conformité JSON-LD.
+:::
+
+Étape suivante : comprendre [quand intervient la validation et comment traiter ses
+échecs](/fr/guides/validation/).

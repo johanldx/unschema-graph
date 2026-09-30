@@ -1,0 +1,179 @@
+---
+interface Props {
+  locale?: 'en' | 'fr';
+  compact?: boolean;
+}
+const { locale = 'en', compact = false } = Astro.props;
+const label = locale === 'fr' ? 'Environnement :' : 'Environment:';
+---
+
+<fieldset class:list={['environment-picker', { compact }]} data-environment-picker>
+  <legend>{label}</legend>
+  <div class="picker-group">
+    {[
+  { id: 'astro', name: 'Astro', badge: 'Astro' },
+  { id: 'svelte', name: 'Svelte', badge: 'Svelte' },
+  { id: 'core', name: 'TypeScript', badge: 'TypeScript' },
+].map((item, index) => (
+  <label class="picker-option">
+    <input
+      type="radio"
+      name={`environment-${compact ? 'compact' : 'full'}-${Astro.url.pathname}`}
+      value={item.id}
+      checked={index === 0}
+    />
+    <span class="picker-pill">
+      <strong>{item.name}</strong>
+      {item.badge && <small>{item.badge}</small>}
+    </span>
+  </label>
+))}
+  </div>
+</fieldset>
+
+<script>
+const key = 'unschema-graph:environment';
+
+const applyEnvironment = (value: string, shouldNavigate = false) => {
+  document.documentElement.dataset.environment = value;
+
+  document
+    .querySelectorAll<HTMLInputElement>('[data-environment-picker] input')
+    .forEach((input) => {
+      input.checked = input.value === value;
+    });
+
+  window.dispatchEvent(new CustomEvent('unschema:environment', { detail: value }));
+
+  // If user is explicitly on a framework-specific quickstart or integration page, navigate to match
+  if (shouldNavigate) {
+    const currentPath = window.location.pathname;
+    const isQuickstart = /\/quick-start\/(astro|svelte|core)\/?/.test(currentPath);
+    const isIntegration = /\/integrations\/(astro|svelte|core)\/?/.test(currentPath);
+
+    if (isQuickstart) {
+      const newPath = currentPath.replace(
+        /\/quick-start\/(astro|svelte|core)\/?/,
+        `/quick-start/${value}/`
+      );
+      if (newPath !== currentPath) {
+        window.location.pathname = newPath;
+      }
+    } else if (isIntegration) {
+      const newPath = currentPath.replace(
+        /\/integrations\/(astro|svelte|core)\/?/,
+        `/integrations/${value}/`
+      );
+      if (newPath !== currentPath) {
+        window.location.pathname = newPath;
+      }
+    }
+  }
+};
+
+document.querySelectorAll<HTMLElement>('[data-environment-picker]').forEach((picker) => {
+  picker.addEventListener('change', (event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.value) {
+      localStorage.setItem(key, input.value);
+      applyEnvironment(input.value, true);
+    }
+  });
+});
+
+const stored = localStorage.getItem(key) || 'astro';
+applyEnvironment(stored, false);
+</script>
+
+<style>
+.environment-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+legend {
+  float: left;
+  margin-right: 0.5rem;
+  color: var(--ug-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.picker-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-sm);
+  background: var(--ug-paper-raised);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.picker-option {
+  position: relative;
+  cursor: pointer;
+  margin: 0;
+}
+.picker-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.picker-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 32px;
+  padding: 0.25rem 0.65rem;
+  border-radius: calc(var(--ug-radius-sm) - 2px);
+  color: var(--ug-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  user-select: none;
+  transition: all 0.14s ease;
+}
+.picker-pill strong {
+  font-weight: 650;
+}
+.picker-pill small {
+  font-size: 0.64rem;
+  font-weight: 500;
+  opacity: 0.75;
+}
+.picker-option input:hover + .picker-pill {
+  color: var(--ug-graphite);
+  background: color-mix(in srgb, var(--ug-violet) 8%, transparent);
+}
+.picker-option input:checked + .picker-pill {
+  background: var(--ug-violet);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(112, 87, 255, 0.3);
+}
+.picker-option input:checked + .picker-pill small {
+  opacity: 0.9;
+}
+.picker-option input:focus-visible + .picker-pill {
+  outline: 2px solid var(--ug-focus);
+  outline-offset: 1px;
+}
+.compact legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+@media (max-width: 35rem) {
+  .picker-pill small {
+    display: none;
+  }
+  .picker-pill {
+    min-height: 36px;
+    padding: 0.3rem 0.55rem;
+  }
+}
+</style>

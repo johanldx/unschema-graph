@@ -1,0 +1,128 @@
+---
+title: Universal TypeScript & Core
+description: Use the universal unschema-graph engine in any JavaScript or TypeScript environment.
+---
+
+The `@unschema-graph/core` package provides a standalone, framework-agnostic engine. It works in Node.js, Bun, Deno, Vite, Nitro, Fastify, Next.js, Nuxt, Remix, or static build scripts.
+
+## Installation
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/core zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/core zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/core zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/core zod
+```
+
+
+---
+
+## The Core Pipeline
+
+The core engine transforms typed entities into clean, anti-XSS JSON-LD via two primary functions: `buildJsonLdGraph` and `serializeJsonLd`.
+
+```ts
+import {
+  Article,
+  Organization,
+  buildJsonLdGraph,
+  serializeJsonLd,
+} from '@unschema-graph/core';
+
+// 1. Build strictly typed entities
+const org = Organization({
+  '@id': '#organization',
+  name: 'Acme Corp',
+  url: 'https://example.com',
+});
+
+const article = Article({
+  headline: 'Core Schema.org in Node.js',
+  image: 'https://example.com/cover.jpg',
+  datePublished: 'today',
+  author: 'Ada Lovelace',
+  publisher: '#organization',
+});
+
+// 2. Resolve relative @ids and compose unified @graph
+const graphPayload = buildJsonLdGraph([org, article], {
+  baseUrl: 'https://example.com',
+  graph: true,
+});
+
+// 3. Serialize with safe Unicode escaping (prevents script breakout)
+const scriptContent = serializeJsonLd(graphPayload, { pretty: true });
+
+console.log(scriptContent);
+```
+
+### Output:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://example.com/#organization",
+      "name": "Acme Corp",
+      "url": "https://example.com"
+    },
+    {
+      "@type": "Article",
+      "headline": "Core Schema.org in Node.js",
+      "image": "https://example.com/cover.jpg",
+      "datePublished": "2026-09-29T00:00:00.000Z",
+      "author": {
+        "@type": "Person",
+        "name": "Ada Lovelace"
+      },
+      "publisher": {
+        "@id": "https://example.com/#organization"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Global Configuration
+
+You can set shared validation options and integration defaults once at app bootstrap.
+`buildJsonLdGraph()` does not read `baseUrl` from this store automatically; pass it in
+`GraphOptions` when composing a graph with Core.
+
+```ts
+import { setGlobalConfig } from '@unschema-graph/core';
+
+setGlobalConfig({
+  onError: process.env.NODE_ENV === 'production' ? 'throw' : 'warn',
+  baseUrl: 'https://example.com',
+});
+```
+
+To reset or inspect the configuration:
+```ts
+import { getGlobalConfig, resetGlobalConfig } from '@unschema-graph/core';
+
+const current = getGlobalConfig();
+resetGlobalConfig();
+```

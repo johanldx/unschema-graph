@@ -1,0 +1,50 @@
+---
+interface Props {
+  animated?: boolean;
+  decorative?: boolean;
+  size?: number;
+}
+const { animated = false, decorative = true, size = 32 } = Astro.props;
+---
+
+<svg
+  class:list={['brand-mark', { animated }]}
+  width={size}
+  height={size}
+  viewBox="0 0 64 64"
+  role={decorative ? undefined : 'img'}
+  aria-hidden={decorative ? 'true' : undefined}
+  aria-label={decorative ? undefined : 'unschema-graph'}
+>
+  <path class="brackets" d="M18 11H9v42h9M46 11h9v42h-9" />
+  <rect class="node node-a" x="19" y="18" width="13" height="12" rx="2" />
+  <rect class="node node-b" x="32" y="34" width="13" height="12" rx="2" />
+  <path class="edge" d="M29 29l7 7" />
+</svg>
+<style>
+.brand-mark {
+  display: block;
+  overflow: visible;
+}
+.brackets,
+.edge {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.brackets {
+  stroke: var(--ug-violet);
+  stroke-width: 5;
+}
+.edge {
+  stroke: currentColor;
+  stroke-width: 4;
+}
+.node-a {
+  fill: var(--ug-violet);
+}
+.node-b {
+  fill: var(--ug-violet-strong);
+}
+</style>

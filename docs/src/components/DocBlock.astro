@@ -1,0 +1,43 @@
+---
+interface Props {
+  kind: 'definition' | 'guarantee' | 'diagram' | 'result' | 'checklist';
+  title: string;
+}
+const { kind, title } = Astro.props;
+const icons = { definition: 'Aa', guarantee: '!', diagram: '→', result: '✓', checklist: '☑' };
+---
+
+<aside class:list={['doc-block', kind]} aria-label={title}>
+  <span aria-hidden="true">{icons[kind]}</span>
+  <div>
+    <strong>{title}</strong>
+    <div class="body"><slot /></div>
+  </div>
+</aside>
+<style>
+.doc-block {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.9rem;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  border-block: var(--ug-border);
+}
+.doc-block > span {
+  color: var(--ug-violet-strong);
+  font: 600 0.85rem var(--ug-font-mono);
+}
+strong {
+  color: var(--ug-graphite);
+}
+.body {
+  margin-top: 0.35rem;
+  color: var(--ug-muted);
+}
+.guarantee {
+  border-color: var(--ug-coral);
+}
+.result {
+  border-color: var(--ug-aqua);
+}
+</style>

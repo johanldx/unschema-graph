@@ -1,0 +1,138 @@
+---
+interface Props {
+  command: string;
+  label: string;
+  successMessage: string;
+  errorMessage: string;
+}
+
+const { command, label, successMessage, errorMessage } = Astro.props;
+---
+
+<copy-command data-success={successMessage} data-error={errorMessage}>
+  <span class="prompt" aria-hidden="true">$</span>
+  <code>{command}</code>
+  <button type="button" data-copy-value={command} aria-label={label}>
+    <svg
+      class="copy-icon"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+    <span class="success-icon" aria-hidden="true">✓</span>
+  </button>
+  <span class="announcement" aria-live="polite"></span>
+</copy-command>
+
+<script>
+class CopyCommandElement extends HTMLElement {
+  connectedCallback() {
+    const button = this.querySelector<HTMLButtonElement>('button[data-copy-value]');
+    const announcement = this.querySelector<HTMLElement>('.announcement');
+    if (!button || !announcement || button.dataset.ready === 'true') return;
+
+    button.dataset.ready = 'true';
+    button.addEventListener('click', async () => {
+      const value = button.dataset.copyValue;
+      if (!value) return;
+
+      try {
+        await navigator.clipboard.writeText(value);
+        this.dataset.copied = 'true';
+        announcement.textContent = this.dataset.success ?? '';
+        window.setTimeout(() => {
+          delete this.dataset.copied;
+        }, 2000);
+      } catch {
+        announcement.textContent = this.dataset.error ?? '';
+      }
+    });
+  }
+}
+
+if (!customElements.get('copy-command')) {
+  customElements.define('copy-command', CopyCommandElement);
+}
+</script>
+
+<style>
+copy-command {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-sm);
+  background: var(--ug-paper);
+  color: var(--ug-graphite);
+  font-family: var(--ug-font-mono);
+  font-size: 0.8rem;
+  overflow: hidden;
+}
+
+.prompt {
+  padding-inline-start: 0.75rem;
+  color: var(--ug-muted);
+}
+
+code {
+  min-width: 0;
+  padding: 0.7rem 0.5rem;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 0;
+  border-inline-start: 1px solid var(--ug-line);
+  background: transparent;
+  color: var(--ug-muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:hover {
+  background: var(--ug-line-subtle);
+  color: var(--ug-violet-strong);
+}
+
+.success-icon {
+  display: none;
+  color: var(--ug-pastel-mint-ink);
+  font-weight: 700;
+}
+
+copy-command[data-copied="true"] .copy-icon {
+  display: none;
+}
+
+copy-command[data-copied="true"] .success-icon {
+  display: inline;
+}
+
+.announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+</style>

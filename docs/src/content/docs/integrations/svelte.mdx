@@ -1,0 +1,157 @@
+---
+title: Svelte 5 & SvelteKit
+description: Native Schema.org JSON-LD component for Svelte 5 using reactive runes and SSR <svelte:head>.
+---
+
+The `@unschema-graph/svelte` package provides a native Svelte 5 component (`<Schema />`) and re-exports the complete catalog of typed Schema.org builders with no additional configuration.
+
+---
+
+## 1. Installation
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/svelte zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/svelte zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/svelte zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/svelte zod
+```
+
+
+No build plugin or Vite integration is required: import the component and builders directly into your `.svelte` files.
+
+---
+
+## 2. Svelte 5 Runes & Reactivity
+
+The `<Schema />` component is written natively for Svelte 5. It uses `$props()` and `$derived.by()` internally. When reactive variables bound to `$state` or `$derived` change, the JSON-LD script inside `<svelte:head>` updates instantly.
+
+```svelte title="src/routes/blog/[slug]/+page.svelte"
+<script lang="ts">
+import { Article, Person, Schema } from '@unschema-graph/svelte';
+
+let title = $state('Building with Svelte 5 Runes');
+let authorName = $state('Johan Ledoux');
+
+// Derived entities automatically track reactive dependencies
+const author = $derived(
+  Person({
+    '@id': '#author',
+    name: authorName,
+    url: 'https://example.com/team/johan',
+  })
+);
+
+const article = $derived(
+  Article({
+    '@id': '#article',
+    headline: title,
+    image: 'https://example.com/cover.webp',
+    datePublished: 'today',
+    author: '#author',
+    publisher: 'https://example.com/#organization',
+  })
+);
+</script>
+
+<!-- The component injects the JSON-LD script into the document <head> -->
+<Schema items={[author, article]} baseUrl="https://example.com" inLanguage="en" />
+
+<main>
+  <h1>{title}</h1>
+  <input type="text" bind:value={title} placeholder="Post title" />
+  <input type="text" bind:value={authorName} placeholder="Author name" />
+</main>
+```
+
+---
+
+## 3. SvelteKit SSR Integration
+
+In SvelteKit, structured data rendered by `<Schema />` is serialized during Server-Side Rendering (SSR) and included in the initial HTML payload sent to crawlers and search engine bots.
+
+### Global Layout Pattern (`+layout.svelte`)
+
+Define site-wide metadata in your root layout:
+
+```svelte title="src/routes/+layout.svelte"
+<script lang="ts">
+import { Organization, Schema, WebSite } from '@unschema-graph/svelte';
+
+let { children } = $props();
+
+const website = WebSite({
+  '@id': '#website',
+  name: 'Acme Corp',
+  url: 'https://example.com',
+  publisher: '#organization',
+});
+
+const publisher = Organization({
+  '@id': '#organization',
+  name: 'Acme Corp',
+  url: 'https://example.com',
+  logo: 'https://example.com/logo.png',
+});
+</script>
+
+<!-- Global @graph nodes injected on every page -->
+<Schema items={[website, publisher]} baseUrl="https://example.com" />
+
+{@render children()}
+```
+
+### Page Pattern (`+page.svelte`)
+
+In individual routes, pass page-specific entities (like `Article`, `Product`, or `FAQPage`):
+
+```svelte title="src/routes/faq/+page.svelte"
+<script lang="ts">
+import { FAQPage, Question, Schema } from '@unschema-graph/svelte';
+
+const faq = FAQPage({
+  mainEntity: [
+    Question({
+      name: 'Does unschema-graph work with Svelte 5?',
+      acceptedAnswer: 'Yes! It has native support with runes and SSR.',
+    }),
+  ],
+});
+</script>
+
+<Schema item={faq} baseUrl="https://example.com" />
+
+<h1>Frequently Asked Questions</h1>
+```
+
+---
+
+## 4. Re-export of All Core Builders
+
+You do not need to install `@unschema-graph/core` separately. All builders, validation helpers, and temporal utilities can be imported directly from `@unschema-graph/svelte`:
+
+```ts
+import {
+  Article,
+  Product,
+  LocalBusiness,
+  withAdditionalProperties,
+  type SchemaInput,
+} from '@unschema-graph/svelte';
+```
