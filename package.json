@@ -1,0 +1,57 @@
+{
+  "name": "unschema-graph",
+  "private": true,
+  "packageManager": "pnpm@12.5.1",
+  "description": "Type-safe Schema.org JSON-LD builders and graph tooling for Core TypeScript, Astro, and Svelte 5.",
+  "type": "module",
+  "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johanldx/unschema-graph.git"
+  },
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build:packages": "pnpm --filter \"@unschema-graph/*\" run build",
+    "build": "pnpm run build:packages",
+    "build:docs": "pnpm --filter unschema-graph-docs run build",
+    "build:example:astro": "pnpm --filter example-astro run build",
+    "build:example:svelte": "pnpm --filter example-svelte run build",
+    "dev:docs": "pnpm --filter unschema-graph-docs dev",
+    "dev:astro": "pnpm --filter example-astro dev",
+    "dev:svelte": "pnpm --filter example-svelte dev",
+    "preview:docs": "pnpm --filter unschema-graph-docs preview",
+    "preview:astro": "pnpm --filter example-astro preview",
+    "preview:svelte": "pnpm --filter example-svelte preview",
+    "audit": "pnpm run build:packages && pnpm run build:example:astro && node ./packages/core/bin/cli.js audit examples/astro/dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm run build:packages && tsc --noEmit && pnpm -r run typecheck",
+    "lint": "biome check --error-on-warnings .",
+    "format": "biome check --write .",
+    "format:check": "biome format .",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@biomejs/biome": "^2.5.14",
+    "@changesets/cli": "^3.0.3",
+    "@sveltejs/package": "^2.5.8",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@types/node": "^26.6.3",
+    "@unschema-graph/astro": "workspace:*",
+    "@unschema-graph/core": "workspace:*",
+    "@unschema-graph/svelte": "workspace:*",
+    "astro": "^7.3.5",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.7.6",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2",
+    "zod": "^4.6.5"
+  }
+}
