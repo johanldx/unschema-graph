@@ -1,0 +1,515 @@
+---
+import Search from 'virtual:starlight/components/Search';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+
+const pathname = Astro.url.pathname;
+const isFr = pathname.startsWith('/fr/') || pathname === '/fr';
+const localePrefix = isFr ? '/fr' : '';
+
+const links = [
+  {
+    label: 'Documentation',
+    href: `${localePrefix}/getting-started/overview/`,
+  },
+  {
+    label: 'Guides',
+    href: `${localePrefix}/guides/mental-model/`,
+  },
+  {
+    label: isFr ? 'Recettes' : 'Recipes',
+    href: `${localePrefix}/recipes/blog-media/`,
+  },
+  {
+    label: 'API',
+    href: `${localePrefix}/reference/builders/`,
+  },
+];
+
+// Locale alternate paths
+const is404 = pathname.includes('404');
+const enHref = is404 ? '/' : isFr ? pathname.replace(/^\/fr(\/|$)/, '/') || '/' : pathname;
+const frHref = is404
+  ? '/fr/'
+  : isFr
+    ? pathname
+    : pathname === '/'
+      ? '/fr/'
+      : `/fr${pathname.startsWith('/') ? '' : '/'}${pathname}`;
+
+// Stargazers count
+let stars = '0';
+try {
+  const res = await fetch('https://api.github.com/repos/johanldx/unschema-graph', {
+    headers: { 'User-Agent': 'unschema-graph-docs' },
+  });
+  if (res.ok) {
+    const data = (await res.json()) as { stargazers_count?: number };
+    if (typeof data.stargazers_count === 'number') {
+      stars =
+        data.stargazers_count >= 1000
+          ? `${(data.stargazers_count / 1000).toFixed(1).replace(/\.0$/, '')}k`
+          : String(data.stargazers_count);
+    }
+  }
+} catch {
+  stars = '0';
+}
+---
+
+<div class="topbar">
+  <div class="header-left">
+    <div class="brand">
+      <SiteTitle />
+    </div>
+
+    <div class="search">
+      <Search />
+    </div>
+  </div>
+
+  <div class="header-right">
+    <nav class="primary-nav" aria-label={isFr ? 'Navigation principale' : 'Primary navigation'}>
+      {links.map((link) => (
+  <a
+    href={link.href}
+    class="nav-link"
+    aria-current={pathname.startsWith(link.href) ? 'page' : undefined}
+  >
+    {link.label}
+  </a>
+))}
+    </nav>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <div class="appearance">
+      <!-- Theme Switch (exact Mise VPSwitchAppearance specification) -->
+      <button
+        type="button"
+        class="theme-switch"
+        id="theme-switch-btn"
+        role="switch"
+        aria-checked="false"
+        aria-label={isFr ? 'Basculer le thème' : 'Toggle theme'}
+        title={isFr ? 'Basculer clair / sombre' : 'Toggle light / dark'}
+      >
+        <span class="check">
+          <!-- Sun Icon (Mise stroke style) -->
+          <svg
+            class="icon-sun"
+            viewBox="0 0 24 24"
+            width="12"
+            height="12"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+            ></path>
+          </svg>
+          <!-- Moon Icon (Mise stroke style) -->
+          <svg
+            class="icon-moon"
+            viewBox="0 0 24 24"
+            width="12"
+            height="12"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+        </span>
+      </button>
+    </div>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <div class="social-links">
+      <!-- GitHub button (exact Mise VPSocialLink layout) -->
+      <a
+        href="https://github.com/johanldx/unschema-graph"
+        class="github-link"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="GitHub repository"
+        title="GitHub"
+      >
+        <svg
+          class="icon-github"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+          />
+        </svg>
+        <span class="star-count" id="header-github-stars">{stars}</span>
+      </a>
+    </div>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <div class="translations">
+      <!-- Mise-styled Segmented Language Switch -->
+      <div
+        class="lang-switch"
+        role="group"
+        aria-label={isFr ? 'Sélection de la langue' : 'Language selection'}
+      >
+        <a
+          href={enHref}
+          class:list={['lang-option', { active: !isFr }]}
+          aria-current={!isFr ? 'true' : undefined}
+          aria-label="English"
+        >
+          EN
+        </a>
+        <a
+          href={frHref}
+          class:list={['lang-option', { active: isFr }]}
+          aria-current={isFr ? 'true' : undefined}
+          aria-label="Français"
+        >
+          FR
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Theme Toggle Logic
+const themeBtn = document.getElementById('theme-switch-btn');
+function getTheme(): 'dark' | 'light' {
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+}
+
+function syncSwitchState() {
+  const isDark = getTheme() === 'dark';
+  if (themeBtn) {
+    themeBtn.setAttribute('aria-checked', String(isDark));
+  }
+}
+
+themeBtn?.addEventListener('click', () => {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try {
+    localStorage.setItem('starlight-theme', next);
+  } catch {}
+  const provider = (
+    window as unknown as { StarlightThemeProvider?: { updatePickers: (t: string) => void } }
+  ).StarlightThemeProvider;
+  if (provider && typeof provider.updatePickers === 'function') {
+    provider.updatePickers(next);
+  }
+  syncSwitchState();
+});
+
+// Watch for external theme changes
+const observer = new MutationObserver(() => syncSwitchState());
+observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+syncSwitchState();
+
+// GitHub Stars live refresher (with session caching)
+const starsEl = document.getElementById('header-github-stars');
+if (starsEl) {
+  const cached = sessionStorage.getItem('ug_header_gh_stars');
+  if (cached) {
+    starsEl.textContent = cached;
+  } else {
+    fetch('https://api.github.com/repos/johanldx/unschema-graph')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { stargazers_count?: number } | null) => {
+        if (data && typeof data.stargazers_count === 'number') {
+          const formatted =
+            data.stargazers_count >= 1000
+              ? `${(data.stargazers_count / 1000).toFixed(1).replace(/\.0$/, '')}k`
+              : String(data.stargazers_count);
+          starsEl.textContent = formatted;
+          sessionStorage.setItem('ug_header_gh_stars', formatted);
+        }
+      })
+      .catch(() => {});
+  }
+}
+</script>
+
+<style>
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  width: 100%;
+  max-width: 1376px; /* calc(1440px - 64px) exactly as in Mise */
+  margin: 0 auto;
+  padding: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  min-width: 8.5rem;
+  max-width: 14rem;
+  flex-grow: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  line-height: 64px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ug-graphite);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.25s ease;
+}
+
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--ug-violet-strong);
+}
+
+/* Mise divider with generous breathing room */
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--ug-line);
+  margin: 0 24px !important;
+  flex-shrink: 0;
+}
+
+.appearance,
+.social-links,
+.translations {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Semi-rounded Theme Switch (border-radius: 6px / check: 4px) */
+.theme-switch {
+  position: relative;
+  border-radius: 6px;
+  display: block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+  border: 1px solid rgba(60, 60, 67, 0.18);
+  background-color: rgba(60, 60, 67, 0.08);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: border-color 0.25s ease;
+}
+
+.theme-switch:hover {
+  border-color: var(--ug-violet);
+}
+
+.theme-switch:focus-visible {
+  outline: 2px solid var(--ug-violet);
+  outline-offset: 2px;
+}
+
+.theme-switch .check {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #67676c;
+}
+
+:global([data-theme="dark"]) .theme-switch {
+  border-color: rgba(84, 84, 88, 0.48);
+  background-color: rgba(101, 108, 118, 0.2);
+}
+
+:global([data-theme="dark"]) .theme-switch .check {
+  transform: translate(18px);
+  background-color: #1a1a1a;
+  color: #dfdfd6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.icon-sun {
+  display: block;
+}
+
+.icon-moon {
+  display: none;
+}
+
+:global([data-theme="dark"]) .icon-sun {
+  display: none;
+}
+
+:global([data-theme="dark"]) .icon-moon {
+  display: block;
+}
+
+/* Mise GitHub Social Link */
+.github-link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  color: var(--ug-muted);
+  text-decoration: none;
+  transition:
+    color 0.25s ease,
+    background-color 0.2s ease;
+}
+
+.github-link:hover {
+  color: var(--ug-graphite);
+  background-color: color-mix(in srgb, var(--ug-violet) 8%, transparent);
+}
+
+.github-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+.star-count {
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ug-muted);
+  font-family: var(--ug-font-mono, monospace);
+  font-weight: 500;
+  margin-top: 1px;
+  transition: color 0.25s ease;
+}
+
+.github-link:hover .star-count {
+  color: var(--ug-violet-strong);
+}
+
+/* Semi-rounded Language Switch */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 1px;
+  border-radius: 6px;
+  border: 1px solid rgba(60, 60, 67, 0.18);
+  background-color: rgba(60, 60, 67, 0.08);
+  gap: 1px;
+  transition: border-color 0.25s ease;
+}
+
+:global([data-theme="dark"]) .lang-switch {
+  border-color: rgba(84, 84, 88, 0.48);
+  background-color: rgba(101, 108, 118, 0.2);
+}
+
+.lang-switch:hover {
+  border-color: var(--ug-violet);
+}
+
+.lang-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-family: var(--ug-font-mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ug-muted);
+  text-decoration: none;
+  line-height: 1;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.lang-option:hover {
+  color: var(--ug-graphite);
+}
+
+.lang-option.active {
+  background-color: #ffffff;
+  color: var(--ug-graphite);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+:global([data-theme="dark"]) .lang-option.active {
+  background-color: #1a1a1a;
+  color: #dfdfd6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 68rem) {
+  .primary-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 48rem) {
+  .search {
+    min-width: 0;
+    flex-grow: 1;
+  }
+}
+</style>

@@ -1,0 +1,132 @@
+---
+title: Audit CLI & CI/CD
+description: Vérifier la syntaxe JSON-LD et les structures Schema.org prises en charge dans les fichiers HTML compilés, en local et en intégration continue.
+---
+
+`unschema-graph` intègre un outil d'audit en ligne de commande pour contrôler vos dossiers de compilation statique (ex. `dist/` ou `build/`) avant toute mise en production.
+
+---
+
+## 1. Exécuter l'audit
+
+Après la génération de votre site, lancez la commande d'audit :
+
+**pnpm**
+
+```bash
+pnpm exec unschema-graph audit dist
+```
+
+**npm / npx**
+
+```bash
+npx @unschema-graph/core audit dist
+```
+
+**yarn**
+
+```bash
+yarn unschema-graph audit dist
+```
+
+**bun**
+
+```bash
+bunx unschema-graph audit dist
+```
+
+
+Vous pouvez cibler n'importe quel dossier de sortie :
+
+```bash
+npx @unschema-graph/core audit ./build
+```
+
+Conservez la même séquence partout :
+
+- **Contrôle local :** compiler le site, puis auditer son dossier de sortie.
+- **Build de production :** lancer l'audit juste après le build et avant le déploiement.
+- **CI :** séparer les étapes de build et d'audit pour localiser rapidement un échec.
+
+---
+
+## 2. Vérifications effectuées
+
+Le moteur d'audit applique des contrôles structurels stricts sur tous les fichiers générés :
+
+1. **Découverte récursive des fichiers HTML :** Analyse l'ensemble des sous-dossiers pour identifier chaque page `.html`.
+2. **Extraction HTML robuste :** Parse le HTML réel pour extraire les balises script LD+JSON quel que soit l'ordre ou la casse des attributs.
+3. **Syntaxe JSON :** Vérifie que chaque bloc est un JSON valide et complet sans troncature.
+4. **Conformité du contexte racine :** S'assure que `@context` pointe vers `https://schema.org` (ou `http://schema.org`).
+5. **Validation des types d'entités :** Contrôle que chaque nœud racine possède un `@type` valide ou un tableau `@graph` d'entités typées.
+6. **Rapport détaillé :** Affiche le nombre de fichiers analysés, les blocs JSON-LD trouvés, le total d'entités et la liste des erreurs avec les chemins de fichiers exacts.
+
+---
+
+## 3. Codes de sortie
+
+- `0` (Succès) : Tous les blocs JSON-LD découverts sont conformes et valides.
+- `1` (Échec) : Une erreur de syntaxe a été détectée, la structure du graphe est invalide, ou aucun bloc JSON-LD n'a été trouvé.
+
+### Sortie attendue
+
+Une exécution réussie se termine par un récapitulatif des fichiers HTML, blocs JSON-LD et entités
+analysés, puis un message de succès. Les nombres exacts dépendent du site :
+
+```text
+Scanned HTML files:  24
+JSON-LD script tags: 18
+Schema.org entities: 42
+
+Schema audit passed successfully. All JSON-LD structures are valid.
+```
+
+En cas d'échec, le rapport nomme le fichier concerné et décrit le bloc ou le graphe incorrect.
+Pour les scripts et la CI, le contrat stable est le code de sortie, pas le texte d'exemple ci-dessus.
+
+---
+
+## 4. Intégration continue (CI/CD)
+
+### Dans `package.json`
+
+Ajoutez un script post-build automatique :
+
+```json title="package.json"
+{
+  "scripts": {
+    "build": "astro build",
+    "postbuild": "unschema-graph audit dist"
+  }
+}
+```
+
+### Workflow GitHub Actions
+
+Intégrez la vérification dans votre pipeline d'intégration continue :
+
+```yaml title=".github/workflows/ci.yml"
+name: CI & Audit Schema
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - name: Audit Schema.org JSON-LD
+        run: npx @unschema-graph/core audit dist
+```

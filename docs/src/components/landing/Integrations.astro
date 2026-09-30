@@ -1,0 +1,168 @@
+---
+import type { LandingCopy, LandingLocale } from '../../data/landing';
+import TechnologyLogo from '../TechnologyLogo.astro';
+import CopyCommand from './CopyCommand.astro';
+import SectionHeader from './SectionHeader.astro';
+
+interface Props {
+  copy: LandingCopy['integrations'];
+  locale: LandingLocale;
+}
+
+const { copy, locale } = Astro.props;
+const localPath = (path: string) => (locale === 'fr' ? `/fr${path}` : path);
+const a11y =
+  locale === 'fr'
+    ? {
+        copy: 'Copier la commande d’installation',
+        success: 'Commande copiée',
+        error: 'Impossible de copier la commande',
+      }
+    : { copy: 'Copy install command', success: 'Command copied', error: 'Unable to copy command' };
+---
+
+<section aria-labelledby="integrations-title">
+  <SectionHeader id="integrations-title" title={copy.title} subtitle={copy.subtitle} />
+  <div class="grid">
+    {copy.cards.map((card) => (
+  <article>
+    <header>
+      <TechnologyLogo technology={card.id} size={30} />
+      <div>
+        <h3>{card.name}</h3>
+        <code>{card.package}</code>
+      </div>
+    </header>
+    <ul>
+      {card.capabilities.map((capability) => (
+        <li>{capability}</li>
+      ))}
+    </ul>
+    <div class="actions">
+      <CopyCommand
+        command={card.install}
+        label={a11y.copy}
+        successMessage={a11y.success}
+        errorMessage={a11y.error}
+      />
+      <a href={localPath(card.quickstart)}>
+        {locale === 'fr' ? `Démarrer avec ${card.name}` : `Start with ${card.name}`}
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </article>
+))}
+  </div>
+</section>
+
+<style>
+section {
+  padding-block: clamp(3.5rem, 7vw, 5.5rem);
+  border-bottom: var(--ug-border);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-md);
+  background: var(--ug-paper-raised);
+  overflow: hidden;
+}
+
+article {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  flex-direction: column;
+  padding: clamp(1.35rem, 2.6vw, 2rem);
+  border-inline-end: 1px solid var(--ug-line);
+}
+
+article:last-child {
+  border-inline-end: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.35rem;
+}
+
+h3 {
+  margin: 0 0 0.15rem;
+  color: var(--ug-graphite);
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+header code {
+  padding: 0;
+  color: var(--ug-muted);
+  font-size: 0.78rem;
+}
+
+ul {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0 0 1.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  position: relative;
+  padding-inline-start: 1rem;
+  color: var(--ug-muted);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+li::before {
+  position: absolute;
+  top: 0.65em;
+  left: 0;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 1px;
+  background: var(--ug-violet);
+  content: "";
+}
+
+.actions {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: auto;
+}
+
+.actions > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ug-violet-strong);
+  font-size: 0.92rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.actions > a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+@media (max-width: 58rem) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  article {
+    border-right: 0;
+    border-bottom: 1px solid var(--ug-line);
+  }
+
+  article:last-child {
+    border-bottom: 0;
+  }
+}
+</style>

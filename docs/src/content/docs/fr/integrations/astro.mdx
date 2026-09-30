@@ -1,0 +1,171 @@
+---
+title: Intégration Astro
+description: Configuration, URLs canoniques, helpers Content Layer et inspecteur Dev Toolbar pour Astro.
+---
+
+Le package `@unschema-graph/astro` assure un support de premier ordre pour Astro 5, 6 et 7, avec une application Dev Toolbar interactive et des helpers pour les collections de contenu.
+
+---
+
+## 1. Installation
+
+**Automatique (CLI)**
+
+```bash
+npx astro add @unschema-graph/astro
+```
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/astro zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/astro zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/astro zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/astro zod
+```
+
+
+---
+
+## 2. Configuration
+
+Déclarez l'intégration dans `astro.config.mjs` :
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import { schemaGraph } from '@unschema-graph/astro';
+
+export default defineConfig({
+  site: 'https://mon-site.fr',
+  integrations: [
+    schemaGraph({
+      // Lève une exception au build pour éviter un mauvais SEO, avertit en dev :
+      onError: process.env.NODE_ENV === 'production' ? 'throw' : 'warn',
+    }),
+  ],
+});
+```
+
+### Référence des options
+
+| Option | Type | Défaut | Description |
+| --- | --- | --- | --- |
+| `baseUrl` | `string` | `config.site` | URL canonique de base pour résoudre les fragments `#id` et URLs relatives. |
+| `onError` | `'throw' \| 'warn' \| 'silent'` | `build: 'throw'`, `dev: 'warn'` | Mode de sévérité de la validation. |
+
+---
+
+## 3. Le composant Astro `<Schema />`
+
+Insérez `<Schema />` dans le `<head>` de votre layout principal ou sur une page dédiée. Le composant sérialise vos entités en `<script type="application/ld+json">` avec zéro JavaScript côté client.
+
+```astro title="src/layouts/BaseLayout.astro"
+---
+import { Organization, Schema, WebSite } from '@unschema-graph/astro';
+
+interface Props {
+  title: string;
+  items?: any[];
+}
+
+const { title, items = [] } = Astro.props;
+
+// Identité globale du site présente sur toutes les pages
+const site = WebSite({
+  '@id': '#website',
+  name: 'Acme Corp',
+  url: 'https://mon-site.fr',
+  publisher: '#organization',
+});
+
+const org = Organization({
+  '@id': '#organization',
+  name: 'Acme Corp',
+  url: 'https://mon-site.fr',
+  logo: 'https://mon-site.fr/logo.png',
+});
+---
+
+<!doctype html>
+<html lang={Astro.currentLocale ?? 'fr'}>
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <!-- Rendu des entités globales + entités de la page dans un seul @graph -->
+    <Schema items={[site, org, ...items]} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+```
+
+---
+
+## 4. Application Dev Toolbar pour Astro
+
+En mode développement (`astro dev`), `@unschema-graph/astro` injecte automatiquement une icône interactive dans la Dev Toolbar d'Astro au bas de votre navigateur.
+
+### Fonctionnalités de la Dev Toolbar :
+
+- **Inspecteur de graphe en temps réel :** Visualisez chaque entité détectée dans le `@graph` de la page courante avec son `@type` et son `@id` résolu.
+- **Alertes de validation instantanées :** Les champs manquants ou erreurs Zod apparaissent en direct au fil de vos modifications de code.
+- **Test express Google Rich Results :** Bouton de copie en un clic du JSON-LD brut pour tester immédiatement dans l'outil de test des résultats enrichis de Google.
+
+:::tip
+Appuyez sur `h` dans votre navigateur lors de l'exécution d'`astro dev` pour faire réapparaître la Dev Toolbar si elle est masquée.
+:::
+
+---
+
+## 5. Helpers pour Collections de contenu Astro
+
+Lors de l'affichage d'articles Markdown ou MDX, `@unschema-graph/astro/content` offre des adaptateurs automatiques :
+
+```astro title="src/pages/blog/[slug].astro"
+---
+import { getEntry, render } from 'astro:content';
+import { toBlogPosting } from '@unschema-graph/astro/content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const post = await getEntry('blog', Astro.params.slug!);
+if (!post) return Astro.redirect('/404');
+
+const { Content } = await render(post);
+
+// Mappe automatiquement title, description, pubDate et author vers BlogPosting
+const blogPosting = toBlogPosting(post, {
+  url: Astro.url.href,
+  publisher: '#organization',
+});
+---
+
+<BaseLayout title={post.data.title} items={[blogPosting]}>
+  <article>
+    <h1>{post.data.title}</h1>
+    <Content />
+  </article>
+</BaseLayout>
+```
+
+Helpers disponibles :
+- `toArticle(entry, overrides?)`
+- `toBlogPosting(entry, overrides?)`
+- `toNewsArticle(entry, overrides?)`
+
+[En savoir plus sur le mapping des Collections de contenu →](/fr/guides/content-collections/)

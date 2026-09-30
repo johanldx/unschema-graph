@@ -1,0 +1,209 @@
+---
+import type { LandingCopy, LandingLocale } from '../../data/landing';
+import TechnologyLogo from '../TechnologyLogo.astro';
+
+interface Props {
+  copy: LandingCopy['hero'];
+  locale: LandingLocale;
+}
+
+const { copy, locale } = Astro.props;
+const localPath = (path: string) => (locale === 'fr' ? `/fr${path}` : path);
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <p class="product-line">{copy.status}</p>
+    <h1 id="hero-title">{copy.promise}</h1>
+    <p class="intro">{copy.intro}</p>
+
+    <div class="actions">
+      <a class="primary" href={localPath('/getting-started/overview/')}>{copy.ctaPrimary}</a>
+      <a class="secondary" href="#comparison">{copy.ctaSecondary}</a>
+    </div>
+
+    <nav class="ecosystem" aria-label={copy.ecosystemLabel}>
+      <span>{copy.ecosystemLabel}</span>
+      <a href={localPath('/getting-started/quick-start/astro/')}
+        ><TechnologyLogo technology="astro" size={18} />Astro</a
+      >
+      <a href={localPath('/getting-started/quick-start/svelte/')}
+        ><TechnologyLogo technology="svelte" size={18} />Svelte</a
+      >
+      <a href={localPath('/getting-started/quick-start/core/')}
+        ><TechnologyLogo technology="core" size={18} />TypeScript</a
+      >
+    </nav>
+  </div>
+
+  <dl class="proofs">
+    {copy.proofs.map(([value, label]) => (
+  <div>
+    <dt>{value}</dt>
+    <dd>{label}</dd>
+  </div>
+))}
+  </dl>
+</section>
+
+<style>
+.hero {
+  padding-block: clamp(4rem, 9vw, 7.5rem) clamp(3rem, 7vw, 5.5rem);
+  border-bottom: var(--ug-border);
+}
+
+.hero-copy {
+  max-width: 61rem;
+}
+
+.product-line {
+  margin: 0 0 1.25rem;
+  color: var(--ug-violet-strong);
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+h1 {
+  max-width: 18ch;
+  margin: 0 0 1.5rem;
+  color: var(--ug-graphite);
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 760;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.intro {
+  max-width: 46rem;
+  margin: 0 0 2rem;
+  color: var(--ug-muted);
+  font-size: clamp(1.05rem, 1.7vw, 1.2rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.actions a {
+  display: inline-flex;
+  min-height: 2.85rem;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 1.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--ug-radius-sm);
+  font-size: 0.95rem;
+  font-weight: 650;
+  text-decoration: none;
+  touch-action: manipulation;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.primary {
+  background: var(--ug-violet-strong);
+  color: white;
+}
+
+.primary:hover {
+  background: var(--ug-violet);
+}
+
+.actions .secondary {
+  border-color: var(--ug-line);
+  background: var(--ug-paper-raised);
+  color: var(--ug-graphite);
+}
+
+.actions .secondary:hover {
+  border-color: var(--ug-violet);
+}
+
+.ecosystem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.1rem;
+  color: var(--ug-muted);
+  font-size: 0.9rem;
+}
+
+.ecosystem > span {
+  font-size: 0.85rem;
+}
+
+.ecosystem a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ug-graphite);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.ecosystem a:hover {
+  color: var(--ug-violet-strong);
+}
+
+.proofs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin: clamp(3.5rem, 7vw, 5.5rem) 0 0;
+  padding: 1.5rem 0 0;
+  border-top: var(--ug-border);
+}
+
+.hero .proofs > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  text-align: left;
+}
+
+.hero .proofs dt {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--ug-graphite);
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.hero .proofs dd {
+  width: 100%;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  color: var(--ug-muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 42rem) {
+  .hero {
+    padding-top: 3.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2.6rem, 12vw, 3.65rem);
+  }
+
+  .actions a {
+    width: 100%;
+  }
+
+  .proofs {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 1rem;
+  }
+}
+</style>

@@ -1,0 +1,261 @@
+---
+import EditLink from 'virtual:starlight/components/EditLink';
+import LastUpdated from 'virtual:starlight/components/LastUpdated';
+import Pagination from 'virtual:starlight/components/Pagination';
+import BrandMark from './BrandMark.astro';
+
+const route = Astro.locals.starlightRoute;
+const isSplash =
+  route?.entry?.data?.template === 'splash' ||
+  Astro.url.pathname === '/' ||
+  Astro.url.pathname === '/fr/' ||
+  Astro.url.pathname === '/fr';
+
+const path = Astro.url.pathname;
+const localePrefix = path.startsWith('/fr/') || path === '/fr' ? '/fr' : '';
+const isFr = Boolean(localePrefix);
+
+const navLinks = [
+  {
+    label: isFr ? 'Documentation' : 'Documentation',
+    href: `${localePrefix}/getting-started/overview/`,
+  },
+  { label: 'Guides', href: `${localePrefix}/guides/mental-model/` },
+  { label: isFr ? 'Recettes' : 'Recipes', href: `${localePrefix}/recipes/blog-media/` },
+  { label: 'API', href: `${localePrefix}/reference/builders/` },
+  { label: 'GitHub', href: 'https://github.com/johanldx/unschema-graph', external: true },
+  { label: 'llms.txt', href: '/llms.txt' },
+];
+---
+
+{isSplash ? (
+  <footer class="footer-simple">
+    <div class="footer-simple-inner">
+      <div class="footer-top">
+        <a href={localePrefix ? '/fr/' : '/'} class="brand-link" aria-label="unschema-graph">
+          <BrandMark size={24} />
+          <span class="brand-name">
+            unschema<span class="brand-accent">-graph</span>
+          </span>
+        </a>
+
+        <nav
+          class="footer-nav"
+          aria-label={isFr ? 'Navigation secondaire' : 'Secondary navigation'}
+        >
+          {navLinks.map((link) => (
+            <a
+              href={link.href}
+              target={link.external ? '_blank' : undefined}
+              rel={link.external ? 'noopener noreferrer' : undefined}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <span class="pill">v0.0.1</span>
+        <span>MIT License</span>
+        <span class="bullet" aria-hidden="true">
+          ·
+        </span>
+        <span>Copyright © 2026</span>
+        <span class="bullet" aria-hidden="true">
+          ·
+        </span>
+        <a href="https://jhdx.dev" class="author-link" target="_blank" rel="noopener noreferrer">
+          jhdx.dev
+        </a>
+      </div>
+    </div>
+  </footer>
+) : (
+  <footer class="footer-compact">
+    <div class="meta">
+      <EditLink />
+      <LastUpdated />
+    </div>
+    <Pagination />
+    <div class="compact-bottom">
+      <span>MIT License</span>
+      <span class="bullet" aria-hidden="true">
+        ·
+      </span>
+      <span>Copyright © 2026</span>
+      <span class="bullet" aria-hidden="true">
+        ·
+      </span>
+      <a href="https://jhdx.dev" class="author-link" target="_blank" rel="noopener noreferrer">
+        jhdx.dev
+      </a>
+      <span class="bullet" aria-hidden="true">
+        ·
+      </span>
+      <a
+        href="https://github.com/johanldx/unschema-graph"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        GitHub
+      </a>
+      <span class="bullet" aria-hidden="true">
+        ·
+      </span>
+      <a href="/llms.txt">llms.txt</a>
+    </div>
+  </footer>
+)}
+
+<style>
+/* Simple, sleek tech footer for landing page */
+.footer-simple {
+  width: 100%;
+  border-top: var(--ug-border);
+  background: var(--ug-paper);
+  color: var(--ug-muted);
+  font-size: 0.85rem;
+}
+
+.footer-simple-inner {
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+  padding-block: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.footer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.5rem;
+  border-bottom: var(--ug-border-subtle);
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ug-graphite);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.brand-accent {
+  color: var(--ug-violet-strong);
+}
+
+.footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.footer-nav a {
+  color: var(--ug-muted);
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.footer-nav a:hover {
+  color: var(--ug-violet-strong);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ug-muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--ug-radius-sm);
+  background: var(--ug-pastel-lavender);
+  color: var(--ug-pastel-lavender-ink);
+  font-family: var(--ug-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.bullet {
+  color: var(--ug-line);
+}
+
+.author-link {
+  color: var(--ug-graphite);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.author-link:hover {
+  color: var(--ug-violet-strong);
+  text-decoration: underline;
+}
+
+/* Compact Footer for Doc Pages */
+.footer-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: var(--ug-border);
+}
+
+.footer-compact .meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--ug-muted);
+}
+
+.compact-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  text-align: center;
+  padding-top: 1rem;
+  border-top: var(--ug-border-subtle);
+  font-size: 0.8rem;
+  color: var(--ug-muted);
+}
+
+.compact-bottom a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.compact-bottom a:hover {
+  color: var(--ug-violet-strong);
+}
+
+@media (max-width: 48rem) {
+  .footer-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+</style>

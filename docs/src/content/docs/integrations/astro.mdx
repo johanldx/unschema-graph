@@ -1,0 +1,171 @@
+---
+title: Astro Integration
+description: Configure validation, canonical URLs, Content Layer helpers, and the Astro Dev Toolbar inspector.
+---
+
+The `@unschema-graph/astro` package provides first-class support for Astro 5, 6, and 7, including an interactive Dev Toolbar application and Content Collections helpers.
+
+---
+
+## 1. Installation
+
+**Automatic (CLI)**
+
+```bash
+npx astro add @unschema-graph/astro
+```
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/astro zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/astro zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/astro zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/astro zod
+```
+
+
+---
+
+## 2. Configuration
+
+Register the integration in `astro.config.mjs`:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import { schemaGraph } from '@unschema-graph/astro';
+
+export default defineConfig({
+  site: 'https://example.com',
+  integrations: [
+    schemaGraph({
+      // Throw during build/CI to prevent bad SEO, warn in dev:
+      onError: process.env.NODE_ENV === 'production' ? 'throw' : 'warn',
+    }),
+  ],
+});
+```
+
+### Options Reference
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `baseUrl` | `string` | `config.site` | Canonical base URL used to resolve relative `#id` fragments and URLs. |
+| `onError` | `'throw' \| 'warn' \| 'silent'` | `build: 'throw'`, `dev: 'warn'` | Validation severity mode. |
+
+---
+
+## 3. The `<Schema />` Astro Component
+
+Place `<Schema />` in your common layout `<head>` or on specific pages. It serializes entities into `<script type="application/ld+json">` with zero client-side JavaScript.
+
+```astro title="src/layouts/BaseLayout.astro"
+---
+import { Organization, Schema, WebSite } from '@unschema-graph/astro';
+
+interface Props {
+  title: string;
+  items?: any[];
+}
+
+const { title, items = [] } = Astro.props;
+
+// Global site identity present on all pages
+const site = WebSite({
+  '@id': '#website',
+  name: 'Acme Corp',
+  url: 'https://example.com',
+  publisher: '#organization',
+});
+
+const org = Organization({
+  '@id': '#organization',
+  name: 'Acme Corp',
+  url: 'https://example.com',
+  logo: 'https://example.com/logo.png',
+});
+---
+
+<!doctype html>
+<html lang={Astro.currentLocale ?? 'en'}>
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <!-- Renders global entities + page-specific entities in one @graph -->
+    <Schema items={[site, org, ...items]} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+```
+
+---
+
+## 4. Astro Dev Toolbar App
+
+In development mode (`astro dev`), `@unschema-graph/astro` automatically adds an interactive icon to the Astro Dev Toolbar at the bottom of your browser window.
+
+### What the Dev Toolbar offers:
+
+- **Entity Inspector:** Lists every entity detected in the page's `@graph` with its primary `@type` and resolved `@id`.
+- **Validation Alerts:** Highlights any missing recommended fields or Zod schema errors live as you edit.
+- **Rich Results Quick Test:** One-click copy of the generated raw JSON-LD to paste directly into Google's Rich Results Test tool.
+
+:::tip
+Press `h` in your browser during `astro dev` to toggle the Astro Dev Toolbar if hidden.
+:::
+
+---
+
+## 5. Content Collections & Content Layer Helpers
+
+When rendering Markdown or MDX entries from Astro Content Collections, `@unschema-graph/astro/content` provides pre-built transformers:
+
+```astro title="src/pages/blog/[slug].astro"
+---
+import { getEntry, render } from 'astro:content';
+import { toBlogPosting } from '@unschema-graph/astro/content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const post = await getEntry('blog', Astro.params.slug!);
+if (!post) return Astro.redirect('/404');
+
+const { Content } = await render(post);
+
+// Automatically maps title, description, pubDate, and author to BlogPosting
+const blogPosting = toBlogPosting(post, {
+  url: Astro.url.href,
+  publisher: '#organization',
+});
+---
+
+<BaseLayout title={post.data.title} items={[blogPosting]}>
+  <article>
+    <h1>{post.data.title}</h1>
+    <Content />
+  </article>
+</BaseLayout>
+```
+
+Available helpers:
+- `toArticle(entry, overrides?)`
+- `toBlogPosting(entry, overrides?)`
+- `toNewsArticle(entry, overrides?)`
+
+[Learn more about Content Collections mapping →](/guides/content-collections/)

@@ -1,0 +1,36 @@
+---
+import PageActions from './PageActions.astro';
+
+const title = Astro.locals.starlightRoute.entry.data.title;
+const normalizedPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isLandingPage = normalizedPath === '/' || normalizedPath === '/fr';
+---
+
+{!isLandingPage && (
+  <div class="page-title-header">
+    <h1 id="_top">{title}</h1>
+    <div class="page-tools">
+      <PageActions />
+    </div>
+  </div>
+)}
+
+<style>
+.page-title-header {
+  margin-bottom: 2rem;
+}
+.page-title-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: var(--ug-graphite);
+}
+.page-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 0.75rem;
+}
+</style>

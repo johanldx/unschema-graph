@@ -1,0 +1,136 @@
+---
+title: Vue d'ensemble
+description: Architecture et écosystème d'unschema-graph pour les applications web modernes.
+---
+
+**unschema-graph** est un moteur Schema.org JSON-LD propulsé par [Zod](https://zod.dev). Il aide les projets TypeScript, Astro et Svelte à construire des entités typées, valider les entrées prises en charge, les relier dans un graphe et sérialiser le résultat de façon sûre dans le HTML.
+
+:::note[Statut pré-1.0]
+Le projet appartient actuellement à la série `0.1.x`. Son API publique est documentée et testée, mais peut encore évoluer avant la version `1.0` ; les changements sont consignés avec Changesets.
+:::
+
+---
+
+## Commencer avec votre environnement
+
+- **Astro :** un composant rendu côté serveur, une intégration,
+  barre d'outils de développement et helpers Content Collections.
+- **Svelte 5 :** un composant réactif qui écrit le JSON-LD avec `<svelte:head>`.
+- **TypeScript / Core :** le moteur indépendant du framework pour les pipelines de
+  rendu personnalisés.
+
+[Comparer les trois environnements](/fr/getting-started/choose-your-environment/) ou
+ouvrir directement le [démarrage Astro](/fr/getting-started/quick-start/astro/).
+
+---
+
+## Piliers fondamentaux
+
+### 0 kB de JavaScript client
+
+Les données structurées sont destinées exclusivement au `<head>` HTML. Nos composants sont exécutés au build statique (SSG) ou au rendu serveur (SSR), avec **0 kB** de JavaScript envoyé au navigateur.
+
+### Builders stricts avec Zod
+
+Chaque entité est typée avec TypeScript et validée à l'exécution avec Zod. Les fautes de frappe, clés inconnues ou propriétés requises manquantes sont bloquées avant la mise en production.
+
+### Résolution de @graph unifié
+
+Au lieu de balises `<script>` morcelées, unschema-graph relie vos entités dans un graphe `@graph` unifié, en résolvant automatiquement les fragments `#id` relatifs et les URLs canoniques.
+
+### Protection anti-XSS intégrée
+
+Les caractères HTML sensibles sont échappés en Unicode pendant la sérialisation afin d'empêcher la fermeture prématurée de la balise `</script>`.
+
+
+---
+
+## Pourquoi unschema-graph ?
+
+Écrire du JSON-LD à la main ou avec de simples types TypeScript expose à des erreurs silencieuses ignorées par les moteurs de recherche. Comparatif :
+
+| Fonctionnalité | Balise `<script>` manuelle | `schema-dts` | `unschema-graph` |
+| :--- | :---: | :---: | :---: |
+| **Typage TypeScript strict** | ❌ | ✅ | ✅ |
+| **Validation à l'exécution (Zod)** | ❌ | ❌ | ✅ (Détecte les erreurs dynamiques/CMS) |
+| **Résolution unifiée de `@graph`** | Manuelle | Manuelle | ✅ (Liaison automatique des `#id`) |
+| **Sécurisation XSS (`</script>`)** | Manuelle | ❌ | ✅ (Échappement Unicode automatique) |
+| **Inspecteur Dev Toolbar Astro** | ❌ | ❌ | ✅ (Débogueur interactif intégré) |
+| **Support natif des runes Svelte 5** | ❌ | ❌ | ✅ (Runes `$props` et `$derived`) |
+| **Poids client envoyé** | 0 kB | 0 kB | **0 kB** |
+
+---
+
+## Écosystème des packages
+
+La suite `unschema-graph` est modulaire et s'adapte à tous vos projets TypeScript :
+
+| Package | Rôle |
+| --- | --- |
+| [`@unschema-graph/astro`](/fr/integrations/astro/) | Intégration Astro (`schemaGraph`), composant `<Schema />`, inspecteur Dev Toolbar, helpers Content Layer. |
+| [`@unschema-graph/svelte`](/fr/integrations/svelte/) | Composant natif Svelte 5 (`<Schema />` avec runes) et réexport de tous les builders. |
+| [`@unschema-graph/core`](/fr/integrations/core/) | Moteur universel : schémas Zod, résolution de graphes `@graph`, helpers temporels, CLI et API d'audit. |
+
+---
+
+## Architecture du pipeline
+
+Le parcours de vos données depuis votre code source jusqu'au script HTML final :
+
+```text
+┌────────────────────────────────────────────────────────┐
+│  Données sources (Markdown, CMS, API, Props)           │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Builders Schema.org stricts (Zod 4)                   │
+│  Article({ headline, author, ... })                    │  ◄── Bloque les clés invalides et fautes de frappe
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Normalisation & Résolution du Graphe                  │
+│  buildJsonLdGraph([items], { baseUrl })                │  ◄── Résout les #id relatifs et déduplique
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Sérialiseur Unicode anti-XSS                          │
+│  serializeJsonLd(payload)                              │  ◄── Échappe les caractères HTML sensibles (< > &)
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  HTML <script type="application/ld+json">              │  ◄── Injecté dans le <head> SSG / SSR (0 kB JS)
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Prochaines étapes
+
+### 1. Installation
+
+Installez le package adapté à votre framework (Astro, Svelte 5 ou Core).
+
+[Guide d'installation →](/fr/getting-started/installation/)
+
+### 2. Démarrage rapide
+
+Générez votre premier graphe relié en moins de 3 minutes.
+
+[Commencer avec Astro →](/fr/getting-started/quick-start/astro/)
+
+### 3. Intégrations Frameworks
+
+Explorez la Dev Toolbar Astro ou les runes réactives de Svelte 5.
+
+[Intégration Astro](/fr/integrations/astro/) · [Intégration Svelte 5](/fr/integrations/svelte/)
+
+### 4. Audit & CI
+
+Validez automatiquement le HTML généré dans votre pipeline CI/CD.
+
+[Découvrir la CLI d'audit →](/fr/audit-and-quality/audit-cli/)
+

@@ -1,0 +1,147 @@
+---
+interface Props {
+  astro: string;
+  svelte: string;
+  core: string;
+  label?: string;
+}
+const { astro, svelte, core, label = 'Framework example' } = Astro.props;
+const examples = { astro, svelte, core };
+---
+
+<section class="framework-tabs" data-framework-tabs aria-label={label}>
+  <div class="tabs-header">
+    <nav class="tabs-nav" aria-label={label}>
+      {Object.keys(examples).map((name) => (
+  <button type="button" data-tab={name} class="tab-btn">
+    <span class="tab-badge"></span>
+    {name === 'astro' ? 'Astro' : name === 'svelte' ? 'Svelte 5' : 'TypeScript'}
+  </button>
+))}
+    </nav>
+    <span class="tabs-caption">JSON-LD</span>
+  </div>
+  {Object.entries(examples).map(([name, code]) => (
+  <pre data-panel={name}>
+    <code>{code}</code>
+  </pre>
+))}
+</section>
+
+<script>
+const sync = (root: HTMLElement, value: string) => {
+  root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((button) => {
+    const isSelected = button.dataset.tab === value;
+    button.setAttribute('aria-pressed', String(isSelected));
+    button.classList.toggle('active', isSelected);
+  });
+  root.querySelectorAll<HTMLElement>('[data-panel]').forEach((panel) => {
+    panel.hidden = panel.dataset.panel !== value;
+  });
+};
+
+const updateAllTabs = (value: string) => {
+  document.querySelectorAll<HTMLElement>('[data-framework-tabs]').forEach((root) => {
+    sync(root, value);
+  });
+};
+
+document.querySelectorAll<HTMLElement>('[data-framework-tabs]').forEach((root) => {
+  root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const value = button.dataset.tab || 'astro';
+      localStorage.setItem('unschema-graph:environment', value);
+      document.documentElement.dataset.environment = value;
+      updateAllTabs(value);
+      window.dispatchEvent(new CustomEvent('unschema:environment', { detail: value }));
+    });
+  });
+  sync(root, localStorage.getItem('unschema-graph:environment') || 'astro');
+});
+
+window.addEventListener('unschema:environment', ((e: CustomEvent<string>) => {
+  if (e.detail) {
+    updateAllTabs(e.detail);
+  }
+}) as EventListener);
+</script>
+
+<style>
+.framework-tabs {
+  margin: 1.5rem 0;
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-md);
+  background: var(--ug-code);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+.tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ug-line) 30%, transparent);
+  background: color-mix(in srgb, var(--ug-code) 85%, black);
+}
+.tabs-nav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.4rem 0;
+}
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 34px;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: var(--ug-radius-sm);
+  background: transparent;
+  color: var(--ug-muted);
+  font: 600 0.78rem var(--ug-font-sans);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tab-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.tab-btn.active,
+.tab-btn[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--ug-violet) 50%, transparent);
+  background: color-mix(in srgb, var(--ug-violet) 22%, transparent);
+  color: #fff;
+}
+.tab-badge {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+.tab-btn.active .tab-badge {
+  background: var(--ug-aqua);
+}
+.tabs-caption {
+  padding-right: 0.75rem;
+  color: var(--ug-muted);
+  font: 600 0.68rem var(--ug-font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+pre {
+  margin: 0;
+  padding: 1.25rem 1.25rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #f1edfa;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  overflow-x: auto;
+}
+pre[hidden] {
+  display: none;
+}
+</style>

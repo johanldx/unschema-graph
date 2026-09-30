@@ -1,0 +1,50 @@
+---
+import { type LandingLocale, landingCopy } from '../data/landing';
+import Comparison from './landing/Comparison.astro';
+import FinalCta from './landing/FinalCta.astro';
+import Hero from './landing/Hero.astro';
+import Integrations from './landing/Integrations.astro';
+import Pipeline from './landing/Pipeline.astro';
+import Recipes from './landing/Recipes.astro';
+
+interface Props {
+  locale?: LandingLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const copy = landingCopy[locale];
+---
+
+<div class="landing-container">
+  <Hero copy={copy.hero} locale={locale} />
+  <Comparison copy={copy.comparison} />
+  <Integrations copy={copy.integrations} locale={locale} />
+  <Pipeline copy={copy.pipeline} />
+  <Recipes copy={copy.recipes} locale={locale} />
+  <FinalCta copy={copy.cta} locale={locale} />
+</div>
+
+<style>
+.landing-container {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+  padding-bottom: clamp(3rem, 5vw, 4.5rem);
+  color: var(--ug-graphite);
+  box-sizing: border-box;
+}
+
+.landing-container :global(*) {
+  box-sizing: border-box;
+}
+
+.landing-container :global(:where(code)) {
+  border: 0;
+  background: transparent;
+}
+
+.landing-container :global(:where(article)) {
+  margin: 0;
+}
+</style>

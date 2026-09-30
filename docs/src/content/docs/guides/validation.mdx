@@ -1,0 +1,135 @@
+---
+title: Validation & Diagnostics
+description: Catch typos, configure error severity modes, safe-parse CMS payloads, and inspect actionable error diagnostics.
+---
+
+Every builder in `unschema-graph` enforces two layers of protection: **compile-time TypeScript types** for your code editor, and **strict runtime Zod validation** for dynamic and external data.
+
+---
+
+## 1. Strict Runtime Validation
+
+Unlike standard TypeScript types which vanish after compilation, `unschema-graph` validates data at runtime using Zod.
+
+Built-in schemas are **strict**: unknown or misspelled properties are rejected immediately:
+
+```ts title="src/pages/article.astro"
+import { Article } from '@unschema-graph/astro';
+
+const article = Article({
+  headline: 'Getting started with unschema-graph',
+  image: '/cover.jpg',
+  datePublished: 'today',
+  author: 'Ada Lovelace',
+
+  // ❌ Typo caught by both TypeScript and runtime Zod:
+  datePublised: 'today',
+});
+```
+
+When an error occurs, `unschema-graph` formats the Zod issue into a readable diagnostic with exact property paths and typo suggestions.
+
+---
+
+## 2. Severity Modes
+
+You can control how validation failures are handled:
+
+| Mode | Behavior on Invalid Input | Recommended Use |
+| --- | --- | --- |
+| `throw` | Throws a detailed `SchemaValidationError` | **CI / Production Builds** (prevent deploying broken schemas) |
+| `warn` | Logs a formatted terminal warning and returns `null` | **Local Development** (avoids interrupting page iteration) |
+| `silent` | Returns `null` silently without console logging | Custom error handling pipelines |
+
+### Setting Global Severity
+
+In Astro (`astro.config.mjs`):
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import { schemaGraph } from '@unschema-graph/astro';
+
+export default defineConfig({
+  integrations: [
+    schemaGraph({
+      // Throw during production build, warn in development:
+      onError: process.env.NODE_ENV === 'production' ? 'throw' : 'warn',
+    }),
+  ],
+});
+```
+
+### Overriding Per-Builder Call
+
+You can override the severity for any individual builder call via its second argument:
+
+```ts
+const optionalProduct = Product(externalData, { onError: 'warn' });
+```
+
+---
+
+## 3. Safe Parsing with `.safeParse()`
+
+When processing external APIs, headless CMS webhooks, or user-submitted content that may be incomplete or invalid, use `.safeParse()` to avoid throwing exceptions:
+
+```ts title="src/lib/cms-loader.ts"
+import { Article } from '@unschema-graph/core';
+
+const result = Article.safeParse(cmsPayload);
+
+if (result.success) {
+  // result.data is strictly typed ArticleOutput
+  console.log('Valid article:', result.data.headline);
+} else {
+  // result.error is SchemaValidationError
+  console.warn('Invalid CMS schema:', result.error.message);
+  console.table(result.error.details);
+}
+```
+
+### Structured Issue Details
+
+When `result.success` is `false`, `result.error.details` provides structured diagnostic records:
+
+```ts
+interface IssueDetail {
+  code: string;           // e.g. 'unrecognized_keys', 'invalid_type'
+  path: string;           // e.g. 'Article.headline', 'Article.author.name'
+  message: string;        // Human-friendly description
+  expected?: string;      // Expected type or schema constraint
+  received?: string;      // Actual value or type received
+  suggestion?: string;    // Typo suggestion if applicable
+}
+```
+
+---
+
+## 4. Extending Validated Entities
+
+When Schema.org introduces cutting-edge properties that are not yet part of the standard library, use `withAdditionalProperties()`:
+
+```ts title="src/pages/product.astro"
+import { Product, withAdditionalProperties } from '@unschema-graph/astro';
+
+const baseProduct = Product({
+  name: 'Mechanical Keyboard',
+  image: 'https://example.com/keyboard.jpg',
+});
+
+// Attach custom or preview Schema.org properties after validation
+const product = withAdditionalProperties(baseProduct, {
+  color: 'Midnight Blue',
+  switchType: 'Tactile Silent',
+});
+```
+
+:::note
+`withAdditionalProperties()` preserves existing `@type` and `@id` values and cannot overwrite them.
+:::
+
+Validation tells you whether data matches a builder. It does not test the HTML emitted
+by your application or guarantee eligibility on an external platform. Run the
+[compiled HTML audit](/audit-and-quality/audit-cli/) after your production build.
+
+Next: learn [how dates and durations are normalized](/guides/dates-and-durations/).

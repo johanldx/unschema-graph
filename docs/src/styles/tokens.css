@@ -1,0 +1,90 @@
+:root {
+  --ug-paper: #fbfaff;
+  --ug-paper-raised: #ffffff;
+  --ug-graphite: #181326;
+  --ug-muted: #67617b;
+  --ug-violet: #7057ff;
+  --ug-violet-strong: #5935e8;
+  --ug-violet-soft: #8e7aff;
+  --ug-aubergine-deep: #1d1630;
+  --ug-aubergine-paper: #fbf8ff;
+  --ug-line: #e4e0ee;
+  --ug-line-subtle: #efeef6;
+  --ug-code: #14111d;
+  --ug-focus: #7057ff;
+
+  /* Functional pastels */
+  --ug-pastel-lavender: #f3f0ff;
+  --ug-pastel-lavender-border: #ded7fb;
+  --ug-pastel-lavender-ink: #552db0;
+
+  --ug-pastel-blue: #f0f7ff;
+  --ug-pastel-blue-border: #d0e5fb;
+  --ug-pastel-blue-ink: #0369a1;
+
+  --ug-pastel-mint: #f0fdf4;
+  --ug-pastel-mint-border: #cbf3d7;
+  --ug-pastel-mint-ink: #166534;
+
+  --ug-pastel-apricot: #fff7ed;
+  --ug-pastel-apricot-border: #fedcc2;
+  --ug-pastel-apricot-ink: #9a3412;
+
+  /* Typography */
+  --ug-font-sans:
+    "Instrument Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ug-font-serif: "Cormorant Garamond", Georgia, serif;
+  --ug-font-mono: "Commit Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Spacing & Layout */
+  --ug-space-1: 0.25rem;
+  --ug-space-2: 0.5rem;
+  --ug-space-3: 0.75rem;
+  --ug-space-4: 1rem;
+  --ug-space-6: 1.5rem;
+  --ug-space-8: 2rem;
+  --ug-space-12: 3rem;
+  --ug-radius-sm: 0.35rem;
+  --ug-radius-md: 0.75rem;
+  --ug-radius-lg: 1rem;
+  --ug-border: 1px solid var(--ug-line);
+  --ug-border-subtle: 1px solid var(--ug-line-subtle);
+  --ug-shadow-sm: 0 2px 8px rgb(24 19 38 / 0.04);
+  --ug-shadow: 0 16px 40px rgb(24 19 38 / 0.07);
+}
+
+:root[data-theme="dark"] {
+  --ug-paper: #120e1c;
+  --ug-paper-raised: #1a1528;
+  --ug-graphite: #f8f6fe;
+  --ug-muted: #aca3c2;
+  --ug-violet: #9b89ff;
+  --ug-violet-strong: #b6aaff;
+  --ug-violet-soft: #816cf5;
+  --ug-aubergine-deep: #171126;
+  --ug-aubergine-paper: #fbf8ff;
+  --ug-line: #2b243e;
+  --ug-line-subtle: #211c30;
+  --ug-code: #0b0911;
+  --ug-focus: #9b89ff;
+
+  /* Functional pastels - dark mode adaptation */
+  --ug-pastel-lavender: #231b38;
+  --ug-pastel-lavender-border: #3b2f5c;
+  --ug-pastel-lavender-ink: #d4c8fc;
+
+  --ug-pastel-blue: #132435;
+  --ug-pastel-blue-border: #234360;
+  --ug-pastel-blue-ink: #9cd4ff;
+
+  --ug-pastel-mint: #112d20;
+  --ug-pastel-mint-border: #1e4f37;
+  --ug-pastel-mint-ink: #86efac;
+
+  --ug-pastel-apricot: #341f15;
+  --ug-pastel-apricot-border: #563321;
+  --ug-pastel-apricot-ink: #fdba74;
+
+  --ug-shadow-sm: 0 2px 8px rgb(0 0 0 / 0.2);
+  --ug-shadow: 0 20px 60px rgb(0 0 0 / 0.35);
+}

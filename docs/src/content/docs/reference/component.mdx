@@ -1,0 +1,89 @@
+---
+title: Schema Component
+description: Complete reference for the Schema component in Astro and Svelte 5.
+---
+
+The `<Schema />` component serializes your Schema.org entities into a sanitized `<script type="application/ld+json">` tag with zero client-side JavaScript.
+
+---
+
+## 1. Imports
+
+**Astro**
+
+```astro title="src/layouts/BaseLayout.astro"
+---
+import { Schema } from '@unschema-graph/astro';
+---
+
+<head>
+  <Schema items={[organization, article]} />
+</head>
+```
+
+**Svelte 5**
+
+```svelte title="src/routes/+page.svelte"
+<script lang="ts">
+import { Schema } from '@unschema-graph/svelte';
+</script>
+
+<!-- Automatically renders in document <head> via <svelte:head> -->
+<Schema items={[organization, article]} baseUrl="https://example.com" />
+```
+
+
+---
+
+## 2. Props Reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `items` | `(SchemaOrgEntity \| null \| undefined)[]` | `undefined` | Array of entities to merge into the unified `@graph`. |
+| `item` | `SchemaOrgEntity \| null` | `undefined` | Convenience prop for passing a single entity. |
+| `data` | `SchemaOrgEntity \| SchemaOrgEntity[] \| null` | `undefined` | Universal alias accepting a single entity or an array. |
+| `baseUrl` | `string` | See priority below | Resolves relative `@id`, `url`, and `item` values against this canonical origin. |
+| `inLanguage` | `string` | Astro: `Astro.currentLocale`<br/>Svelte: `undefined` | Fills missing language code on language-aware entities. |
+| `pretty` | `boolean` | `false` | Enables indented, multi-line JSON output for debugging. |
+| `indent` | `number` | `2` | Space indentation width when `pretty` is enabled. |
+| `graph` | `boolean` | `true` | Wraps entities in a root `@graph`. If `false` and only 1 entity is provided, renders flat root. |
+| `context` | `string` | `'https://schema.org'` | Root JSON-LD context URL. |
+| `debug` *(Astro only)* | `boolean` | `false` | Injects an HTML diagnostic comment and prints development terminal logs. |
+
+---
+
+## 3. Base URL Resolution Priority
+
+When resolving relative identifiers (`#organization`, `/posts/hello#article`):
+
+1. **Astro component:** `baseUrl` prop → `Astro.site` → global configuration. The Astro integration writes its `baseUrl` option to that global configuration, or falls back to `config.site` when the option is omitted.
+2. **Svelte component:** the `baseUrl` prop only. It does not read the Core global configuration automatically.
+3. **Core API:** the `baseUrl` passed in `GraphOptions`. `getGlobalConfig()` is available to application code, but `buildJsonLdGraph()` does not read it automatically.
+
+---
+
+## 4. Usage Patterns
+
+### Passing Multiple Entities (`items`)
+
+Recommended pattern: pass all layout and page entities to a single `<Schema />` call:
+
+```astro title="src/pages/article.astro"
+<Schema items={[publisherOrg, authorPerson, articleNode, breadcrumbs]} />
+```
+
+### Passing a Single Entity (`item`)
+
+```astro title="src/pages/about.astro"
+<Schema item={organization} />
+```
+
+### Pretty-Printing in Development
+
+```astro title="src/pages/index.astro"
+<Schema
+  items={[org, website]}
+  pretty={import.meta.env.DEV}
+  debug={import.meta.env.DEV}
+/>
+```

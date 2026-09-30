@@ -1,0 +1,157 @@
+---
+title: Svelte 5 & SvelteKit
+description: Composant Schema.org JSON-LD natif pour Svelte 5 avec runes réactives et SSR <svelte:head>.
+---
+
+Le package `@unschema-graph/svelte` propose un composant Svelte 5 natif (`<Schema />`) et réexporte le catalogue complet des builders Schema.org sans configuration supplémentaire.
+
+---
+
+## 1. Installation
+
+**pnpm**
+
+```bash
+pnpm add @unschema-graph/svelte zod
+```
+
+**npm**
+
+```bash
+npm install @unschema-graph/svelte zod
+```
+
+**yarn**
+
+```bash
+yarn add @unschema-graph/svelte zod
+```
+
+**bun**
+
+```bash
+bun add @unschema-graph/svelte zod
+```
+
+
+Aucun plugin Vite n'est nécessaire : importez le composant et les builders directement dans vos fichiers `.svelte`.
+
+---
+
+## 2. Runes Svelte 5 & Réactivité
+
+Le composant `<Schema />` a été développé spécifiquement pour Svelte 5. Il exploite les runes `$props()` et `$derived.by()` en interne. Lorsque vos variables d'état liées à `$state` ou `$derived` changent, le script JSON-LD contenu dans `<svelte:head>` est instantanément mis à jour.
+
+```svelte title="src/routes/blog/[slug]/+page.svelte"
+<script lang="ts">
+import { Article, Person, Schema } from '@unschema-graph/svelte';
+
+let title = $state('Construire avec les runes de Svelte 5');
+let authorName = $state('Johan Ledoux');
+
+// Les entités dérivées suivent automatiquement les dépendances réactives
+const author = $derived(
+  Person({
+    '@id': '#author',
+    name: authorName,
+    url: 'https://mon-site.fr/equipe/johan',
+  })
+);
+
+const article = $derived(
+  Article({
+    '@id': '#article',
+    headline: title,
+    image: 'https://mon-site.fr/cover.webp',
+    datePublished: 'today',
+    author: '#author',
+    publisher: 'https://mon-site.fr/#organization',
+  })
+);
+</script>
+
+<!-- Le composant injecte le script JSON-LD dans le <head> -->
+<Schema items={[author, article]} baseUrl="https://mon-site.fr" inLanguage="fr" />
+
+<main>
+  <h1>{title}</h1>
+  <input type="text" bind:value={title} placeholder="Titre de l'article" />
+  <input type="text" bind:value={authorName} placeholder="Nom de l'auteur" />
+</main>
+```
+
+---
+
+## 3. Rendu serveur SSR avec SvelteKit
+
+Dans SvelteKit, les données structurées générées par `<Schema />` sont sérialisées au moment du rendu serveur (SSR) et directement incluses dans le HTML initial reçu par les moteurs de recherche.
+
+### Modèle de Layout global (`+layout.svelte`)
+
+Déclarez les entités permanentes du site au niveau racine :
+
+```svelte title="src/routes/+layout.svelte"
+<script lang="ts">
+import { Organization, Schema, WebSite } from '@unschema-graph/svelte';
+
+let { children } = $props();
+
+const website = WebSite({
+  '@id': '#website',
+  name: 'Acme Corp',
+  url: 'https://mon-site.fr',
+  publisher: '#organization',
+});
+
+const publisher = Organization({
+  '@id': '#organization',
+  name: 'Acme Corp',
+  url: 'https://mon-site.fr',
+  logo: 'https://mon-site.fr/logo.png',
+});
+</script>
+
+<!-- Nœuds @graph globaux injectés sur chaque page -->
+<Schema items={[website, publisher]} baseUrl="https://mon-site.fr" />
+
+{@render children()}
+```
+
+### Modèle de Page (`+page.svelte`)
+
+Sur chaque route spécifique, transmettez les entités dédiées (`Article`, `Product`, ou `FAQPage`) :
+
+```svelte title="src/routes/faq/+page.svelte"
+<script lang="ts">
+import { FAQPage, Question, Schema } from '@unschema-graph/svelte';
+
+const faq = FAQPage({
+  mainEntity: [
+    Question({
+      name: 'Est-ce que unschema-graph fonctionne avec Svelte 5 ?',
+      acceptedAnswer: 'Oui ! Il offre un support natif avec runes et SSR.',
+    }),
+  ],
+});
+</script>
+
+<Schema item={faq} baseUrl="https://mon-site.fr" />
+
+<h1>Foire aux questions</h1>
+```
+
+---
+
+## 4. Réexport de tous les builders du Core
+
+Vous n'avez pas besoin d'installer `@unschema-graph/core` séparément. L'ensemble des builders, fonctions de validation et utilitaires temporels est exporté directement depuis `@unschema-graph/svelte` :
+
+```ts
+import {
+  Article,
+  Product,
+  LocalBusiness,
+  withAdditionalProperties,
+  type SchemaInput,
+} from '@unschema-graph/svelte';
+```

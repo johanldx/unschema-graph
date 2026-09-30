@@ -1,0 +1,122 @@
+---
+import type { LandingCopy, LandingLocale } from '../../data/landing';
+import SectionHeader from './SectionHeader.astro';
+
+interface Props {
+  copy: LandingCopy['recipes'];
+  locale: LandingLocale;
+}
+
+const { copy, locale } = Astro.props;
+const localPath = (path: string) => (locale === 'fr' ? `/fr${path}` : path);
+---
+
+<section aria-labelledby="recipes-title">
+  <SectionHeader id="recipes-title" title={copy.title} subtitle={copy.subtitle} />
+  <div class="list">
+    {copy.items.map((recipe) => (
+  <a href={localPath(`/recipes/${recipe.slug}/`)}>
+    <span class="meta">
+      <code>/{recipe.slug}</code>
+      <strong>{recipe.title}</strong>
+    </span>
+    <span class="description">{recipe.description}</span>
+    <span class="arrow" aria-hidden="true">
+      →
+    </span>
+  </a>
+))}
+  </div>
+  <div class="footer-link">
+    <a href={localPath('/recipes/blog-media/')}
+      >{copy.allRecipes}<span aria-hidden="true">→</span></a
+    >
+  </div>
+</section>
+
+<style>
+section {
+  padding-block: clamp(3.5rem, 7vw, 5.5rem);
+  border-bottom: var(--ug-border);
+}
+.list {
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-md);
+  background: var(--ug-paper-raised);
+  overflow: hidden;
+}
+.list > a {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.7fr) 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  min-height: 5.25rem;
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid var(--ug-line);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+.list > a:last-child {
+  border-bottom: 0;
+}
+.list > a:hover {
+  background: color-mix(in srgb, var(--ug-violet) 5%, var(--ug-paper-raised));
+}
+.meta {
+  display: grid;
+  gap: 0.25rem;
+}
+.meta code {
+  padding: 0;
+  color: var(--ug-muted);
+  font-size: 0.76rem;
+}
+.meta strong {
+  color: var(--ug-graphite);
+  font-size: 1rem;
+}
+.description {
+  color: var(--ug-muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+.arrow {
+  color: var(--ug-muted);
+  font-size: 1.2rem;
+  transition:
+    color 160ms ease,
+    transform 160ms var(--ug-ease-out);
+}
+.list > a:hover .arrow {
+  color: var(--ug-violet-strong);
+  transform: translateX(0.25rem);
+}
+.footer-link {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+.footer-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ug-violet-strong);
+  font-size: 0.92rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+.footer-link a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+@media (max-width: 48rem) {
+  .list > a {
+    grid-template-columns: 1fr auto;
+    gap: 0.6rem 1rem;
+  }
+  .description {
+    grid-column: 1 / -1;
+  }
+}
+</style>

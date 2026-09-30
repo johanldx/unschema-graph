@@ -1,0 +1,136 @@
+---
+title: Validation & Diagnostics
+description: Détection des fautes de frappe, modes de sévérité des erreurs, parsing sécurisé de CMS et diagnostics précis.
+---
+
+Chaque builder d'`unschema-graph` applique deux niveaux de protection : le **typage statique TypeScript** pour l'autocomplétion dans votre éditeur, et une **validation stricte à l'exécution avec Zod** pour les données dynamiques et externes.
+
+---
+
+## 1. Validation stricte à l'exécution
+
+Contrairement aux interfaces TypeScript qui disparaissent à la compilation, `unschema-graph` valide vos données au moment de l'exécution grâce à Zod.
+
+Les schémas sont **stricts** : les clés inconnues ou mal orthographiées sont immédiatement rejetées :
+
+```ts title="src/pages/article.astro"
+import { Article } from '@unschema-graph/astro';
+
+const article = Article({
+  headline: 'Bien démarrer avec unschema-graph',
+  image: '/cover.jpg',
+  datePublished: 'today',
+  author: 'Ada Lovelace',
+
+  // ❌ Faute de frappe interceptée par TypeScript et Zod :
+  datePublised: 'today',
+});
+```
+
+Lorsqu'une anomalie survient, `unschema-graph` met en forme l'erreur Zod en un diagnostic lisible indiquant le chemin précis de la propriété et une suggestion de correction.
+
+---
+
+## 2. Modes de sévérité
+
+Vous pouvez piloter la réaction du moteur en cas de schéma invalide :
+
+| Mode | Comportement en cas d'erreur | Usage recommandé |
+| --- | --- | --- |
+| `throw` | Lève une exception `SchemaValidationError` détaillée | **Builds CI / Production** (empêche de déployer un SEO erroné) |
+| `warn` | Affiche un avertissement clair en console et renvoie `null` | **Développement local** (n'interrompt pas le travail sur la page) |
+| `silent` | Renvoie `null` sans aucun message en console | Pipelines personnalisés |
+
+### Configuration globale de la sévérité
+
+Dans votre configuration Astro (`astro.config.mjs`) :
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import { schemaGraph } from '@unschema-graph/astro';
+
+export default defineConfig({
+  integrations: [
+    schemaGraph({
+      // Lève une exception en production, avertit en dev :
+      onError: process.env.NODE_ENV === 'production' ? 'throw' : 'warn',
+    }),
+  ],
+});
+```
+
+### Surcharge par appel de builder
+
+Vous pouvez également surcharger le mode de sévérité sur un builder particulier via son second argument :
+
+```ts
+const produitOptionnel = Product(donneesExternes, { onError: 'warn' });
+```
+
+---
+
+## 3. Parsing sécurisé avec `.safeParse()`
+
+Lorsque vous consommez des APIs externes, des webhooks de CMS headless ou des contenus soumis par des utilisateurs, utilisez `.safeParse()` pour éviter toute interruption d'exécution :
+
+```ts title="src/lib/cms-loader.ts"
+import { Article } from '@unschema-graph/core';
+
+const result = Article.safeParse(donneesCms);
+
+if (result.success) {
+  // result.data est strictement typé en ArticleOutput
+  console.log('Article valide :', result.data.headline);
+} else {
+  // result.error est une instance de SchemaValidationError
+  console.warn('Schéma CMS invalide :', result.error.message);
+  console.table(result.error.details);
+}
+```
+
+### Détails structurés des anomalies
+
+Lorsque `result.success` vaut `false`, le tableau `result.error.details` fournit des informations actionnables :
+
+```ts
+interface IssueDetail {
+  code: string;           // ex. 'unrecognized_keys', 'invalid_type'
+  path: string;           // ex. 'Article.headline', 'Article.author.name'
+  message: string;        // Description compréhensible de l'anomalie
+  expected?: string;      // Type ou contrainte attendue
+  received?: string;      // Valeur ou type reçu
+  suggestion?: string;    // Suggestion en cas de faute de frappe
+}
+```
+
+---
+
+## 4. Extension d'entités validées
+
+Lorsque Schema.org intègre de nouvelles propriétés expérimentales non encore présentes dans la bibliothèque standard, utilisez `withAdditionalProperties()` :
+
+```ts title="src/pages/product.astro"
+import { Product, withAdditionalProperties } from '@unschema-graph/astro';
+
+const baseProduct = Product({
+  name: 'Clavier mécanique',
+  image: 'https://mon-site.fr/clavier.jpg',
+});
+
+// Attache des propriétés personnalisées après validation
+const product = withAdditionalProperties(baseProduct, {
+  color: 'Bleu nuit',
+  switchType: 'Tactile silencieux',
+});
+```
+
+:::note
+`withAdditionalProperties()` préserve impérativement les valeurs `@type` et `@id` d'origine et ne permet pas de les écraser.
+:::
+
+La validation indique si les données respectent un builder. Elle ne contrôle pas le
+HTML produit par votre application et ne garantit aucune éligibilité sur une plateforme
+externe. Exécutez [l'audit du HTML compilé](/fr/audit-and-quality/audit-cli/) après le
+build de production.
+
+Étape suivante : comprendre [la normalisation des dates et durées](/fr/guides/dates-and-durations/).

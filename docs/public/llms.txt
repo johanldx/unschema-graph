@@ -1,0 +1,98 @@
+# unschema-graph
+
+> Type-safe Schema.org JSON-LD builders and graph tooling for Core TypeScript, Astro, and Svelte 5.
+
+- Documentation: https://unschema-graph.jhdx.dev/
+- GitHub: https://github.com/johanldx/unschema-graph
+- License: MIT
+- Status: pre-1.0; review release notes before upgrading
+
+## Choose the package
+
+- **@unschema-graph/core**: framework-independent builders, graph resolution, safe serialization, duration utilities, and the audit CLI/API.
+- **@unschema-graph/astro**: Core exports plus the Astro integration, server-rendered `<Schema />`, Dev Toolbar app, and Content Collections helpers.
+- **@unschema-graph/svelte**: Core exports plus the Svelte 5 server-rendered `<Schema />` component.
+
+Astro is the recommended starting path for an Astro documentation site. Core and Svelte are first-class entry points for their respective environments.
+
+## Agent workflow
+
+1. Read the implementation guide and the focused quick start for the project environment.
+2. Model only facts visible on the page with official builders.
+3. Give reusable entities stable `@id` values and render one unified graph.
+4. Configure an intentional canonical base URL.
+5. Build the project, inspect the emitted LD+JSON, and run `npx @unschema-graph/core audit <output-directory>`.
+6. Do not claim that valid markup guarantees ranking, eligibility, or rich results.
+
+## Start here
+
+- [AI implementation guide](https://unschema-graph.jhdx.dev/ai/implementation-guide.md)
+- [Using Markdown with an agent](https://unschema-graph.jhdx.dev/ai/using-markdown.md)
+- [Choose an environment](https://unschema-graph.jhdx.dev/getting-started/choose-your-environment.md)
+- [Architecture pipeline](https://unschema-graph.jhdx.dev/architecture/pipeline.md)
+- [Troubleshooting](https://unschema-graph.jhdx.dev/operations/troubleshooting.md)
+- [Compatibility and stability](https://unschema-graph.jhdx.dev/reference/compatibility.md)
+- [Known limitations](https://unschema-graph.jhdx.dev/operations/known-limitations.md)
+- [Complete English documentation bundle](https://unschema-graph.jhdx.dev/llms-full.txt)
+
+Focused French Markdown routes are available under `https://unschema-graph.jhdx.dev/fr/<route>.md`. The concise index and complete bundle remain English canonical machine entry points. These files are optional context for agents, not a Google Search requirement or ranking signal.
+
+## Quick starts
+
+- [Astro](https://unschema-graph.jhdx.dev/getting-started/quick-start/astro.md)
+- [Svelte 5](https://unschema-graph.jhdx.dev/getting-started/quick-start/svelte.md)
+- [Core / other frameworks](https://unschema-graph.jhdx.dev/getting-started/quick-start/core.md)
+
+## 51 supported Schema.org builders
+
+- [Article](https://unschema-graph.jhdx.dev/reference/builders/article.md)
+- [BlogPosting](https://unschema-graph.jhdx.dev/reference/builders/blog-posting.md)
+- [NewsArticle](https://unschema-graph.jhdx.dev/reference/builders/news-article.md)
+- [Recipe](https://unschema-graph.jhdx.dev/reference/builders/recipe.md)
+- [HowTo](https://unschema-graph.jhdx.dev/reference/builders/how-to.md)
+- [HowToStep](https://unschema-graph.jhdx.dev/reference/builders/how-to-step.md)
+- [HowToSection](https://unschema-graph.jhdx.dev/reference/builders/how-to-section.md)
+- [VideoObject](https://unschema-graph.jhdx.dev/reference/builders/video-object.md)
+- [Clip](https://unschema-graph.jhdx.dev/reference/builders/clip.md)
+- [Course](https://unschema-graph.jhdx.dev/reference/builders/course.md)
+- [Book](https://unschema-graph.jhdx.dev/reference/builders/book.md)
+- [Movie](https://unschema-graph.jhdx.dev/reference/builders/movie.md)
+- [Dataset](https://unschema-graph.jhdx.dev/reference/builders/dataset.md)
+- [DataDownload](https://unschema-graph.jhdx.dev/reference/builders/data-download.md)
+- [Event](https://unschema-graph.jhdx.dev/reference/builders/event.md)
+- [FAQPage](https://unschema-graph.jhdx.dev/reference/builders/faq-page.md)
+- [Question](https://unschema-graph.jhdx.dev/reference/builders/question.md)
+- [Answer](https://unschema-graph.jhdx.dev/reference/builders/answer.md)
+- [QAPage](https://unschema-graph.jhdx.dev/reference/builders/qa-page.md)
+- [QAQuestion](https://unschema-graph.jhdx.dev/reference/builders/qa-question.md)
+- [DiscussionForumPosting](https://unschema-graph.jhdx.dev/reference/builders/discussion-forum-posting.md)
+- [Comment](https://unschema-graph.jhdx.dev/reference/builders/comment.md)
+- [ProfilePage](https://unschema-graph.jhdx.dev/reference/builders/profile-page.md)
+- [WebSite](https://unschema-graph.jhdx.dev/reference/builders/web-site.md)
+- [WebPage](https://unschema-graph.jhdx.dev/reference/builders/web-page.md)
+- [BreadcrumbList](https://unschema-graph.jhdx.dev/reference/builders/breadcrumb-list.md)
+- [ListItem](https://unschema-graph.jhdx.dev/reference/builders/list-item.md)
+- [ItemList](https://unschema-graph.jhdx.dev/reference/builders/item-list.md)
+- [Organization](https://unschema-graph.jhdx.dev/reference/builders/organization.md)
+- [Person](https://unschema-graph.jhdx.dev/reference/builders/person.md)
+- [LocalBusiness](https://unschema-graph.jhdx.dev/reference/builders/local-business.md)
+- [Restaurant](https://unschema-graph.jhdx.dev/reference/builders/restaurant.md)
+- [Store](https://unschema-graph.jhdx.dev/reference/builders/store.md)
+- [LodgingBusiness](https://unschema-graph.jhdx.dev/reference/builders/lodging-business.md)
+- [VacationRental](https://unschema-graph.jhdx.dev/reference/builders/vacation-rental.md)
+- [Hotel](https://unschema-graph.jhdx.dev/reference/builders/hotel.md)
+- [Product](https://unschema-graph.jhdx.dev/reference/builders/product.md)
+- [Offer](https://unschema-graph.jhdx.dev/reference/builders/offer.md)
+- [AggregateOffer](https://unschema-graph.jhdx.dev/reference/builders/aggregate-offer.md)
+- [Service](https://unschema-graph.jhdx.dev/reference/builders/service.md)
+- [JobPosting](https://unschema-graph.jhdx.dev/reference/builders/job-posting.md)
+- [SoftwareApplication](https://unschema-graph.jhdx.dev/reference/builders/software-application.md)
+- [WebApplication](https://unschema-graph.jhdx.dev/reference/builders/web-application.md)
+- [MobileApplication](https://unschema-graph.jhdx.dev/reference/builders/mobile-application.md)
+- [Review](https://unschema-graph.jhdx.dev/reference/builders/review.md)
+- [Rating](https://unschema-graph.jhdx.dev/reference/builders/rating.md)
+- [AggregateRating](https://unschema-graph.jhdx.dev/reference/builders/aggregate-rating.md)
+- [ImageObject](https://unschema-graph.jhdx.dev/reference/builders/image-object.md)
+- [PostalAddress](https://unschema-graph.jhdx.dev/reference/builders/postal-address.md)
+- [GeoCoordinates](https://unschema-graph.jhdx.dev/reference/builders/geo-coordinates.md)
+- [ContactPoint](https://unschema-graph.jhdx.dev/reference/builders/contact-point.md)
