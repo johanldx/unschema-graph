@@ -1,0 +1,55 @@
+{
+  "name": "@unschema-graph/svelte",
+  "version": "0.1.0",
+  "description": "Svelte 5 Schema component and full unschema-graph core tooling for Svelte and SvelteKit.",
+  "type": "module",
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johanldx/unschema-graph.git",
+    "directory": "packages/svelte"
+  },
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "seo",
+    "json-ld",
+    "schema-org",
+    "structured-data"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./Schema.svelte": {
+      "types": "./dist/Schema.svelte.d.ts",
+      "svelte": "./dist/Schema.svelte",
+      "default": "./dist/Schema.svelte"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "svelte-package --input src",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "@unschema-graph/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  }
+}
