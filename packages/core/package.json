@@ -1,6 +1,6 @@
 {
   "name": "@unschema-graph/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Framework-independent Schema.org JSON-LD builders, graph resolution, safe serialization, and static HTML auditing.",
   "type": "module",
   "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
