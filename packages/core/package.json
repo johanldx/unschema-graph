@@ -1,0 +1,61 @@
+{
+  "name": "@unschema-graph/core",
+  "version": "0.1.0",
+  "description": "Framework-independent Schema.org JSON-LD builders, graph resolution, safe serialization, and static HTML auditing.",
+  "type": "module",
+  "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johanldx/unschema-graph.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "schema-org",
+    "json-ld",
+    "structured-data",
+    "seo",
+    "zod",
+    "rich-snippets"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "bin": {
+    "unschema-graph": "./bin/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./audit": {
+      "types": "./dist/core/audit.d.ts",
+      "import": "./dist/core/audit.js",
+      "default": "./dist/core/audit.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "prepack": "pnpm run build"
+  },
+  "peerDependencies": {
+    "zod": "^4.6.0"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.2",
+    "zod": "^4.6.5"
+  }
+}
