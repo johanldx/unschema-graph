@@ -145,12 +145,17 @@ When you provide a `baseUrl` (or set `site` in Astro's `astro.config.mjs`), `uns
 | Input `@id` | Configured `baseUrl` | Output in `@graph` |
 | --- | --- | --- |
 | `#organization` | `https://example.com` | `https://example.com/#organization` |
+| `#organization` | `https://example.com/about` | `https://example.com/about#organization` |
+| `#organization` | `https://example.com/about/` | `https://example.com/about/#organization` |
 | `/about` | `https://example.com` | `https://example.com/about` |
 | `/about#organization` | `https://example.com` | `https://example.com/about#organization` |
 | `https://example.com/#organization` | `https://example.com` | unchanged |
 | `urn:example:foo` | `https://example.com` | unchanged |
 | `mailto:hello@example.com` | `https://example.com` | unchanged |
 | `tel:+33123456789` | `https://example.com` | unchanged |
+
+Fragment resolution preserves the path form supplied by `baseUrl`: `/about` and `/about/` remain
+distinct document URLs.
 
 Built-in schemas distinguish these values explicitly: `WebUrlSchema` validates absolute
 HTTP(S) URLs, `RelativeOrAbsoluteUrlSchema` validates URL properties, and entity

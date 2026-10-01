@@ -37,6 +37,19 @@ const article = Article({
 });
 ```
 
+#### Explicit string references
+
+A string becomes an `@id` reference only when it explicitly looks like one: a fragment
+(`#person`), a path (`/people/ada#person`, `./page`, `../page`), or an absolute URI. Plain names
+are expanded only by relationships that define a fallback type, such as `Article.author`.
+Generic relationships without a fallback reject plain names:
+
+```ts
+ProfilePage({ mainEntity: '#person' }); // Valid explicit reference
+ProfilePage({ mainEntity: Person({ name: 'Ada Lovelace' }) }); // Valid direct entity
+ProfilePage({ mainEntity: 'Ada Lovelace' }); // Validation error
+```
+
 ### 2. Automatic Graph Discovery
 
 You no longer need to manually gather every connected entity into an array when serializing. Passing a root node recursively discovers all referenced entities with an `@id`:

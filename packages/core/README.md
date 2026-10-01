@@ -59,6 +59,11 @@ const graph = buildJsonLdGraph(article, {
 const jsonString = serializeJsonLd(graph);
 ```
 
+Relationship strings that look like fragments, paths, or absolute URIs become `@id`
+references. A plain name such as `author: 'Ada Lovelace'` expands only when that relationship
+defines a fallback type. Generic relationships without a fallback require a typed entity or an
+explicit reference such as `'#person'` or `{ '@id': '#person' }`.
+
 ### 2. Runtime validation with `safeParse`
 
 Validate untrusted external data (such as CMS responses or API payloads) before rendering:

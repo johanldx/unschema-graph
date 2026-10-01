@@ -37,6 +37,20 @@ const article = Article({
 });
 ```
 
+#### Références textuelles explicites
+
+Une chaîne devient une référence `@id` uniquement lorsqu’elle ressemble explicitement à un
+identifiant : fragment (`#person`), chemin (`/personnes/ada#person`, `./page`, `../page`) ou URI
+absolue. Les noms simples sont développés uniquement par les relations qui définissent un type
+de fallback, comme `Article.author`. Les relations génériques sans fallback rejettent les noms
+simples :
+
+```ts
+ProfilePage({ mainEntity: '#person' }); // Référence explicite valide
+ProfilePage({ mainEntity: Person({ name: 'Ada Lovelace' }) }); // Entité directe valide
+ProfilePage({ mainEntity: 'Ada Lovelace' }); // Erreur de validation
+```
+
 ### 2. Découverte automatique du graphe
 
 Vous n'avez plus besoin d'assembler manuellement toutes les entités reliées dans un tableau. Passer une entité racine explore récursivement toutes les entités référencées dotées d'un `@id` :

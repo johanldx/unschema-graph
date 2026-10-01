@@ -51,7 +51,7 @@ pnpm run release:check
 This automated gate runs:
 1. **Linting & formatting check:** `biome check --error-on-warnings .`
 2. **Typecheck:** `pnpm run typecheck` across all 7 workspace packages.
-3. **Unit & integration test suites:** `vitest run` (24 suites, 224+ tests).
+3. **Unit & integration test suites:** the complete `vitest run` suite.
 4. **Package builds:** all three publishable packages are compiled.
 5. **Strict Astro output audit:** `pnpm run audit:strict` fails on warnings as well as errors.
 6. **Example verification:** the Core example is built and audited, and the Svelte example is built.
@@ -61,6 +61,9 @@ This automated gate runs:
 For local development, `pnpm run audit` runs the same build and audit without `--strict`, so
 warnings remain visible without blocking iteration. CI and every release path share the
 `pnpm run verify` gate, whose Astro audit is strict.
+
+The automated publish workflow runs `pnpm run release:check` independently on the exact release
+commit before invoking `changeset publish`.
 
 ---
 

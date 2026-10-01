@@ -19,7 +19,8 @@ for public packages published through a trusted publisher.
 1. Add a Changeset for every user-visible package change.
 2. Merge only after CI, including `pnpm run verify` and `pnpm run test:published`, is green.
 3. Merge the Changesets version PR to update package versions and changelogs together.
-4. The publish workflow creates the npm releases, package Git tags and GitHub Releases.
+4. The publish workflow independently runs `pnpm run release:check` on the release commit before
+   creating npm releases, package Git tags and GitHub Releases.
 5. For `1.0.0`, the workflow additionally creates the aggregate `v1.0.0` Git tag and GitHub Release.
 
 Before announcing a release, verify the npm pages expose provenance and that the generated

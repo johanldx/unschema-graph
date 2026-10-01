@@ -147,12 +147,17 @@ Lorsque vous configurez `baseUrl` (ou la propriété `site` dans l'`astro.config
 | Entrée `@id` | `baseUrl` configurée | Sortie dans `@graph` |
 | --- | --- | --- |
 | `#organization` | `https://mon-site.fr` | `https://mon-site.fr/#organization` |
+| `#organization` | `https://mon-site.fr/a-propos` | `https://mon-site.fr/a-propos#organization` |
+| `#organization` | `https://mon-site.fr/a-propos/` | `https://mon-site.fr/a-propos/#organization` |
 | `/a-propos` | `https://mon-site.fr` | `https://mon-site.fr/a-propos` |
 | `/a-propos#person` | `https://mon-site.fr` | `https://mon-site.fr/a-propos#person` |
 | `https://mon-site.fr/#organization` | `https://mon-site.fr` | inchangé |
 | `urn:example:foo` | `https://mon-site.fr` | inchangé |
 | `mailto:hello@example.com` | `https://mon-site.fr` | inchangé |
 | `tel:+33123456789` | `https://mon-site.fr` | inchangé |
+
+La résolution d’un fragment préserve la forme du chemin fournie par `baseUrl` : `/a-propos` et
+`/a-propos/` restent deux URL de document distinctes.
 
 Les schémas intégrés distinguent ces valeurs explicitement : `WebUrlSchema` valide les
 URL HTTP(S) absolues, `RelativeOrAbsoluteUrlSchema` valide les propriétés URL et les

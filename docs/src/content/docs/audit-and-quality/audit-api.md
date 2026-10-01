@@ -49,6 +49,10 @@ When a page contains a canonical link element, the audit uses its `href` URL to 
 fragment and absolute same-document `@id` references. An absolute reference to another path on
 the same origin is treated as external to the current graph.
 
+Without a canonical URL, only a fragment-only reference such as `#organization` can be proven to
+target the current document. Path references such as `/about#organization`, `./page#thing`, and
+`../page#thing` are therefore not reported as locally broken.
+
 ---
 
 ## Auditing Raw HTML Strings

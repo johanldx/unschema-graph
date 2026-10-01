@@ -49,6 +49,11 @@ Lorsqu’une page contient un élément de lien canonique, l’audit utilise son
 valider les références `@id` absolues ou sous forme de fragment qui ciblent le même document. Une
 URL absolue vers un autre chemin de la même origine est considérée comme externe au graphe courant.
 
+Sans URL canonique, seule une référence composée uniquement d’un fragment comme `#organization`
+peut être identifiée avec certitude comme appartenant au document courant. Les chemins comme
+`/a-propos#organization`, `./page#thing` et `../page#thing` ne sont donc pas signalés comme des
+références locales cassées.
+
 ---
 
 ## Auditer des chaînes HTML brutes

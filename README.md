@@ -113,6 +113,10 @@ The curated builder catalog targets the Schema.org 30.1 vocabulary baseline and 
 ### 2. 🕸️ Relational Graph Engine (`@graph`)
 Search engines love connected knowledge graphs. Pass entities directly as nested objects (`publisher: organization`) or reference them via `#id` fragments. `unschema-graph` automatically crawls the object graph, hoists shared nodes to the top level, resolves relative `#id` fragments against your canonical `baseUrl`, and merges duplicate entities deterministically into a single `@graph`.
 
+Relationship strings are explicit: fragments, paths, and absolute URIs become `@id`
+references. Plain names expand only when the relationship defines an unambiguous fallback type;
+otherwise, pass a typed entity or an explicit `@id` reference.
+
 ### 3. 🔒 Zero-Trust Anti-XSS Protection
 Never inject unescaped JSON into your HTML. Our serializer substitutes `<` and `>` with Unicode escapes (`\u003c`, `\u003e`), guaranteeing that untrusted CMS fields or comments cannot break out of `<script>` blocks or execute arbitrary JavaScript.
 
