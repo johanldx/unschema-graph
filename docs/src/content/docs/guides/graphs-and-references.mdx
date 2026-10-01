@@ -92,7 +92,9 @@ publisher: { '@id': '#organization' }
 ```
 
 Otherwise, when the relation declares a `fallbackType`, the string becomes an inline
-named entity. Without a fallback type, it remains an `@id` shorthand:
+named entity. Without a fallback type, a plain string is rejected: pass a direct entity,
+an explicit ID-looking string, or an `{ '@id': '...' }` object instead.
+
 - `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
 - `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
 - `brand: 'AC/DC'` → `{ "@type": "Brand", "name": "AC/DC" }`

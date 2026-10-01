@@ -173,6 +173,39 @@ describe('entity relationships', () => {
     expect(twice).toEqual(once);
   });
 
+  it('keeps explicit reference forms valid without a fallback type', () => {
+    const referenceSchema = entityRef({ schemas: [OrganizationSchema] });
+
+    for (const reference of [
+      '#organization',
+      '/about#organization',
+      './about#organization',
+      '../about#organization',
+      'https://example.com/#organization',
+      'urn:example:organization',
+    ]) {
+      expect(referenceSchema.parse(reference)).toEqual({ '@id': reference });
+    }
+
+    expect(referenceSchema.parse({ '@id': '#organization' })).toEqual({
+      '@id': '#organization',
+    });
+  });
+
+  it('rejects plain relation strings when no fallback type is defined', () => {
+    const referenceSchema = entityRef({ schemas: [OrganizationSchema] });
+    const result = referenceSchema.safeParse('Acme');
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.message).toContain('Expected an explicit entity reference');
+    }
+
+    expect(() => ProfilePage({ mainEntity: 'Ada Lovelace' })).toThrow(
+      /Invalid entity relationship/
+    );
+  });
+
   it('normalizes ProfilePage.mainEntity entity, string ID, and @id object forms', () => {
     const person = Person({ '@id': '#person', name: 'Ada' });
 

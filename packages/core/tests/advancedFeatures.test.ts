@@ -246,6 +246,32 @@ describe('Advanced Feature 3: Static Build Audit Engine', () => {
     });
   });
 
+  it('only audits fragment-only references as local without a canonical URL', () => {
+    const result = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@type":"WebPage",
+        "@id":"#page",
+        "fragmentReference":{"@id":"#missing"},
+        "rootPathReference":{"@id":"/about#missing"},
+        "relativePathReference":{"@id":"./about#missing"},
+        "parentPathReference":{"@id":"../about#missing"}
+      }</script>`,
+      'no-canonical-reference.html'
+    );
+
+    expect(result.errors).toEqual([
+      {
+        code: 'broken-reference',
+        severity: 'error',
+        file: 'no-canonical-reference.html',
+        id: '#missing',
+        path: 'WebPage.fragmentReference',
+        message: 'Broken @id reference: #missing\nReferenced from: WebPage.fragmentReference',
+      },
+    ]);
+  });
+
   it('reports a missing absolute reference to the canonical document', () => {
     const result = auditHtmlContent(
       `<html><head>

@@ -59,6 +59,7 @@ export interface EntityRefOptions<TSchemas extends EntitySchemas> {
  * 2. An explicit reference object `{ '@id': '#organization' }`.
  * 3. A fragment, relative path, or URI string, which transforms to `{ '@id': str }`.
  * 4. A plain name string (e.g. `'John Doe'`, `'Acme Corp'`), which transforms to `{ '@type': fallbackType, name: str }` when fallbackType is provided.
+ * A plain name is rejected when no fallback type is configured.
  */
 export function entityRef<const TSchemas extends EntitySchemas>({
   schemas,
@@ -68,14 +69,23 @@ export function entityRef<const TSchemas extends EntitySchemas>({
   const stringSchema = z
     .string()
     .min(1)
-    .transform((val) => {
+    .transform((val, ctx) => {
       if (isIdReference(val)) {
         return { '@id': val };
       }
       if (fallbackType) {
         return { '@type': fallbackType, name: val };
       }
-      return { '@id': val };
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Expected an explicit entity reference',
+        params: {
+          kind: 'entity_reference',
+          suggestion:
+            "Pass an entity object, '#id', '/path#id', absolute URI, or { '@id': '#id' }.",
+        },
+      });
+      return z.NEVER;
     });
 
   const relationSchema = z.union([stringSchema, ...schemas, IdObjectSchema] as unknown as [

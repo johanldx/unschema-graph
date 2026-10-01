@@ -17,15 +17,13 @@ export function resolveReferenceId(id: string, baseUrl?: string): string {
   try {
     const base = baseUrl.trim();
     const baseWithScheme = withHttpScheme(base);
-    const resolvedUrl = trimmed.startsWith('#')
-      ? new URL(trimmed, baseWithScheme.endsWith('/') ? baseWithScheme : `${baseWithScheme}/`)
-      : new URL(trimmed, baseWithScheme);
+    const resolvedUrl = new URL(trimmed, baseWithScheme);
 
     return resolvedUrl.href;
   } catch {
     const cleanBase = baseUrl.trim().replace(/\/+$/, '');
     if (trimmed.startsWith('#')) {
-      return `${cleanBase}/${trimmed}`;
+      return `${cleanBase}${trimmed}`;
     }
     if (trimmed.startsWith('/')) {
       return `${cleanBase}${trimmed}`;
@@ -36,8 +34,7 @@ export function resolveReferenceId(id: string, baseUrl?: string): string {
 
 export function canonicalDocumentUrl(url: string): string | undefined {
   try {
-    const resolved = resolveReferenceId('#', url);
-    const canonical = new URL(withHttpScheme(resolved));
+    const canonical = new URL(withHttpScheme(url.trim()));
     canonical.hash = '';
     return canonical.href;
   } catch {
@@ -56,7 +53,7 @@ export function isSameDocumentReference(referenceId: string, documentUrl?: strin
   }
 
   if (!documentUrl) {
-    return !URI_SCHEME.test(reference);
+    return reference.startsWith('#');
   }
 
   const canonicalDocument = canonicalDocumentUrl(documentUrl);

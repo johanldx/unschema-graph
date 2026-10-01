@@ -157,12 +157,42 @@ describe('core/graph', () => {
     ]);
   });
 
+  it('only treats fragment-only references as same-document without a base URL', () => {
+    const diagnostics: GraphDiagnostic[] = [];
+
+    buildJsonLdGraph(
+      {
+        '@type': 'WebPage',
+        '@id': '#page',
+        fragmentReference: { '@id': '#missing' },
+        rootPathReference: { '@id': '/about#missing' },
+        relativePathReference: { '@id': './about#missing' },
+        parentPathReference: { '@id': '../about#missing' },
+      },
+      {
+        onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+      }
+    );
+
+    expect(diagnostics.filter((diagnostic) => diagnostic.code === 'broken-reference')).toEqual([
+      expect.objectContaining({
+        id: '#missing',
+        path: 'WebPage.fragmentReference',
+      }),
+    ]);
+  });
+
   it.each([
     ['#missing', 'https://example.com/', true],
     ['/#missing', 'https://example.com/', true],
     ['https://example.com/#missing', 'https://example.com/', true],
     ['https://example.com/about#missing', 'https://example.com/', false],
     ['https://example.com/products/42#missing', 'https://example.com/', false],
+    ['https://example.com/about#missing', 'https://example.com/about', true],
+    ['https://example.com/about/#missing', 'https://example.com/about/', true],
+    ['https://example.com/about/team#missing', 'https://example.com/about', false],
+    ['https://example.com/about/#missing', 'https://example.com/about', false],
+    ['https://example.com/about#missing', 'https://example.com/about/', false],
     ['https://external.example/#missing', 'https://example.com/', false],
     ['urn:test:missing', 'https://example.com/', false],
     ['https://example.com/docs/page/#missing', 'https://example.com/docs/page/', true],
@@ -528,7 +558,11 @@ describe('core/graph', () => {
   describe('Step 20 — API Polish & Robustness', () => {
     it('canonicalizes @id consistently regardless of trailing slash in baseUrl', () => {
       // Standalone fragment with and without trailing slash
-      expect(resolveId('#org', 'https://example.com/docs')).toBe('https://example.com/docs/#org');
+      expect(resolveId('#org', 'https://example.com/about')).toBe('https://example.com/about#org');
+      expect(resolveId('#org', 'https://example.com/about/')).toBe(
+        'https://example.com/about/#org'
+      );
+      expect(resolveId('#org', 'https://example.com/docs')).toBe('https://example.com/docs#org');
       expect(resolveId('#org', 'https://example.com/docs/')).toBe('https://example.com/docs/#org');
       expect(resolveId('#org', 'https://example.com')).toBe('https://example.com/#org');
       expect(resolveId('#org', 'https://example.com/')).toBe('https://example.com/#org');

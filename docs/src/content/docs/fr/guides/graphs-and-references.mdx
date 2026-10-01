@@ -92,7 +92,10 @@ publisher: { '@id': '#organization' }
 ```
 
 Sinon, lorsque la relation déclare un `fallbackType`, la chaîne devient une entité
-nommée inline. Sans type de fallback, elle reste un raccourci `@id` :
+nommée inline. Sans type de fallback, une chaîne simple est rejetée : fournissez plutôt
+une entité directe, une chaîne ressemblant explicitement à un identifiant ou un objet
+`{ '@id': '...' }`.
+
 - `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
 - `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
 - `brand: 'AC/DC'` → `{ "@type": "Brand", "name": "AC/DC" }`

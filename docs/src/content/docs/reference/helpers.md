@@ -89,8 +89,10 @@ const PublisherSchema = entityRef({
 ```
 
 The same primitive preserves direct builder entities, normalizes ID strings to `{ '@id' }`,
-and expands plain strings with `fallbackType`. Value objects such as addresses remain
-separate schemas so free-form strings are not mistaken for entity references.
+and expands plain strings with `fallbackType`. Without a fallback type, plain strings are
+rejected; pass a direct entity, an explicit ID-looking string, or an `{ '@id' }` object.
+Value objects such as addresses remain separate schemas so free-form strings are not
+mistaken for entity references.
 
 ## Content helpers
 

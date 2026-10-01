@@ -90,9 +90,11 @@ const PublisherSchema = entityRef({
 ```
 
 La même primitive conserve les entités issues des builders, normalise les chaînes
-d’identifiant en `{ '@id' }` et développe les chaînes simples avec `fallbackType`. Les
-value objects comme les adresses gardent des schémas distincts afin qu’une chaîne libre
-ne soit pas confondue avec une référence d’entité.
+d’identifiant en `{ '@id' }` et développe les chaînes simples avec `fallbackType`. Sans
+type de fallback, les chaînes simples sont rejetées : fournissez une entité directe, une
+chaîne ressemblant explicitement à un identifiant ou un objet `{ '@id' }`. Les value
+objects comme les adresses gardent des schémas distincts afin qu’une chaîne libre ne soit
+pas confondue avec une référence d’entité.
 
 ## Helpers de contenu
 
