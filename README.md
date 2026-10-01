@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/johanldx/unschema-graph/releases"><img src="https://img.shields.io/badge/version-v0.2.0-blue.svg" alt="Version 0.2.0" /></a>
+  <a href="https://github.com/johanldx/unschema-graph/releases"><img src="https://img.shields.io/badge/version-v0.9.0-blue.svg" alt="Version 0.9.0" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/core"><img src="https://img.shields.io/npm/v/@unschema-graph/core?color=6366f1&label=%40unschema-graph%2Fcore" alt="Core npm version" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/astro"><img src="https://img.shields.io/npm/v/@unschema-graph/astro?color=f97316&label=%40unschema-graph%2Fastro" alt="Astro npm version" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/svelte"><img src="https://img.shields.io/npm/v/@unschema-graph/svelte?color=ff3e00&label=%40unschema-graph%2Fsvelte" alt="Svelte npm version" /></a>
@@ -15,7 +15,7 @@
 </p>
 
 > [!NOTE]
-> `unschema-graph` is currently at version **`v0.2.0`**. All public APIs are fully typed, tested, and documented. Breaking changes are announced via [Changesets](https://github.com/johanldx/unschema-graph/tree/main/.changeset).
+> `unschema-graph` is currently at version **`v0.9.0` (v1 Release Candidate)**. All 51 Schema.org builders, relational `@graph` algorithms, and framework integrations are production-tested and stabilized.
 
 ---
 
