@@ -49,10 +49,28 @@ async function writePackage(directory, overrides) {
   await rm(templatePath);
 }
 
-async function materializeFixture(name, overrides, suffix = '') {
+async function writeWorkspace(directory, overrides = {}) {
+  const workspacePath = join(directory, 'pnpm-workspace.yaml');
+  let content = '';
+  try {
+    content = await readFile(workspacePath, 'utf8');
+  } catch {
+    content = "packages:\n  - '.'\n";
+  }
+  if (Object.keys(overrides).length > 0) {
+    const lines = Object.entries(overrides)
+      .map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)}`)
+      .join('\n');
+    content += `\noverrides:\n${lines}\n`;
+  }
+  await writeFile(workspacePath, content);
+}
+
+async function materializeFixture(name, overrides, suffix = '', workspaceOverrides = {}) {
   const target = join(workspace, 'consumers', `${name}${suffix}`);
   await cp(join(fixturesRoot, name), target, { recursive: true });
   await writePackage(target, overrides);
+  await writeWorkspace(target, workspaceOverrides);
   return target;
 }
 
@@ -203,12 +221,26 @@ try {
     peerDependencies: { svelte: '^5.0.0' },
   });
 
-  const coreFixture = await materializeFixture('core', {
-    dependencies: {
-      '@unschema-graph/core': coreDependency,
-      zod: '^4.6.0',
+  await writeFile(
+    join(workspace, 'pnpm-workspace.yaml'),
+    `packages:\n  - "consumers/*"\noverrides:\n  "@unschema-graph/core": "${coreDependency}"\n`
+  );
+
+  const workspaceOverrides = {
+    '@unschema-graph/core': coreDependency,
+  };
+
+  const coreFixture = await materializeFixture(
+    'core',
+    {
+      dependencies: {
+        '@unschema-graph/core': coreDependency,
+        zod: '^4.6.0',
+      },
     },
-  });
+    '',
+    workspaceOverrides
+  );
   await installAndBuild(coreFixture);
 
   for (const major of requestedAstroMajors()) {
@@ -222,22 +254,28 @@ try {
           zod: '^4.6.0',
         },
       },
-      `-${major}`
+      `-${major}`,
+      workspaceOverrides
     );
     await installAndBuild(astroFixture);
   }
 
-  const svelteFixture = await materializeFixture('sveltekit', {
-    dependencies: {
-      '@sveltejs/adapter-auto': '^6.0.0',
-      '@sveltejs/kit': '^2.0.0',
-      '@unschema-graph/core': coreDependency,
-      '@unschema-graph/svelte': pathToFileURL(svelteTarball).href,
-      svelte: '^5.0.0',
-      vite: '^7.0.0',
-      zod: '^4.6.0',
+  const svelteFixture = await materializeFixture(
+    'sveltekit',
+    {
+      dependencies: {
+        '@sveltejs/adapter-auto': '^6.0.0',
+        '@sveltejs/kit': '^2.0.0',
+        '@unschema-graph/core': coreDependency,
+        '@unschema-graph/svelte': pathToFileURL(svelteTarball).href,
+        svelte: '^5.0.0',
+        vite: '^7.0.0',
+        zod: '^4.6.0',
+      },
     },
-  });
+    '',
+    workspaceOverrides
+  );
   await installAndBuild(svelteFixture);
 
   console.log(
