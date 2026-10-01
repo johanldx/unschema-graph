@@ -1,5 +1,8 @@
 import {
   defineSchema,
+  FAQPage,
+  LocalBusinessSchema,
+  SchemaTypeSchema,
   SchemaValidationError,
   withAdditionalProperties,
   withAdditionalTypes,
@@ -54,6 +57,20 @@ describe('core/defineSchema', () => {
     });
   });
 
+  it('protects builder-owned metadata in the additional-properties escape hatch', () => {
+    const app = SoftwareApplication({
+      name: 'Astro Studio',
+      operatingSystem: 'Linux',
+    });
+
+    expect(() => withAdditionalProperties(app, { '@type': 'Product' } as never)).toThrowError(
+      'withAdditionalProperties() cannot replace @type or @id'
+    );
+    expect(() => withAdditionalProperties(app, { '@id': '#replacement' } as never)).toThrowError(
+      'withAdditionalProperties() cannot replace @type or @id'
+    );
+  });
+
   it('rejects unknown properties and incompatible @type values', () => {
     expect(() =>
       SoftwareApplication({
@@ -86,20 +103,53 @@ describe('core/defineSchema', () => {
     ).toThrowError(SchemaValidationError);
   });
 
-  it('allows overriding @type with an array (multi-typing)', () => {
+  it('normalizes multiple types with the primary type first and no duplicates', () => {
     const app = withAdditionalTypes(
       SoftwareApplication({
         name: 'Mobile Studio',
         operatingSystem: 'iOS, Android',
       }),
-      ['MobileApplication']
+      ['MobileApplication', 'SoftwareApplication', 'MobileApplication']
     );
+
+    const expanded = withAdditionalTypes(app, ['DesktopApplication', 'MobileApplication']);
 
     expect(app).toEqual({
       '@type': ['SoftwareApplication', 'MobileApplication'],
       name: 'Mobile Studio',
       operatingSystem: 'iOS, Android',
     });
+    expect(expanded['@type']).toEqual([
+      'SoftwareApplication',
+      'MobileApplication',
+      'DesktopApplication',
+    ]);
+    expect(SchemaTypeSchema.parse(['Thing', 'Thing', 'Product'])).toEqual(['Thing', 'Product']);
+    expect(SchemaTypeSchema.safeParse([]).success).toBe(false);
+    expect(() => withAdditionalTypes(app, [''])).toThrow();
+  });
+
+  it('rejects unknown properties in exported and nested built-in schemas', () => {
+    expect(
+      LocalBusinessSchema.safeParse({
+        name: 'Acme Paris',
+        address: '1 rue de Rivoli',
+        unexpected: true,
+      }).success
+    ).toBe(false);
+
+    expect(() =>
+      FAQPage({
+        questions: [
+          {
+            question: 'What is JSON-LD?',
+            answer: 'Linked data expressed as JSON.',
+            // @ts-expect-error Nested shorthand objects are strict.
+            unexpected: true,
+          },
+        ],
+      })
+    ).toThrowError(SchemaValidationError);
   });
 
   it('throws SchemaValidationError on missing required fields by default', () => {
@@ -152,5 +202,60 @@ describe('core/defineSchema', () => {
     expect(invalid.success).toBe(false);
     expect(invalid.error).toBeInstanceOf(SchemaValidationError);
     expect(invalid.error?.entityType).toBe('SoftwareApplication');
+  });
+
+  it('strictly protects reserved JSON-LD keywords against user overrides', () => {
+    const validApp = SoftwareApplication({
+      name: 'Safe App',
+      operatingSystem: 'Linux',
+    });
+
+    // Builder level rejection
+    expect(() =>
+      SoftwareApplication({
+        name: 'App',
+        operatingSystem: 'Linux',
+        // @ts-expect-error Testing reserved @context
+        '@context': 'https://schema.org',
+      })
+    ).toThrowError(SchemaValidationError);
+
+    expect(() =>
+      SoftwareApplication({
+        name: 'App',
+        operatingSystem: 'Linux',
+        // @ts-expect-error Testing reserved @graph
+        '@graph': [],
+      })
+    ).toThrowError(SchemaValidationError);
+
+    // withAdditionalProperties rejection
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@context': 'https://schema.org',
+      })
+    ).toThrowError(TypeError);
+
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@graph': [],
+      })
+    ).toThrowError(TypeError);
+
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@id': '#override',
+      })
+    ).toThrowError(TypeError);
+
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@type': 'Other',
+      })
+    ).toThrowError(TypeError);
   });
 });

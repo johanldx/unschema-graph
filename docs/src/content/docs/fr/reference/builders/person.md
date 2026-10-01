@@ -44,15 +44,15 @@ type PersonOutput = SchemaOutput<typeof PersonSchema, 'Person'>;
 | `givenName` | string | Non | — |
 | `familyName` | string | Non | — |
 | `additionalName` | string | Non | — |
-| `url` | string | Non | — |
+| `url` | string | Non | non-empty |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) | Non | non-empty |
 | `jobTitle` | string | Non | — |
-| `worksFor` | string \| object | Non | — |
-| `sameAs` | string \| Array<string> | Non | — |
+| `worksFor` | unknown | Non | — |
+| `sameAs` | string \| Array<string> | Non | non-empty |
 | `email` | string | Non | format: email |
 | `telephone` | string | Non | — |
 | `description` | string | Non | — |
-| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Non | — |
+| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

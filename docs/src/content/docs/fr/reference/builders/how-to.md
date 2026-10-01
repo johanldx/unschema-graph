@@ -45,9 +45,9 @@ type HowToOutput = SchemaOutput<typeof HowToSchema, 'HowTo'>;
 | `description` | string | Non | — |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
 | `totalTime` | string \| number \| DurationObject | Non | non-empty; greater than 0 |
-| `estimatedCost` | string \| object | Non | — |
-| `supply` | string \| Array<string> \| Array<object> | Non | — |
-| `tool` | string \| Array<string> \| Array<object> | Non | — |
+| `estimatedCost` | string \| string \| object | Non | non-empty |
+| `supply` | string \| Array<string> \| Array<string \| object> | Non | — |
+| `tool` | string \| Array<string> \| Array<string \| object> | Non | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

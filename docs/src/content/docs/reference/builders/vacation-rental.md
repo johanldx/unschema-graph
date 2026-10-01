@@ -41,23 +41,23 @@ type VacationRentalOutput = SchemaOutput<typeof LodgingBusinessSchema, 'Vacation
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
-| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | Yes | — |
+| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | Yes | non-empty |
 | `image` | string \| [ImageObject](/reference/builders/image-object/) | No | non-empty |
 | `telephone` | string | No | — |
 | `priceRange` | string | No | — |
-| `url` | string | No | — |
-| `geo` | [GeoCoordinates](/reference/builders/geo-coordinates/) | No | — |
+| `url` | string | No | non-empty |
+| `geo` | [GeoCoordinates](/reference/builders/geo-coordinates/) \| string \| [GeoCoordinates](/reference/builders/geo-coordinates/) | No | non-empty |
 | `openingHoursSpecification` | object \| Array<object> | No | — |
 | `currenciesAccepted` | string | No | — |
 | `paymentAccepted` | string | No | — |
-| `sameAs` | string \| Array<string> | No | — |
+| `sameAs` | string \| Array<string> | No | non-empty |
 | `servesCuisine` | string \| Array<string> | No | — |
-| `menu` | string | No | — |
+| `menu` | string | No | non-empty |
 | `checkinTime` | string | No | — |
 | `checkoutTime` | string | No | — |
 | `numberOfRooms` | number | No | integer; greater than 0; maximum: 9007199254740991 |
 | `petsAllowed` | boolean \| string | No | — |
-| `amenityFeature` | string \| Array<string> \| object \| Array<object> | No | — |
+| `amenityFeature` | string \| Array<string> \| string \| object \| Array<string \| object> | No | non-empty |
 | `starRating` | object | No | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a

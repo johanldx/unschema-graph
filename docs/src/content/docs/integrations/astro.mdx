@@ -66,7 +66,12 @@ export default defineConfig({
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `baseUrl` | `string` | `config.site` | Canonical base URL used to resolve relative `#id` fragments and URLs. |
+| `inLanguage` | `string` | route locale | Default BCP-47 locale when a page has no Astro route locale. |
 | `onError` | `'throw' \| 'warn' \| 'silent'` | `build: 'throw'`, `dev: 'warn'` | Validation severity mode. |
+
+Resolution is deterministic: a `<Schema baseUrl>` prop wins over the integration
+`baseUrl`, which wins over Astro's `site`. Locale precedence is `<Schema inLanguage>`,
+then `Astro.currentLocale`, then the integration default.
 
 ---
 
@@ -124,8 +129,13 @@ In development mode (`astro dev`), `@unschema-graph/astro` automatically adds an
 ### What the Dev Toolbar offers:
 
 - **Entity Inspector:** Lists every entity detected in the page's `@graph` with its primary `@type` and resolved `@id`.
-- **Validation Alerts:** Highlights any missing recommended fields or Zod schema errors live as you edit.
-- **Rich Results Quick Test:** One-click copy of the generated raw JSON-LD to paste directly into Google's Rich Results Test tool.
+- **Graph diagnostics:** Shows broken local references and duplicate merge conflicts reported during server rendering.
+- **Render context:** Displays node count, effective `baseUrl`, locale, and warning count.
+- **JSON-LD copy:** Copies the generated payload for external inspection or testing.
+
+The component remains server-rendered and ships no client JavaScript. Toolbar metadata
+is attached as inert `data-*` attributes and is only consumed by Astro's development
+toolbar.
 
 :::tip
 Press `h` in your browser during `astro dev` to toggle the Astro Dev Toolbar if hidden.

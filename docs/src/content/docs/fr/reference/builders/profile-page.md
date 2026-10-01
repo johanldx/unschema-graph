@@ -42,7 +42,7 @@ type ProfilePageOutput = SchemaOutput<typeof ProfilePageSchema, 'ProfilePage'>;
 | `@id` | string | Non | non-empty |
 | `mainEntity` | object | Oui | — |
 | `name` | string | Non | — |
-| `url` | string | Non | — |
+| `url` | string | Non | non-empty |
 | `description` | string | Non | — |
 | `dateCreated` | string \| number \| Date | Non | non-empty |
 | `dateModified` | string \| number \| Date | Non | non-empty |

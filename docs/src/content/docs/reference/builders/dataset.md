@@ -42,10 +42,10 @@ type DatasetOutput = SchemaOutput<typeof DatasetSchema, 'Dataset'>;
 | `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `description` | string | Yes | non-empty |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 | `creator` | string \| object \| Array<string \| object> | No | — |
 | `distribution` | [DataDownload](/reference/builders/data-download/) \| Array<[DataDownload](/reference/builders/data-download/)> | No | — |
-| `license` | string | No | — |
+| `license` | string | No | non-empty |
 | `keywords` | string \| Array<string> | No | — |
 | `temporalCoverage` | string | No | — |
 | `spatialCoverage` | string | No | — |

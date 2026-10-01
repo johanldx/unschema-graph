@@ -20,10 +20,16 @@ export interface SchemaGraphOptions {
   onError?: Severity;
 
   /**
-   * Base canonical URL used to resolve relative `@id` and URL properties.
+   * Base canonical URL used to resolve relative entity identifiers (`@id`).
    * @example 'https://example.com'
    */
   baseUrl?: string;
+
+  /**
+   * Default BCP-47 language tag used by framework adapters when no route locale is available.
+   * @example 'fr-FR'
+   */
+  inLanguage?: string;
 }
 
 /**
@@ -63,6 +69,19 @@ export interface SchemaOrgEntity {
    */
   [key: string]: unknown;
 }
+
+/** Explicit JSON-LD reference to an entity identified elsewhere. */
+export interface EntityIdReference {
+  '@id': string;
+}
+
+/**
+ * Accepted input for a relationship to a specific Schema.org entity type.
+ *
+ * Builders accept the entity itself, an ID shorthand, or an explicit `@id` object.
+ * Relationship schemas normalize string shorthands before returning builder output.
+ */
+export type EntityReference<T> = T | string | EntityIdReference;
 
 /**
  * Framework-neutral props accepted by Schema rendering adapters.
@@ -119,6 +138,26 @@ export interface SchemaProps {
 
 /** Stable machine-readable validation error code. */
 export type SchemaValidationErrorCode = 'SCHEMA_VALIDATION_ERROR';
+
+/**
+ * Generic machine-readable diagnostic contract across validation, graph collection, and CLI audit.
+ */
+export interface SchemaDiagnostic {
+  /** Stable diagnostic error or warning code. */
+  code: string;
+  /** Severity level. */
+  severity: 'error' | 'warning' | 'info';
+  /** Path to property or reference within the graph. */
+  path?: string;
+  /** Entity type name if applicable. */
+  entityType?: string;
+  /** Resolved or relative entity identifier. */
+  entityId?: string;
+  /** Human-readable explanation of the issue. */
+  message: string;
+  /** Actionable recommendation to fix the diagnostic. */
+  suggestion?: string;
+}
 
 /** Actionable representation of one invalid Schema.org property. */
 export interface SchemaValidationIssue {

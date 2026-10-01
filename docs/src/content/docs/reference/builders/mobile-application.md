@@ -48,7 +48,7 @@ type MobileApplicationOutput = SchemaOutput<typeof SoftwareApplicationSchema, 'M
 | `review` | [Review](/reference/builders/review/) \| Array<[Review](/reference/builders/review/)> | No | — |
 | `screenshot` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | No | non-empty |
 | `softwareVersion` | string | No | — |
-| `downloadUrl` | string | No | — |
+| `downloadUrl` | string | No | non-empty |
 | `fileSize` | string | No | — |
 | `description` | string | No | — |
 

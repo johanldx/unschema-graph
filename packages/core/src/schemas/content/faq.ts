@@ -30,10 +30,12 @@ export const QuestionSchema = z
 /**
  * Simplified shorthand representation for question-answer pairs.
  */
-const SimpleQAPairSchema = z.object({
-  question: z.string().min(1, 'Question string cannot be empty'),
-  answer: z.string().min(1, 'Answer string cannot be empty'),
-});
+const SimpleQAPairSchema = z
+  .object({
+    question: z.string().min(1, 'Question string cannot be empty'),
+    answer: z.string().min(1, 'Answer string cannot be empty'),
+  })
+  .strict();
 
 /**
  * Zod schema for Schema.org `FAQPage`.

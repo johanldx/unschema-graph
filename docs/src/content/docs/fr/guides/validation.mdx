@@ -5,6 +5,40 @@ description: Détection des fautes de frappe, modes de sévérité des erreurs, 
 
 Chaque builder d'`unschema-graph` applique deux niveaux de protection : le **typage statique TypeScript** pour l'autocomplétion dans votre éditeur, et une **validation stricte à l'exécution avec Zod** pour les données dynamiques et externes.
 
+`unschema-graph` valide les contraintes implémentées par ses schémas. La bibliothèque ne
+prétend pas valider l’intégralité du vocabulaire Schema.org ni garantir l’éligibilité à
+un résultat enrichi d’un moteur de recherche.
+
+## Niveaux de validation
+
+La bibliothèque sépare trois préoccupations :
+
+| Niveau | Ce qui est contrôlé |
+| --- | --- |
+| Syntaxe JSON-LD et composition du graphe | Structure sérialisable, identités, références et règles de graphe implémentées par le Core. |
+| Modèle Schema.org implémenté | Types et propriétés pris en charge par un builder générique comme `Article`. |
+| Profil consommateur | Règles supplémentaires implémentées pour un consommateur, comme `GoogleArticle`. |
+
+Un builder générique ne rejette pas une entité uniquement parce qu’un champ exigé par
+Google manque. Activez explicitement un profil consommateur lorsque c’est votre cible :
+
+```ts
+import { Article, GoogleArticle } from '@unschema-graph/core';
+
+const articleGenerique = Article({ headline: 'Article Schema.org' });
+
+const articleProfilGoogle = GoogleArticle({
+  headline: 'Profil Article',
+  image: '/couverture.jpg',
+  datePublished: '2026-10-01',
+  author: 'Ada Lovelace',
+});
+```
+
+`GoogleArticleSchema` et `GoogleRecipeSchema` sont exportés pour la composition directe.
+Leurs règles décrivent les profils actuellement implémentés par la bibliothèque ; les
+respecter ne promet ni indexation ni affichage d’un résultat enrichi par Google.
+
 ---
 
 ## 1. Validation stricte à l'exécution
@@ -102,6 +136,20 @@ interface IssueDetail {
   suggestion?: string;    // Suggestion en cas de faute de frappe
 }
 ```
+
+Les relations d’entités ajoutent une aide spécialisée. Par exemple, passer un `Product`
+comme `WebSite.publisher` produit :
+
+```text
+Property "WebSite.publisher"
+Expected: Organization | Person | @id reference
+Received: Product
+Suggestion: Pass Organization(...), Person(...), '#organization', or { '@id': '#organization' }.
+```
+
+Les mêmes valeurs `path`, `expected`, `received` et `suggestion` sont disponibles dans
+`error.details`. Le terminal, la CI, la toolbar de développement Astro et de futurs
+outils IDE peuvent ainsi exploiter une forme de diagnostic stable et unique.
 
 ---
 

@@ -48,6 +48,16 @@ Use the same sequence everywhere:
 - **Production build:** run the audit immediately after the build, before deployment.
 - **CI:** keep build and audit as separate steps so a failure is easy to locate.
 
+Useful options:
+
+```bash
+# Treat duplicate-ID warnings as failures
+npx @unschema-graph/core audit dist --strict
+
+# Emit a stable machine-readable report
+npx @unschema-graph/core audit dist --format json
+```
+
 ---
 
 ## 2. What the Audit Validates
@@ -60,13 +70,15 @@ The audit engine runs thorough structural checks across all compiled output:
 4. **Root Context Check:** Ensures `@context` is present and targets `https://schema.org` (or `http://schema.org`).
 5. **Entity Type Validation:** Verifies that root nodes contain a valid `@type` or a valid `@graph` array containing typed entities.
 6. **Detailed Reporting:** Outputs the number of scanned files, total JSON-LD blocks, total entities detected, and any actionable errors with exact file paths.
+7. **Graph Integrity:** Detects broken local `@id` references, duplicate declarations, and conflicting values for the same ID.
 
 ---
 
 ## 3. Exit Codes
 
-- `0` (Success): All discovered JSON-LD blocks are well-formed and valid.
-- `1` (Failure): Syntax error encountered, malformed graph structure, or no JSON-LD blocks were detected.
+- `0` (Success): No error was found; warnings are allowed unless `--strict` is set.
+- `1` (Audit failure): Invalid JSON-LD, a broken reference, an ID conflict, no HTML/JSON-LD, or a warning under `--strict`.
+- `2` (Usage failure): Unknown option, invalid format, or extra positional argument.
 
 ### Expected output
 
@@ -74,11 +86,10 @@ A successful run ends with a summary of the scanned HTML files, JSON-LD blocks a
 followed by a success message. The exact counts depend on the site:
 
 ```text
-Scanned HTML files:  24
-JSON-LD script tags: 18
-Schema.org entities: 42
-
-Schema audit passed successfully. All JSON-LD structures are valid.
+✓ 24 HTML files scanned
+✓ 18 JSON-LD blocks parsed
+✓ 7 local graph references resolved
+✓ 42 Schema.org entities found
 ```
 
 On failure, the report names the affected file and explains the malformed block or graph. Treat

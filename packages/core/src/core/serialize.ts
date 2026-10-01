@@ -28,13 +28,14 @@ const ESCAPE_LOOKUP: Record<string, string> = {
   '\u2029': '\\u2029',
 };
 
-const ESCAPE_REGEX = /[<>&]/g;
+const ESCAPE_REGEX = /[<>&\u2028\u2029]/gu;
 
 /**
  * Escapes sensitive HTML characters within an already-serialized JSON string.
  *
  * Prevents Cross-Site Scripting (XSS) when injecting JSON into `<script>` tags,
- * specifically neutralizing `</script>`, `<script>`, and `<!--` sequences.
+ * specifically neutralizing `</script>`, `<script>`, `<!--`, and `-->` sequences,
+ * as well as Unicode line/paragraph separators (`\u2028` and `\u2029`).
  *
  * @param jsonString - Raw JSON string to escape.
  * @returns Sanitized JSON string safe for inclusion in HTML `<script>` tags.
@@ -53,8 +54,13 @@ export function escapeJsonLd(jsonString: string): string {
 /**
  * Safely serializes arbitrary Schema.org data into an XSS-safe JSON-LD string.
  *
- * Performs standard JSON serialization followed by Unicode escaping of `<`, `>`, and `&`.
- * The resulting string can be safely placed directly inside a `<script type="application/ld+json">` tag.
+ * This function is the recommended and primary way to inject Schema.org JSON-LD structured
+ * data into an HTML `<script type="application/ld+json">` tag.
+ *
+ * Performs standard JSON serialization followed by Unicode escaping of `<`, `>`, `&`,
+ * and Unicode line and paragraph separators (`\u2028`, `\u2029`) to prevent `<script>`
+ * injection, comment breakout (`<!--`, `-->`), and parsing anomalies.
+ * Pretty formatting options (`pretty`, `indent`) strictly preserve all escaping guarantees.
  *
  * @param data - The data structure, Schema.org entity, or graph array to serialize.
  * @param options - Optional formatting configuration (pretty-print, indentation).
@@ -76,10 +82,49 @@ export function escapeJsonLd(jsonString: string): string {
  * ```
  */
 export function serializeJsonLd(data: unknown, options: SerializeOptions = {}): string {
+  if (typeof data === 'bigint') {
+    throw new TypeError(
+      '[unschema-graph] Cannot serialize BigInt. Convert it to a string or number.'
+    );
+  }
+  if (typeof data === 'symbol') {
+    throw new TypeError('[unschema-graph] Cannot serialize Symbol.');
+  }
+  if (typeof data === 'function') {
+    throw new TypeError('[unschema-graph] Cannot serialize Function.');
+  }
+  if (typeof data === 'number' && (Number.isNaN(data) || !Number.isFinite(data))) {
+    throw new TypeError(`[unschema-graph] Cannot serialize invalid number (${String(data)}).`);
+  }
+
   const { pretty = false, indent = 2 } = options;
   const space = pretty ? Math.max(0, indent) : undefined;
 
-  const serialized = JSON.stringify(data, null, space);
+  const replacer = (key: string, value: unknown): unknown => {
+    if (typeof value === 'bigint') {
+      throw new TypeError(
+        `[unschema-graph] Cannot serialize BigInt at property "${key || 'root'}". Convert it to a string or number.`
+      );
+    }
+    if (typeof value === 'symbol') {
+      throw new TypeError(
+        `[unschema-graph] Cannot serialize Symbol at property "${key || 'root'}".`
+      );
+    }
+    if (typeof value === 'function') {
+      throw new TypeError(
+        `[unschema-graph] Cannot serialize Function at property "${key || 'root'}".`
+      );
+    }
+    if (typeof value === 'number' && (Number.isNaN(value) || !Number.isFinite(value))) {
+      throw new TypeError(
+        `[unschema-graph] Cannot serialize invalid number (${String(value)}) at property "${key || 'root'}".`
+      );
+    }
+    return value;
+  };
+
+  const serialized = JSON.stringify(data, replacer, space);
 
   if (serialized === undefined) {
     return '{}';

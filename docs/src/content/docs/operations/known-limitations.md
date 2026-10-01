@@ -1,6 +1,6 @@
 ---
 title: Known limitations
-description: Explicit boundaries of schema coverage, auditing, search eligibility, and pre-1.0 stability.
+description: Explicit boundaries of schema coverage, auditing, search eligibility, and 1.x stability.
 ---
 
 - The 51 builders intentionally model a strict subset of Schema.org, not the complete vocabulary.
@@ -10,7 +10,7 @@ description: Explicit boundaries of schema coverage, auditing, search eligibilit
 - Content helpers recognize documented conventional field names. Custom CMS models require explicit overrides or mappings.
 - Relative date expressions depend on the current clock unless a reference date is supplied.
 - The Node audit entry point is not browser-safe.
-- The project is pre-1.0; documented interfaces can still evolve with release notes.
+- In 1.x, public APIs are governed by strict Semantic Versioning; breaking changes are reserved for major versions.
 
 These constraints are product boundaries, not hidden failures. See
 [troubleshooting](/operations/troubleshooting/) for diagnosis and

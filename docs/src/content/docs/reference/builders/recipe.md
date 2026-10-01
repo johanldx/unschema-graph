@@ -3,7 +3,7 @@ title: Recipe builder
 description: Reference for the Recipe builder and its validated Schema.org Recipe output.
 ---
 
-Creates a Recipe and normalizes instruction and duration shorthands. The `Recipe` builder injects `@type`, validates synchronously, and
+Creates a generic Schema.org Recipe and normalizes provided shorthands. The `Recipe` builder injects `@type`, validates synchronously, and
 rejects unknown properties.
 
 ## Import
@@ -40,11 +40,11 @@ type RecipeOutput = SchemaOutput<typeof RecipeSchema, 'Recipe'>;
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
-| `name` | string | Yes | non-empty |
-| `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | Yes | non-empty |
-| `recipeIngredient` | Array<string> | Yes | minimum items: 1 |
-| `recipeInstructions` | Array<string \| object> \| string | Yes | — |
-| `author` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | No | non-empty |
+| `name` | string | No | non-empty |
+| `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | No | non-empty |
+| `recipeIngredient` | Array<string> | No | minimum items: 1 |
+| `recipeInstructions` | Array<string \| object> \| string | No | minimum items: 1 |
+| `author` | unknown | No | — |
 | `datePublished` | string \| number \| Date | No | non-empty |
 | `description` | string | No | — |
 | `prepTime` | string \| number \| DurationObject | No | non-empty; greater than 0 |

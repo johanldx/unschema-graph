@@ -1,6 +1,6 @@
 {
   "name": "@unschema-graph/core",
-  "version": "0.2.0",
+  "version": "0.9.0",
   "description": "Framework-independent Schema.org JSON-LD builders, graph resolution, safe serialization, and static HTML auditing.",
   "type": "module",
   "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "https://github.com/johanldx/unschema-graph.git",
     "directory": "packages/core"
+  },
+  "homepage": "https://unschema-graph.jhdx.dev",
+  "bugs": {
+    "url": "https://github.com/johanldx/unschema-graph/issues"
   },
   "keywords": [
     "schema-org",
@@ -21,6 +25,7 @@
   "engines": {
     "node": ">=22.12.0"
   },
+  "sideEffects": false,
   "bin": {
     "unschema-graph": "./bin/cli.js"
   },
@@ -39,7 +44,8 @@
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "files": [
     "dist",

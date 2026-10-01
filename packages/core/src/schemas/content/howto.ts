@@ -3,6 +3,7 @@ import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDurationSchema } from '../../core/duration.js';
 import { ImageUrlOrObject } from '../common/image.js';
 import { EntityReferenceSchema } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 
 /**
  * Zod schema for Schema.org `HowToStep`.
@@ -14,7 +15,7 @@ export const HowToStepSchema = z
     name: z.string().optional(),
     text: z.string().min(1, 'Property "text" is required for HowToStep'),
     image: ImageUrlOrObject.optional(),
-    url: z.string().optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
   })
   .strict();
 

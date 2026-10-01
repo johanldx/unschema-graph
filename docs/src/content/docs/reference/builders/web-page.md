@@ -41,13 +41,13 @@ type WebPageOutput = SchemaOutput<typeof WebPageSchema, 'WebPage'>;
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
 | `name` | string | No | — |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 | `headline` | string | No | — |
 | `description` | string | No | — |
 | `inLanguage` | string | No | — |
 | `speakable` | string \| Array<string> \| object | No | — |
-| `isPartOf` | string \| object | No | — |
-| `breadcrumb` | string \| object | No | — |
+| `isPartOf` | unknown | No | — |
+| `breadcrumb` | unknown | No | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'WebPage'`.

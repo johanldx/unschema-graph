@@ -42,12 +42,12 @@ type OrganizationOutput = SchemaOutput<typeof OrganizationSchema, 'Organization'
 | `@id` | string | Non | — |
 | `name` | string | Oui | non-empty |
 | `legalName` | string | Non | — |
-| `url` | string | Non | — |
+| `url` | string | Non | non-empty |
 | `logo` | string \| [ImageObject](/fr/reference/builders/image-object/) | Non | non-empty |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) | Non | non-empty |
 | `description` | string | Non | — |
-| `sameAs` | string \| Array<string> | Non | — |
-| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Non | — |
+| `sameAs` | string \| Array<string> | Non | non-empty |
+| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Non | non-empty |
 | `contactPoint` | [ContactPoint](/fr/reference/builders/contact-point/) \| Array<[ContactPoint](/fr/reference/builders/contact-point/)> | Non | — |
 | `email` | string | Non | format: email |
 | `telephone` | string | Non | — |

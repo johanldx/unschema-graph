@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { SchemaTypeSchema } from '../../core/schemaType.js';
 import { addDuration, IsoDateSchema, IsoDurationSchema } from '../../core/temporal.js';
 import { AggregateOfferSchema, OfferSchema } from '../commerce/offer.js';
 import { PostalAddressSchema } from '../common/address.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { createEntityRef } from '../common/reference.js';
+import { entityRef } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 
@@ -16,10 +18,10 @@ const EventLocationSchema = z.union([
   PostalAddressSchema,
   z
     .object({
-      '@type': z.union([z.string(), z.array(z.string())]).optional(),
+      '@type': SchemaTypeSchema.optional(),
       name: z.string().optional(),
       address: z.union([z.string(), PostalAddressSchema]).optional(),
-      url: z.string().optional(),
+      url: RelativeOrAbsoluteUrlSchema.optional(),
     })
     .strict(),
 ]);
@@ -27,10 +29,11 @@ const EventLocationSchema = z.union([
 /**
  * Organizer or performer reference/entity schema.
  */
-const PerformerOrOrganizerSchema = createEntityRef(
-  z.union([PersonSchema, OrganizationSchema]),
-  'Organization'
-);
+const PerformerOrOrganizerSchema = entityRef({
+  schemas: [PersonSchema, OrganizationSchema],
+  types: ['Person', 'Organization'],
+  fallbackType: 'Organization',
+});
 
 /**
  * Zod schema for Schema.org `Event`.

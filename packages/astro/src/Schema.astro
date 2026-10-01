@@ -1,6 +1,7 @@
 ---
 import {
   buildJsonLdGraph,
+  type GraphDiagnostic,
   getGlobalConfig,
   type SchemaProps,
   serializeJsonLd,
@@ -24,18 +25,18 @@ const {
   inLanguage,
 } = Astro.props;
 
-// Determine effective locale: Prop > Astro.currentLocale
-const effectiveLocale = inLanguage ?? Astro.currentLocale;
-
-// Determine effective base URL: Prop > Astro.site > Global Config
 const globalConfig = getGlobalConfig();
+// Deterministic locale precedence: prop > Astro route locale > integration/global default.
+const effectiveLocale = inLanguage ?? Astro.currentLocale ?? globalConfig.inLanguage;
+
 const astroSiteStr = Astro.site
   ? typeof Astro.site === 'string'
     ? Astro.site
     : (Astro.site as URL).href
   : undefined;
 
-const effectiveBaseUrl = baseUrl ?? astroSiteStr ?? globalConfig.baseUrl;
+// Deterministic URL precedence: prop > integration/global config > Astro site.
+const effectiveBaseUrl = baseUrl ?? globalConfig.baseUrl ?? astroSiteStr;
 
 // Gather all items from data, item, and items aliases
 const rawItems: unknown[] = [];
@@ -86,12 +87,31 @@ const preparedItems = rawItems.map((rawItem) => {
   return { ...entity, inLanguage: effectiveLocale };
 });
 
+const graphDiagnostics: GraphDiagnostic[] = [];
 const graphPayload = buildJsonLdGraph(preparedItems, {
   graph,
   context,
   baseUrl: effectiveBaseUrl,
+  onDiagnostic: (diagnostic) => graphDiagnostics.push(diagnostic),
 });
 const jsonLdOutput = graphPayload ? serializeJsonLd(graphPayload, { pretty, indent }) : null;
+const exposeToolbarMetadata = Boolean(import.meta.env?.DEV);
+const toolbarBaseUrl =
+  exposeToolbarMetadata && effectiveBaseUrl ? encodeURIComponent(effectiveBaseUrl) : undefined;
+const toolbarLocale =
+  exposeToolbarMetadata && effectiveLocale ? encodeURIComponent(effectiveLocale) : undefined;
+const diagnosticsMetadata =
+  exposeToolbarMetadata && graphDiagnostics.length > 0
+    ? encodeURIComponent(JSON.stringify(graphDiagnostics))
+    : undefined;
+
+function escapeHtmlComment(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('--', '&#45;&#45;');
+}
 
 let debugComment: string | null = null;
 if (debug && jsonLdOutput) {
@@ -103,7 +123,7 @@ if (debug && jsonLdOutput) {
       ? ((graphPayload as Record<string, unknown>)['@graph'] as unknown[]).length
       : 1;
 
-  debugComment = `<!--\n  [@unschema-graph/astro debug]\n  - Entities in graph: ${entityCount}\n  - Base URL:          ${effectiveBaseUrl ?? 'none'}\n  - Locale:            ${effectiveLocale ?? 'none'}\n-->`;
+  debugComment = `<!--\n  [@unschema-graph/astro debug]\n  - Entities in graph: ${entityCount}\n  - Base URL:          ${escapeHtmlComment(effectiveBaseUrl ?? 'none')}\n  - Locale:            ${escapeHtmlComment(effectiveLocale ?? 'none')}\n-->`;
 
   if (import.meta.env?.DEV) {
     console.log(`\n[@unschema-graph/astro] Debug Structured Data:`);
@@ -115,4 +135,12 @@ if (debug && jsonLdOutput) {
 ---
 
 {debugComment && <Fragment set:html={debugComment} />}
-{jsonLdOutput && <script type="application/ld+json" set:html={jsonLdOutput} />}
+{jsonLdOutput && (
+  <script
+    type="application/ld+json"
+    data-unschema-base-url={toolbarBaseUrl}
+    data-unschema-locale={toolbarLocale}
+    data-unschema-diagnostics={diagnosticsMetadata}
+    set:html={jsonLdOutput}
+  />
+)}

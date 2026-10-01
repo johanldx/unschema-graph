@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { EntityReferenceSchema } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { ListItemSchema } from './breadcrumb.js';
 
 const RawItemElementSchema = z.union([
@@ -8,8 +9,8 @@ const RawItemElementSchema = z.union([
   z
     .object({
       name: z.string().optional(),
-      url: z.string().optional(),
-      item: z.union([z.string(), EntityReferenceSchema]).optional(),
+      url: RelativeOrAbsoluteUrlSchema.optional(),
+      item: z.union([RelativeOrAbsoluteUrlSchema, EntityReferenceSchema]).optional(),
       position: z.number().int().positive().optional(),
     })
     .strict(),

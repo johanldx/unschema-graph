@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -39,8 +39,17 @@ jobs:
         run: pnpm run build:packages
 
       - name: Publish to npm
+        id: changesets
         uses: changesets/action@v1
         with:
           publish: pnpm exec changeset publish
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
+      - name: Create aggregate v1 release
+        if: steps.changesets.outputs.published == 'true' && fromJSON(steps.changesets.outputs.publishedPackages)[0].version == '1.0.0'
+        run: gh release create v1.0.0 --target "$GITHUB_SHA" --title "unschema-graph v1.0.0" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,7 +1,7 @@
 import schemaGraph from '@unschema-graph/astro/integration';
 import {
-  Article,
   buildJsonLdGraph,
+  GoogleArticle,
   getGlobalConfig,
   resetGlobalConfig,
   resolveEntityIds,
@@ -41,6 +41,7 @@ describe('Astro Integration & @id Resolution', () => {
       expect(resolveId('mailto:info@example.com', 'https://example.com')).toBe(
         'mailto:info@example.com'
       );
+      expect(resolveId('did:example:123', 'https://example.com')).toBe('did:example:123');
     });
 
     it('returns original id if baseUrl is undefined', () => {
@@ -121,6 +122,7 @@ describe('Astro Integration & @id Resolution', () => {
       const integration = schemaGraph({
         baseUrl: 'https://mon-site.fr',
         onError: 'throw',
+        inLanguage: 'fr-FR',
       });
 
       const setupHook = integration.hooks['astro:config:setup'] as Function;
@@ -140,6 +142,7 @@ describe('Astro Integration & @id Resolution', () => {
       const config = getGlobalConfig();
       expect(config.baseUrl).toBe('https://mon-site.fr');
       expect(config.onError).toBe('throw');
+      expect(config.inLanguage).toBe('fr-FR');
     });
 
     it('defaults to config.site when baseUrl is omitted in integration options', () => {
@@ -175,7 +178,7 @@ describe('Astro Integration & @id Resolution', () => {
       });
 
       // @ts-expect-error Intentionally incomplete input.
-      expect(Article({ headline: 'Incomplete' })).toBeNull();
+      expect(GoogleArticle({ headline: 'Incomplete' })).toBeNull();
       expect(warn).toHaveBeenCalledOnce();
       warn.mockRestore();
       resetGlobalConfig();

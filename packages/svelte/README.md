@@ -81,7 +81,7 @@ No separate adapter is required for SvelteKit. The `<Schema />` component uses S
 | Dependency | Supported Range | Notes |
 | :--- | :--- | :--- |
 | **Svelte** | `^5.0.0` | Native runes implementation (`$props`, `$derived`). |
-| **Node.js** | `>=22.12.0` | Build and dev tooling. |
+| **Node.js** | `>=22.12.0` | Oldest maintained LTS baseline tested in CI. |
 | **Zod** | `^4.6.0` | Peer dependency for schema validation. |
 
 ---

@@ -5,8 +5,8 @@ description: Architecture et écosystème d'unschema-graph pour les applications
 
 **unschema-graph** est un moteur Schema.org JSON-LD propulsé par [Zod](https://zod.dev). Il aide les projets TypeScript, Astro et Svelte à construire des entités typées, valider les entrées prises en charge, les relier dans un graphe et sérialiser le résultat de façon sûre dans le HTML.
 
-:::note[Statut pré-1.0]
-Le projet appartient actuellement à la série `0.1.x`. Son API publique est documentée et testée, mais peut encore évoluer avant la version `1.0` ; les changements sont consignés avec Changesets.
+:::note[Version 0.9.0 — Release Candidate v1]
+La version actuelle **0.9.0** constitue la version candidate officielle préparant la v1.0.0 (« feature-complete »). L'ensemble de l'architecture est stabilisé : 51 builders Schema.org rigoureusement typés, résolution automatique du graphe relationnel `@graph`, sérialisation sécurisée anti-XSS et composants natifs pour Astro et Svelte 5 prêts pour la production.
 :::
 
 ---
@@ -133,4 +133,3 @@ Explorez la Dev Toolbar Astro ou les runes réactives de Svelte 5.
 Validez automatiquement le HTML généré dans votre pipeline CI/CD.
 
 [Découvrir la CLI d'audit →](/fr/audit-and-quality/audit-cli/)
-

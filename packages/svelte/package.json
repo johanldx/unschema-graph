@@ -1,8 +1,9 @@
 {
   "name": "@unschema-graph/svelte",
-  "version": "0.2.0",
+  "version": "0.9.0",
   "description": "Svelte 5 Schema component and full unschema-graph core tooling for Svelte and SvelteKit.",
   "type": "module",
+  "main": "./dist/index.js",
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
@@ -11,6 +12,10 @@
     "type": "git",
     "url": "https://github.com/johanldx/unschema-graph.git",
     "directory": "packages/svelte"
+  },
+  "homepage": "https://unschema-graph.jhdx.dev",
+  "bugs": {
+    "url": "https://github.com/johanldx/unschema-graph/issues"
   },
   "keywords": [
     "svelte",
@@ -36,7 +41,8 @@
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "files": [
     "dist"

@@ -41,7 +41,7 @@ type CommentOutput = SchemaOutput<typeof CommentSchema, 'Comment'>;
 | --- | --- | :---: | --- |
 | `@id` | string | Non | — |
 | `text` | string | Oui | non-empty |
-| `author` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Oui | non-empty |
+| `author` | unknown | Oui | — |
 | `datePublished` | string \| number \| Date | Non | non-empty |
 | `upvoteCount` | number | Non | integer; minimum: -9007199254740991; maximum: 9007199254740991 |
 

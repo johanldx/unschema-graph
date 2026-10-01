@@ -43,10 +43,10 @@ type OfferOutput = SchemaOutput<typeof OfferSchema, 'Offer'>;
 | `price` | number \| string | Yes | — |
 | `priceCurrency` | string | Yes | minimum length: 3; maximum length: 3 |
 | `availability` | string | No | — |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 | `priceValidUntil` | string \| number \| Date | No | non-empty |
 | `itemCondition` | string | No | — |
-| `seller` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | No | non-empty |
+| `seller` | unknown | No | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'Offer'`.

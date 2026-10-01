@@ -18,7 +18,7 @@ or at build time, then audit the emitted HTML. Do not invent facts to target a s
 | --- | --- | --- |
 | Astro | `@unschema-graph/astro` | Builders and Astro `<Schema />` component |
 | Svelte 5 / SvelteKit | `@unschema-graph/svelte` | Builders and Svelte `<Schema />` component |
-| Other framework or server | `@unschema-graph/core` | Builders, `createGraph()` and `serializeJsonLd()` |
+| Other framework or server | `@unschema-graph/core` | Builders, `buildJsonLdGraph()` and `serializeJsonLd()` |
 
 Astro fits documentation sites that need its integration features, while Core and
 Svelte are first-class entry points. Never install a framework adapter in an unrelated project.
@@ -56,11 +56,12 @@ const article = Article({
   image: '/images/article.jpg',
   datePublished: '2026-09-29',
   author: 'Ada Lovelace',
-  publisher: '#organization',
+  publisher: organization, // Typed entity-object reference!
 });
 ---
 
-<Schema data={[organization, article]} />
+<!-- Passing article automatically discovers organization via @graph resolution -->
+<Schema items={article} />
 ```
 
 Set Astro's `site` option to the canonical origin. Relative `@id`, `url` and `item` values are then

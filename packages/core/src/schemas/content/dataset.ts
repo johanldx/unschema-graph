@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 
@@ -10,7 +11,7 @@ export const DataDownloadSchema = z
   .object({
     '@type': z.literal('DataDownload').default('DataDownload').optional(),
     '@id': z.string().optional(),
-    contentUrl: z.string().min(1, 'Property "contentUrl" is required for DataDownload'),
+    contentUrl: WebUrlSchema,
     encodingFormat: z.string().optional(), // e.g. 'text/csv', 'application/json'
     name: z.string().optional(),
     description: z.string().optional(),
@@ -28,10 +29,10 @@ export const DatasetSchema = z
   .object({
     name: z.string().min(1, 'Property "name" is required for Dataset'),
     description: z.string().min(1, 'Property "description" is required for Dataset'),
-    url: z.string().optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
     creator: CreatorSchema.optional(),
     distribution: z.union([DataDownloadSchema, z.array(DataDownloadSchema)]).optional(),
-    license: z.string().optional(),
+    license: RelativeOrAbsoluteUrlSchema.optional(),
     keywords: z.union([z.string(), z.array(z.string())]).optional(),
     temporalCoverage: z.string().optional(),
     spatialCoverage: z.string().optional(),

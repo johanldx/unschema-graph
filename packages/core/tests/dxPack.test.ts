@@ -155,8 +155,8 @@ describe('DX Pack Features', () => {
     });
   });
 
-  describe('Breadcrumb relative URL resolution & leaf nodes', () => {
-    it('resolves relative URLs in BreadcrumbList', () => {
+  describe('Breadcrumb URL semantics & leaf nodes', () => {
+    it('preserves relative URL values in BreadcrumbList', () => {
       const breadcrumb = BreadcrumbList({
         itemListElement: [
           { name: 'Accueil', item: '/' },
@@ -170,8 +170,8 @@ describe('DX Pack Features', () => {
       });
       const item = (graph as any)['@graph'][0];
 
-      expect(item.itemListElement[0].item).toBe('https://mon-site.fr/');
-      expect(item.itemListElement[1].item).toBe('https://mon-site.fr/blog');
+      expect(item.itemListElement[0].item).toBe('/');
+      expect(item.itemListElement[1].item).toBe('/blog');
       // Leaf node without item is valid Schema.org
       expect(item.itemListElement[2].name).toBe('Article');
       expect(item.itemListElement[2].item).toBeUndefined();

@@ -49,8 +49,8 @@ type EventOutput = SchemaOutput<typeof EventSchema, 'Event'>;
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
 | `eventStatus` | string | Non | — |
 | `eventAttendanceMode` | string | Non | — |
-| `organizer` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Non | non-empty |
-| `performer` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Non | non-empty |
+| `organizer` | Array<unknown> | Non | — |
+| `performer` | Array<unknown> | Non | — |
 | `offers` | [Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/) \| Array<[Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/)> | Non | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder

@@ -214,6 +214,71 @@ describe('Advanced Feature 3: Static Build Audit Engine', () => {
     expect(res.errors[0].message).toMatch(/missing "@type"/);
   });
 
+  it('should resolve local graph references and report broken ones with their path', () => {
+    const valid = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@graph":[
+          {"@type":"Organization","@id":"#organization","name":"Acme"},
+          {"@type":"WebSite","publisher":{"@id":"#organization"}}
+        ]
+      }</script>`,
+      'valid-reference.html'
+    );
+    expect(valid.resolvedLocalReferences).toBe(1);
+    expect(valid.errors).toHaveLength(0);
+
+    const broken = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@type":"WebSite",
+        "publisher":{"@id":"#missing"}
+      }</script>`,
+      'broken-reference.html'
+    );
+    expect(broken.errors).toContainEqual({
+      code: 'broken-reference',
+      severity: 'error',
+      file: 'broken-reference.html',
+      id: '#missing',
+      path: 'WebSite.publisher',
+      message: 'Broken @id reference: #missing\nReferenced from: WebSite.publisher',
+    });
+  });
+
+  it('should distinguish duplicate declarations from conflicting @id values', () => {
+    const duplicate = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@graph":[
+          {"@type":"Organization","@id":"#organization","name":"Acme"},
+          {"@type":"Organization","@id":"#organization","name":"Acme","url":"/about"}
+        ]
+      }</script>`,
+      'duplicate.html'
+    );
+    expect(duplicate.errors).toHaveLength(0);
+    expect(duplicate.warnings[0]).toMatchObject({
+      code: 'duplicate-id',
+      id: '#organization',
+    });
+
+    const conflict = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@graph":[
+          {"@type":"Organization","@id":"#organization","name":"Acme"},
+          {"@type":"Organization","@id":"#organization","name":"Other"}
+        ]
+      }</script>`,
+      'conflict.html'
+    );
+    expect(conflict.errors[0]).toMatchObject({
+      code: 'duplicate-conflict',
+      id: '#organization',
+    });
+  });
+
   it('should audit a directory recursively and pass clean directories', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'asg-audit-test-'));
     const subDir = path.join(tmpDir, 'blog');
@@ -232,8 +297,10 @@ describe('Advanced Feature 3: Static Build Audit Engine', () => {
     expect(report.scannedFiles).toBe(2);
     expect(report.totalBlocks).toBe(2);
     expect(report.totalEntities).toBe(2);
+    expect(report.resolvedLocalReferences).toBe(0);
     expect(report.passed).toBe(true);
     expect(report.errors).toHaveLength(0);
+    expect(report.warnings).toHaveLength(0);
 
     // Clean up
     fs.rmSync(tmpDir, { recursive: true, force: true });

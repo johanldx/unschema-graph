@@ -19,7 +19,7 @@ de moteur de recherche.
 | --- | --- | --- |
 | Astro | `@unschema-graph/astro` | Builders et composant Astro `<Schema />` |
 | Svelte 5 / SvelteKit | `@unschema-graph/svelte` | Builders et composant Svelte `<Schema />` |
-| Autre framework ou serveur | `@unschema-graph/core` | Builders, `createGraph()` et `serializeJsonLd()` |
+| Autre framework ou serveur | `@unschema-graph/core` | Builders, `buildJsonLdGraph()` et `serializeJsonLd()` |
 
 Astro convient aux sites de documentation qui utilisent ses intégrations, tandis que Core et
 Svelte sont des points d'entrée de premier rang. N'installez jamais un adaptateur de framework dans
@@ -58,11 +58,12 @@ const article = Article({
   image: '/images/article.jpg',
   datePublished: '2026-09-29',
   author: 'Ada Lovelace',
-  publisher: '#organization',
+  publisher: organization, // Référence d'entité objet typée !
 });
 ---
 
-<Schema data={[organization, article]} />
+<!-- Passer article découvre automatiquement organization grâce à la résolution de @graph -->
+<Schema items={article} />
 ```
 
 Définissez l'option Astro `site` avec l'origine canonique. Les valeurs relatives `@id`, `url` et

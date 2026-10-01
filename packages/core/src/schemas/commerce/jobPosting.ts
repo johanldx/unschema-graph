@@ -2,10 +2,14 @@ import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema } from '../../core/temporal.js';
 import { PostalAddressSchema } from '../common/address.js';
-import { createEntityRef, EntityReferenceSchema } from '../common/reference.js';
+import { EntityReferenceSchema, entityRef } from '../common/reference.js';
 import { OrganizationSchema } from '../identity/organization.js';
 
-const HiringOrgSchema = createEntityRef(OrganizationSchema, 'Organization');
+const HiringOrgSchema = entityRef({
+  schemas: [OrganizationSchema],
+  types: ['Organization'],
+  fallbackType: 'Organization',
+});
 
 const JobLocationSchema = z.union([
   PostalAddressSchema,

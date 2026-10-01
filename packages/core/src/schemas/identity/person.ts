@@ -1,8 +1,17 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { SchemaTypeSchema } from '../../core/schemaType.js';
 import { PostalAddressSchema } from '../common/address.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { EntityReferenceSchema } from '../common/reference.js';
+import { EntityReferenceSchema, entityRef } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
+import { OrganizationSchema } from './organization.js';
+
+const WorksForSchema = entityRef({
+  schemas: [OrganizationSchema],
+  types: ['Organization'],
+  fallbackType: 'Organization',
+});
 
 /**
  * Zod schema for Schema.org `Person`.
@@ -10,17 +19,17 @@ import { EntityReferenceSchema } from '../common/reference.js';
  */
 export const PersonSchema = z
   .object({
-    '@type': z.union([z.string(), z.array(z.string())]).optional(),
+    '@type': SchemaTypeSchema.optional(),
     '@id': z.string().optional(),
     name: z.string().min(1, 'Property "name" is required for Person'),
     givenName: z.string().optional(),
     familyName: z.string().optional(),
     additionalName: z.string().optional(),
-    url: z.string().optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
     image: ImageUrlOrObject.optional(),
     jobTitle: z.string().optional(),
-    worksFor: z.union([z.string(), EntityReferenceSchema]).optional(),
-    sameAs: z.union([z.string(), z.array(z.string())]).optional(),
+    worksFor: WorksForSchema.optional(),
+    sameAs: z.union([RelativeOrAbsoluteUrlSchema, z.array(RelativeOrAbsoluteUrlSchema)]).optional(),
     email: z.string().email('Property "email" must be a valid email address').optional(),
     telephone: z.string().optional(),
     description: z.string().optional(),

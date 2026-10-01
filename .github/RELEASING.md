@@ -9,4 +9,18 @@ Before enabling automated releases:
    - Under **Workflow permissions**, enable "Read and write permissions" and check "Allow GitHub Actions to create and approve pull requests".
 4. Protect the `main` branch and require the CI workflow (Vitest/Build) to pass before merging.
 
-No long-lived npm token is required. The publish workflow uses GitHub OIDC; npm generates package provenance automatically for public repositories.
+No long-lived npm token is required. The publish workflow uses GitHub OIDC and Node 24,
+which satisfies the current npm Trusted Publishing runtime requirements. Provenance is
+enabled in every package manifest and by the workflow; npm also generates it automatically
+for public packages published through a trusted publisher.
+
+## Release contract
+
+1. Add a Changeset for every user-visible package change.
+2. Merge only after CI, including `pnpm run test:published`, is green.
+3. Merge the Changesets version PR to update package versions and changelogs together.
+4. The publish workflow creates the npm releases, package Git tags and GitHub Releases.
+5. For `1.0.0`, the workflow additionally creates the aggregate `v1.0.0` Git tag and GitHub Release.
+
+Before announcing a release, verify the npm pages expose provenance and that the generated
+GitHub Releases point to the expected tags and changelog entries.

@@ -4,6 +4,7 @@ import {
   Comment,
   Course,
   DiscussionForumPosting,
+  GoogleRecipe,
   HowTo,
   HowToStep,
   JobPosting,
@@ -54,10 +55,15 @@ describe('Advanced & Sectoral Schemas (12 Pack)', () => {
       expect(recipe.nutrition?.calories).toBe('280 calories');
     });
 
-    it('throws when required image or ingredients are missing', () => {
+    it('separates the generic Schema.org model from the Google profile', () => {
+      expect(Recipe({ name: 'Schema.org Recipe' })).toEqual({
+        '@type': 'Recipe',
+        name: 'Schema.org Recipe',
+      });
+
       expect(() =>
-        // @ts-expect-error Missing image and ingredients
-        Recipe({ name: 'Empty Recipe' })
+        // @ts-expect-error Google profile requires image, ingredients, and instructions.
+        GoogleRecipe({ name: 'Incomplete Google Recipe' })
       ).toThrowError(SchemaValidationError);
     });
   });
@@ -287,6 +293,42 @@ describe('Advanced & Sectoral Schemas (12 Pack)', () => {
         '@type': 'Organization',
         name: 'Rootage',
       });
+    });
+
+    it('accepts text and typed place values for areaServed', () => {
+      expect(Service({ name: 'National support', areaServed: 'France' }).areaServed).toBe('France');
+
+      for (const type of ['Country', 'AdministrativeArea', 'Place'] as const) {
+        expect(
+          Service({
+            name: 'Regional support',
+            areaServed: { '@type': type, name: 'France' },
+          }).areaServed
+        ).toEqual({ '@type': type, name: 'France' });
+      }
+
+      expect(
+        Service({
+          name: 'European support',
+          areaServed: ['France', { '@type': 'Country', name: 'Belgium' }],
+        }).areaServed
+      ).toEqual(['France', { '@type': 'Country', name: 'Belgium' }]);
+    });
+
+    it('rejects unrelated or empty areaServed value objects', () => {
+      expect(() =>
+        Service({
+          name: 'Invalid coverage',
+          // @ts-expect-error Organization is not an areaServed place type.
+          areaServed: { '@type': 'Organization', name: 'Acme' },
+        })
+      ).toThrow();
+      expect(() =>
+        Service({
+          name: 'Unnamed coverage',
+          areaServed: { '@type': 'Country' },
+        })
+      ).toThrow();
     });
   });
 

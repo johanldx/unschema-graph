@@ -1,0 +1,11 @@
+{
+  "name": "published-core-consumer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc && node dist/index.js && unschema-graph audit fixture"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.0"
+  }
+}

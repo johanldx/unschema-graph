@@ -41,14 +41,14 @@ type ServiceOutput = SchemaOutput<typeof ServiceSchema, 'Service'>;
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
-| `provider` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| [LocalBusiness](/fr/reference/builders/local-business/) \| EntityReference | Non | non-empty |
+| `provider` | unknown | Non | — |
 | `serviceType` | string | Non | — |
 | `description` | string | Non | — |
-| `areaServed` | string \| Array<string> \| object | Non | — |
+| `areaServed` | string \| object \| Array<string \| object> | Non | non-empty; minimum items: 1 |
 | `offers` | [Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/) \| Array<[Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/)> | Non | — |
 | `aggregateRating` | Aggregate[Rating](/fr/reference/builders/rating/) | Non | — |
 | `review` | [Review](/fr/reference/builders/review/) \| Array<[Review](/fr/reference/builders/review/)> | Non | — |
-| `termsOfService` | string | Non | — |
+| `termsOfService` | string | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

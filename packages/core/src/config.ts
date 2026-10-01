@@ -1,5 +1,10 @@
 import type { SchemaGraphOptions } from './types/index.js';
 
+/**
+ * Supported Schema.org vocabulary baseline version for built-in builders and validators.
+ */
+export const SCHEMA_ORG_BASELINE = '28.1';
+
 let globalConfig: SchemaGraphOptions = {};
 
 /**

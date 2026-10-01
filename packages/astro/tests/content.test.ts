@@ -1,4 +1,4 @@
-import { toArticle, toBlogPosting } from '@unschema-graph/astro/content';
+import { toArticle, toBlogPosting, toNewsArticle } from '@unschema-graph/astro/content';
 import { SchemaValidationError } from '@unschema-graph/core';
 import { describe, expect, it } from 'vitest';
 
@@ -36,7 +36,9 @@ describe('Astro Content Collections Helpers', () => {
     });
     expect(blogPost.keywords).toEqual(['astro', 'seo', 'web']);
     expect(blogPost.wordCount).toBe(11);
-    expect(blogPost.mainEntityOfPage).toBe('https://mon-site.fr/blog/astro-5-guide');
+    expect(blogPost.mainEntityOfPage).toEqual({
+      '@id': 'https://mon-site.fr/blog/astro-5-guide',
+    });
     expect('url' in blogPost).toBe(false);
   });
 
@@ -64,14 +66,66 @@ describe('Astro Content Collections Helpers', () => {
   });
 
   it('does not invent an author when content metadata is incomplete', () => {
+    const article = toArticle({
+      data: {
+        title: 'No author',
+        image: 'https://example.com/no-author.jpg',
+        pubDate: '2026-09-29',
+      },
+    });
+
+    expect(article['@type']).toBe('Article');
+    expect(article.author).toBeUndefined();
+  });
+
+  it('keeps all three helpers aligned with builder reference normalization', () => {
+    const entry = Object.freeze({
+      data: Object.freeze({ title: 'Shared mapping', author: 'Ada Lovelace' }),
+    });
+    const overrides = { url: '#page', publisher: '#publisher' } as const;
+
+    const article = toArticle(entry, overrides);
+    const blogPosting = toBlogPosting(entry, overrides);
+    const newsArticle = toNewsArticle(entry, overrides);
+
+    expect([article['@type'], blogPosting['@type'], newsArticle['@type']]).toEqual([
+      'Article',
+      'BlogPosting',
+      'NewsArticle',
+    ]);
+    for (const entity of [article, blogPosting, newsArticle]) {
+      expect(entity.author).toEqual({ '@type': 'Person', name: 'Ada Lovelace' });
+      expect(entity.publisher).toEqual({ '@id': '#publisher' });
+      expect(entity.mainEntityOfPage).toEqual({ '@id': '#page' });
+    }
+    expect(entry.data).toEqual({ title: 'Shared mapping', author: 'Ada Lovelace' });
+  });
+
+  it('surfaces the same actionable relationship errors as manual builders', () => {
     expect(() =>
-      toArticle({
-        data: {
-          title: 'No author',
-          image: 'https://example.com/no-author.jpg',
-          pubDate: '2026-09-29',
-        },
-      })
+      toNewsArticle(
+        { data: { title: 'Invalid publisher' } },
+        {
+          publisher: { '@type': 'Product', name: 'Keyboard' } as never,
+        }
+      )
     ).toThrow(SchemaValidationError);
+
+    let caught: unknown;
+    try {
+      toArticle(
+        { data: { title: 'Invalid publisher' } },
+        { publisher: { '@type': 'Product', name: 'Keyboard' } as never }
+      );
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(SchemaValidationError);
+    const result = caught as SchemaValidationError;
+    expect(result.details[0]).toMatchObject({
+      path: 'Article.publisher',
+      expected: 'Organization | Person | @id reference',
+      received: 'Product',
+    });
   });
 });

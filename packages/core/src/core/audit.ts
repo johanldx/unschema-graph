@@ -1,17 +1,46 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export interface AuditError {
+export type AuditDiagnosticCode =
+  | 'empty-script'
+  | 'invalid-json'
+  | 'invalid-root'
+  | 'missing-context'
+  | 'invalid-graph'
+  | 'missing-type'
+  | 'broken-reference'
+  | 'duplicate-id'
+  | 'duplicate-conflict'
+  | 'no-html'
+  | 'no-jsonld';
+
+export interface AuditDiagnostic {
+  code: AuditDiagnosticCode;
+  severity: 'warning' | 'error';
   file: string;
   message: string;
+  path?: string;
+  id?: string;
 }
+
+export type AuditError = AuditDiagnostic;
 
 export interface AuditResult {
   scannedFiles: number;
   totalBlocks: number;
   totalEntities: number;
+  resolvedLocalReferences: number;
   errors: AuditError[];
+  warnings: AuditDiagnostic[];
   passed: boolean;
+}
+
+export interface AuditContentResult {
+  blocks: number;
+  entities: number;
+  resolvedLocalReferences: number;
+  errors: AuditError[];
+  warnings: AuditDiagnostic[];
 }
 
 function extractJsonLdBlocks(html: string): string[] {
@@ -30,6 +59,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (!isRecord(value)) return value;
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .map((key) => [key, canonicalize(value[key])])
+  );
+}
+
 /**
  * Recursively retrieves all `.html` files within a directory.
  */
@@ -39,7 +78,9 @@ export function getHtmlFiles(dir: string): string[] {
   }
 
   const results: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const entries = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .sort((left, right) => left.name.localeCompare(right.name));
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
@@ -56,16 +97,11 @@ export function getHtmlFiles(dir: string): string[] {
 /**
  * Extracts and validates Schema.org JSON-LD scripts from HTML content.
  */
-export function auditHtmlContent(
-  html: string,
-  filePath = 'index.html'
-): {
-  blocks: number;
-  entities: number;
-  errors: AuditError[];
-} {
+export function auditHtmlContent(html: string, filePath = 'index.html'): AuditContentResult {
   const errors: AuditError[] = [];
+  const warnings: AuditDiagnostic[] = [];
   const rawBlocks = extractJsonLdBlocks(html);
+  const rootEntities: Record<string, unknown>[] = [];
   let blocks = 0;
   let entities = 0;
 
@@ -75,6 +111,8 @@ export function auditHtmlContent(
 
     if (!trimmed) {
       errors.push({
+        code: 'empty-script',
+        severity: 'error',
         file: filePath,
         message: 'Empty application/ld+json script block found.',
       });
@@ -86,6 +124,8 @@ export function auditHtmlContent(
       parsed = JSON.parse(trimmed);
     } catch (err) {
       errors.push({
+        code: 'invalid-json',
+        severity: 'error',
         file: filePath,
         message: `JSON syntax error: ${(err as Error).message}`,
       });
@@ -94,6 +134,8 @@ export function auditHtmlContent(
 
     if (!isRecord(parsed)) {
       errors.push({
+        code: 'invalid-root',
+        severity: 'error',
         file: filePath,
         message: 'JSON-LD root must be an object.',
       });
@@ -102,6 +144,8 @@ export function auditHtmlContent(
 
     if (!parsed['@context']) {
       errors.push({
+        code: 'missing-context',
+        severity: 'error',
         file: filePath,
         message: 'Missing required "@context" property.',
       });
@@ -110,6 +154,8 @@ export function auditHtmlContent(
     if (parsed['@graph']) {
       if (!Array.isArray(parsed['@graph'])) {
         errors.push({
+          code: 'invalid-graph',
+          severity: 'error',
           file: filePath,
           message: 'Property "@graph" must be an array.',
         });
@@ -118,23 +164,132 @@ export function auditHtmlContent(
         parsed['@graph'].forEach((item: unknown, idx: number) => {
           if (!isRecord(item) || !item['@type']) {
             errors.push({
+              code: 'missing-type',
+              severity: 'error',
               file: filePath,
               message: `@graph entity at index ${idx} is missing "@type".`,
             });
+          } else {
+            rootEntities.push(item);
           }
         });
       }
     } else if (parsed['@type']) {
       entities++;
+      rootEntities.push(parsed);
     } else {
       errors.push({
+        code: 'missing-type',
+        severity: 'error',
         file: filePath,
         message: 'Root JSON-LD is missing "@type" or "@graph".',
       });
     }
   }
 
-  return { blocks, entities, errors };
+  const definitions = new Map<
+    string,
+    { node: Record<string, unknown>; path: string; file: string }
+  >();
+  const references: { id: string; path: string }[] = [];
+
+  const walk = (value: unknown, currentPath: string): void => {
+    if (Array.isArray(value)) {
+      value.forEach((entry, index) => {
+        walk(entry, `${currentPath}[${index}]`);
+      });
+      return;
+    }
+    if (!isRecord(value)) return;
+
+    const id = typeof value['@id'] === 'string' ? value['@id'] : undefined;
+    if (id) {
+      const semanticKeys = Object.keys(value).filter(
+        (key) => key !== '@id' && key !== '@context' && key !== '@type'
+      );
+      const idOnlyReference = semanticKeys.length === 0 && value['@type'] === undefined;
+      if (idOnlyReference) {
+        references.push({ id, path: currentPath });
+      } else {
+        const previous = definitions.get(id);
+        if (previous) {
+          const conflictingKeys = Object.keys(value)
+            .filter((key) => key !== '@id' && key in previous.node)
+            .filter(
+              (key) =>
+                JSON.stringify(canonicalize(previous.node[key])) !==
+                JSON.stringify(canonicalize(value[key]))
+            )
+            .sort();
+
+          if (conflictingKeys.length > 0) {
+            errors.push({
+              code: 'duplicate-conflict',
+              severity: 'error',
+              file: filePath,
+              id,
+              path: currentPath,
+              message: `Conflicting duplicate @id: ${id} (${conflictingKeys.join(', ')})`,
+            });
+          } else {
+            warnings.push({
+              code: 'duplicate-id',
+              severity: 'warning',
+              file: filePath,
+              id,
+              path: currentPath,
+              message: `Duplicate @id declaration: ${id}`,
+            });
+          }
+        } else {
+          definitions.set(id, { node: value, path: currentPath, file: filePath });
+        }
+      }
+    }
+
+    for (const [key, child] of Object.entries(value)) {
+      if (key === '@context' || key === '@id' || key === '@type') continue;
+      walk(child, `${currentPath}.${key}`);
+    }
+  };
+
+  for (const entity of rootEntities) {
+    const rawType = entity['@type'];
+    const entityType = Array.isArray(rawType) ? rawType[0] : rawType;
+    walk(entity, typeof entityType === 'string' ? entityType : '(entity)');
+  }
+
+  let resolvedLocalReferences = 0;
+  for (const reference of references) {
+    const isLocal =
+      reference.id.startsWith('#') ||
+      reference.id.startsWith('/') ||
+      reference.id.startsWith('./') ||
+      reference.id.startsWith('../');
+    if (!isLocal) continue;
+    if (definitions.has(reference.id)) {
+      resolvedLocalReferences++;
+    } else {
+      errors.push({
+        code: 'broken-reference',
+        severity: 'error',
+        file: filePath,
+        id: reference.id,
+        path: reference.path,
+        message: `Broken @id reference: ${reference.id}\nReferenced from: ${reference.path}`,
+      });
+    }
+  }
+
+  const byStableLocation = (left: AuditDiagnostic, right: AuditDiagnostic): number =>
+    left.file.localeCompare(right.file) ||
+    (left.path ?? '').localeCompare(right.path ?? '') ||
+    left.code.localeCompare(right.code) ||
+    left.message.localeCompare(right.message);
+
+  errors.sort(byStableLocation);
+  warnings.sort(byStableLocation);
+  return { blocks, entities, resolvedLocalReferences, errors, warnings };
 }
 
 /**
@@ -146,11 +301,15 @@ export function auditHtmlContent(
 export function auditHtmlDirectory(outputDir: string): AuditResult {
   const htmlFiles = getHtmlFiles(outputDir);
   const allErrors: AuditError[] = [];
+  const allWarnings: AuditDiagnostic[] = [];
   let totalBlocks = 0;
   let totalEntities = 0;
+  let resolvedLocalReferences = 0;
 
   if (htmlFiles.length === 0) {
     allErrors.push({
+      code: 'no-html',
+      severity: 'error',
       file: outputDir,
       message: `No HTML files found in directory: "${outputDir}". Run "astro build" first.`,
     });
@@ -159,17 +318,44 @@ export function auditHtmlDirectory(outputDir: string): AuditResult {
   for (const file of htmlFiles) {
     const content = fs.readFileSync(file, 'utf-8');
     const relPath = path.relative(process.cwd(), file);
-    const { blocks, entities, errors } = auditHtmlContent(content, relPath);
+    const {
+      blocks,
+      entities,
+      resolvedLocalReferences: resolved,
+      errors,
+      warnings,
+    } = auditHtmlContent(content, relPath);
     totalBlocks += blocks;
     totalEntities += entities;
+    resolvedLocalReferences += resolved;
     allErrors.push(...errors);
+    allWarnings.push(...warnings);
   }
+
+  if (htmlFiles.length > 0 && totalBlocks === 0) {
+    allErrors.push({
+      code: 'no-jsonld',
+      severity: 'error',
+      file: outputDir,
+      message: `No JSON-LD <script> tags found in directory: "${outputDir}".`,
+    });
+  }
+
+  const byStableLocation = (left: AuditDiagnostic, right: AuditDiagnostic): number =>
+    left.file.localeCompare(right.file) ||
+    (left.path ?? '').localeCompare(right.path ?? '') ||
+    left.code.localeCompare(right.code) ||
+    left.message.localeCompare(right.message);
+  allErrors.sort(byStableLocation);
+  allWarnings.sort(byStableLocation);
 
   return {
     scannedFiles: htmlFiles.length,
     totalBlocks,
     totalEntities,
+    resolvedLocalReferences,
     errors: allErrors,
+    warnings: allWarnings,
     passed: allErrors.length === 0 && totalBlocks > 0,
   };
 }

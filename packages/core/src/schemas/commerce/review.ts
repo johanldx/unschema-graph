@@ -36,11 +36,15 @@ export const AggregateRatingSchema = z
   .strict();
 
 import { IsoDateSchema } from '../../core/temporal.js';
-import { createEntityRef, TypedEntitySchema } from '../common/reference.js';
+import { entityRef, TypedEntitySchema } from '../common/reference.js';
 
-const ReviewAuthorSchema = createEntityRef(z.union([PersonSchema, OrganizationSchema]), 'Person');
+const ReviewAuthorSchema = entityRef({
+  schemas: [PersonSchema, OrganizationSchema],
+  types: ['Person', 'Organization'],
+  fallbackType: 'Person',
+});
 
-const ItemReviewedSchema = createEntityRef(TypedEntitySchema);
+const ItemReviewedSchema = entityRef({ schemas: [TypedEntitySchema] });
 
 /**
  * Zod schema for Schema.org `Review`.

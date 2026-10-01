@@ -41,14 +41,14 @@ type ServiceOutput = SchemaOutput<typeof ServiceSchema, 'Service'>;
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
-| `provider` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| [LocalBusiness](/reference/builders/local-business/) \| EntityReference | No | non-empty |
+| `provider` | unknown | No | — |
 | `serviceType` | string | No | — |
 | `description` | string | No | — |
-| `areaServed` | string \| Array<string> \| object | No | — |
+| `areaServed` | string \| object \| Array<string \| object> | No | non-empty; minimum items: 1 |
 | `offers` | [Offer](/reference/builders/offer/) \| Aggregate[Offer](/reference/builders/offer/) \| Array<[Offer](/reference/builders/offer/) \| Aggregate[Offer](/reference/builders/offer/)> | No | — |
 | `aggregateRating` | Aggregate[Rating](/reference/builders/rating/) | No | — |
 | `review` | [Review](/reference/builders/review/) \| Array<[Review](/reference/builders/review/)> | No | — |
-| `termsOfService` | string | No | — |
+| `termsOfService` | string | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'Service'`.

@@ -49,8 +49,8 @@ type EventOutput = SchemaOutput<typeof EventSchema, 'Event'>;
 | `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | No | non-empty |
 | `eventStatus` | string | No | — |
 | `eventAttendanceMode` | string | No | — |
-| `organizer` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | No | non-empty |
-| `performer` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | No | non-empty |
+| `organizer` | Array<unknown> | No | — |
+| `performer` | Array<unknown> | No | — |
 | `offers` | [Offer](/reference/builders/offer/) \| Aggregate[Offer](/reference/builders/offer/) \| Array<[Offer](/reference/builders/offer/) \| Aggregate[Offer](/reference/builders/offer/)> | No | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a

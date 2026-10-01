@@ -1,12 +1,16 @@
 import { z } from 'zod';
 import type { SchemaOrgEntity, SchemaValidationResult, ValidationOptions } from '../types/index.js';
+import { normalizeSchemaTypes } from './schemaType.js';
 import { safeValidateSchema, validateSchema } from './validator.js';
 
 /**
  * Accepted input type for a schema builder, combining the inferred Zod schema input
  * with a strictly typed Schema.org identifier. The builder owns `@type`.
  */
-export type SchemaInput<TSchema extends z.ZodTypeAny> = Omit<z.input<TSchema>, '@id' | '@type'> & {
+export type SchemaInput<TSchema extends z.ZodTypeAny> = Omit<
+  z.input<TSchema>,
+  '@id' | '@type' | '@context' | '@graph'
+> & {
   '@id'?: string;
 };
 
@@ -15,7 +19,7 @@ export type SchemaInput<TSchema extends z.ZodTypeAny> = Omit<z.input<TSchema>, '
  */
 export type SchemaOutput<TSchema extends z.ZodTypeAny, TType extends string = string> = Omit<
   z.output<TSchema>,
-  '@id' | '@type'
+  '@id' | '@type' | '@context' | '@graph'
 > & {
   '@type': TType;
   '@id'?: string;
@@ -24,29 +28,54 @@ export type SchemaOutput<TSchema extends z.ZodTypeAny, TType extends string = st
 /**
  * Explicitly adds properties that are not yet modeled by a built-in schema.
  * Validation always happens before this escape hatch is applied.
+ * Reserved JSON-LD keywords (`@context`, `@type`, `@id`, `@graph`) cannot be defined or overridden.
  */
 export function withAdditionalProperties<
   TEntity extends SchemaOrgEntity,
   const TAdditional extends Record<string, unknown>,
 >(
   entity: TEntity,
-  properties: TAdditional & { '@type'?: never; '@id'?: never }
+  properties: TAdditional & {
+    '@type'?: never;
+    '@id'?: never;
+    '@context'?: never;
+    '@graph'?: never;
+  }
 ): TEntity & TAdditional {
+  if (
+    Object.hasOwn(properties, '@type') ||
+    Object.hasOwn(properties, '@id') ||
+    Object.hasOwn(properties, '@context') ||
+    Object.hasOwn(properties, '@graph')
+  ) {
+    throw new TypeError(
+      'withAdditionalProperties() cannot replace @type or @id, or define reserved keywords (@context, @graph)'
+    );
+  }
   return { ...entity, ...properties };
 }
 
+type PrimarySchemaType<TEntity extends SchemaOrgEntity> = TEntity['@type'] extends string
+  ? TEntity['@type']
+  : TEntity['@type'] extends readonly [infer TPrimary extends string, ...string[]]
+    ? TPrimary
+    : string;
+
 /** Adds extra Schema.org types while preserving the builder's primary type. */
 export function withAdditionalTypes<
-  TType extends string,
-  TEntity extends SchemaOrgEntity & { '@type': TType },
+  TEntity extends SchemaOrgEntity,
   const TAdditionalTypes extends readonly [string, ...string[]],
 >(
   entity: TEntity,
   additionalTypes: TAdditionalTypes
-): Omit<TEntity, '@type'> & { '@type': [TType, ...TAdditionalTypes] } {
+): Omit<TEntity, '@type'> & {
+  '@type': [PrimarySchemaType<TEntity>, ...TAdditionalTypes];
+} {
   return {
     ...entity,
-    '@type': [entity['@type'], ...additionalTypes],
+    '@type': normalizeSchemaTypes(entity['@type'], additionalTypes),
+  } as unknown as Omit<TEntity, '@type'> & {
+    '@type': [PrimarySchemaType<TEntity>, ...TAdditionalTypes];
   };
 }
 
@@ -155,6 +184,12 @@ export function defineSchema<TSchema extends z.ZodTypeAny, TType extends string 
       '@type': z
         .never({ error: `Property "@type" is owned by the ${entityType} builder` })
         .optional(),
+      '@context': z
+        .never({ error: 'Property "@context" is managed at document/graph level' })
+        .optional(),
+      '@graph': z
+        .never({ error: 'Property "@graph" cannot be used as an entity property' })
+        .optional(),
     })
     .strict();
 
@@ -172,8 +207,19 @@ export function defineSchema<TSchema extends z.ZodTypeAny, TType extends string 
       return result.data;
     }
 
-    const { '@id': id, '@type': type, ...schemaInput } = input as Record<string, unknown>;
-    const metadataResult = metadataSchema.safeParse({ '@id': id, '@type': type });
+    const {
+      '@id': id,
+      '@type': type,
+      '@context': context,
+      '@graph': graph,
+      ...schemaInput
+    } = input as Record<string, unknown>;
+    const metadataResult = metadataSchema.safeParse({
+      '@id': id,
+      '@type': type,
+      '@context': context,
+      '@graph': graph,
+    });
     const schemaResult = schemaToValidate.safeParse(schemaInput);
 
     if (!metadataResult.success) {

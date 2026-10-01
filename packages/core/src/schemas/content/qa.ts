@@ -1,12 +1,17 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema } from '../../core/temporal.js';
-import { createEntityRef } from '../common/reference.js';
+import { entityRef } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 import { AnswerSchema } from './faq.js';
 
-const AuthorSchema = createEntityRef(z.union([PersonSchema, OrganizationSchema]), 'Person');
+const AuthorSchema = entityRef({
+  schemas: [PersonSchema, OrganizationSchema],
+  types: ['Person', 'Organization'],
+  fallbackType: 'Person',
+});
 
 /**
  * Zod schema for Schema.org `Comment`.
@@ -57,7 +62,7 @@ export const DiscussionForumPostingSchema = z
     datePublished: IsoDateSchema,
     text: z.string().optional(),
     comment: z.union([CommentSchema, z.array(CommentSchema)]).optional(),
-    url: z.string().optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
   })
   .strict();
 

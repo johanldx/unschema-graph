@@ -40,18 +40,18 @@ type ArticleOutput = SchemaOutput<typeof ArticleSchema, 'Article'>;
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
-| `headline` | string | Oui | non-empty |
-| `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Oui | non-empty |
-| `datePublished` | string \| number \| Date | Oui | non-empty |
+| `headline` | string | Non | non-empty |
+| `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
+| `datePublished` | string \| number \| Date | Non | non-empty |
 | `dateModified` | string \| number \| Date | Non | non-empty |
-| `author` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Oui | non-empty |
-| `publisher` | string \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | non-empty |
+| `author` | Array<unknown> | Non | — |
+| `publisher` | unknown | Non | — |
 | `description` | string | Non | — |
 | `articleBody` | string | Non | — |
 | `articleSection` | string \| Array<string> | Non | — |
 | `keywords` | string \| Array<string> | Non | — |
 | `inLanguage` | string | Non | — |
-| `mainEntityOfPage` | string \| object | Non | — |
+| `mainEntityOfPage` | string \| object | Non | non-empty |
 | `wordCount` | number | Non | integer; greater than 0; maximum: 9007199254740991 |
 | `speakable` | string \| Array<string> \| object | Non | — |
 

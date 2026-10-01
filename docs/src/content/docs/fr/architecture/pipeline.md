@@ -4,8 +4,8 @@ description: Contrats publics et modèle d’implémentation des données source
 ---
 
 Cette page décrit les modules et seams d’unschema-graph. Les éléments marqués **contrat
-public** sont utilisables dans la ligne pré-1.0 actuelle. Les notes d’implémentation
-expliquent le fonctionnement présent sans constituer une API stable.
+public** sont régis par des garanties de stabilité strictes SemVer en v1. Les notes d’implémentation
+expliquent les mécanismes internes sans constituer une rupture d'API publique.
 
 ## Vue d’ensemble du pipeline
 
@@ -100,11 +100,24 @@ valeur `</script>` de fermer le script JSON-LD. Ce n’est ni un assainisseur HT
 garantie sémantique. Validez à l’entrée, ne concaténez pas de fragments et placez la
 chaîne uniquement dans un script `application/ld+json`.
 
+## Convergence architecturale v1
+
+`unschema-graph` applique une convergence architecturale absolue autour d'une primitive et d'une politique unifiées pour chaque responsabilité centrale :
+
+1. **1 primitive de relation (`entityRef`) :** Une primitive unique gère toutes les références d'entités objets, les chaînes de fragments `#id`, les références URI et les entités nommées inline.
+2. **1 modèle de référence :** Les entités sont référencées par des pointeurs `{ "@id": "..." }` ; les références relatives sont canonisées de façon déterministe avec `baseUrl`.
+3. **1 collecteur de graphe (`buildJsonLdGraph`) :** Un collecteur récursif unique explore l'arbre des relations, découvre tous les nœuds identifiés, prévient les cycles infinis et hisse les nœuds dans le tableau racine `@graph`.
+4. **1 stratégie de merge (`mergeEntities`) :** Un algorithme de fusion unique et déterministe combine les nœuds en doublon partageant un `@id` selon des stratégies explicites (`merge`, `first`, `last`, `error`).
+5. **1 stratégie d'URL / ID (`resolveId` / `resolveEntityIds`) :** Une séparation sémantique stricte entre URLs web (`url`, `sameAs`) et identifiants d'entités (`@id`), préservant les URIs externes.
+6. **1 politique inline vs node :** Seule l'identité détermine le hissage. Toute entité dotée d'un `@id` devient un nœud racine de `@graph` ; les value objects sans `@id` restent imbriqués inline dans leur parent.
+7. **1 politique de validation :** Validation Schema.org stricte appliquée à la compilation via TypeScript et à l'exécution via Zod, extensible via `withAdditionalProperties` et `defineSchema`.
+8. **1 moteur partagé entre les frameworks :** `@unschema-graph/astro` et `@unschema-graph/svelte` partagent exactement le même moteur `@unschema-graph/core` avec 0 kB de JavaScript côté client.
+
 ## Contrat stable et explication
 
 Exports publics, entrées documentées, retours, formes d’erreurs et non-mutation forment
-l’interface. Arborescence, helpers, passes de parcours, stratégie de fusion et détails
-des adaptateurs peuvent évoluer. Les tests doivent franchir le même seam public que le
+l’interface garantie par SemVer. Arborescence, helpers, passes de parcours, stratégie de fusion et détails
+des adaptateurs peuvent évoluer en interne. Les tests franchissent le même seam public que le
 code applicatif.
 
 Suite : [référence Core](/fr/integrations/core/), [helpers et types](/fr/reference/helpers/),

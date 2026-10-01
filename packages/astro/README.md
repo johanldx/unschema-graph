@@ -92,7 +92,7 @@ const breadcrumbs = BreadcrumbList({
 <head>
   <title>{post.data.title}</title>
   <!-- Injects a single unified, deduplicated, anti-XSS escaped @graph script -->
-  <Schema data={[publisher, article, breadcrumbs]} />
+  <Schema items={[publisher, article, breadcrumbs]} />
 </head>
 ```
 
@@ -117,7 +117,7 @@ const blogPosting = toBlogPosting(posts[0], {
 | Dependency | Supported Range | Notes |
 | :--- | :--- | :--- |
 | **Astro** | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0` | Server-rendered and static output. Component adds 0 KB client JS. |
-| **Node.js** | `>=22.12.0` | Runtime and build tooling. |
+| **Node.js** | `>=22.12.0` | Oldest maintained LTS baseline tested in CI. |
 | **Zod** | `^4.6.0` | Peer dependency for schema validation. |
 
 ---

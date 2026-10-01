@@ -45,9 +45,9 @@ type WebSiteOutput = SchemaOutput<typeof WebSiteSchema, 'WebSite'>;
 | `alternateName` | string \| Array<string> | Non | — |
 | `description` | string | Non | — |
 | `inLanguage` | string | Non | — |
-| `searchUrl` | string | Non | — |
-| `publisher` | string \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | non-empty |
-| `potentialAction` | string \| object \| Array<string \| object> | Non | — |
+| `searchUrl` | string | Non | non-empty |
+| `publisher` | unknown | Non | — |
+| `potentialAction` | string \| object \| Array<string \| object> | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

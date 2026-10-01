@@ -1,14 +1,19 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema } from '../../core/temporal.js';
-import { createEntityRef } from '../common/reference.js';
+import { entityRef } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 
 /**
  * Seller reference or entity schema.
  */
-const SellerSchema = createEntityRef(z.union([OrganizationSchema, PersonSchema]), 'Organization');
+const SellerSchema = entityRef({
+  schemas: [OrganizationSchema, PersonSchema],
+  types: ['Organization', 'Person'],
+  fallbackType: 'Organization',
+});
 
 /**
  * Zod schema for Schema.org `Offer`.
@@ -26,7 +31,7 @@ export const OfferSchema = z
       .min(3, 'Property "priceCurrency" must be a 3-letter ISO 4217 code (e.g. EUR, USD)')
       .max(3, 'Property "priceCurrency" must be a 3-letter ISO 4217 code (e.g. EUR, USD)'),
     availability: z.string().optional(),
-    url: z.string().optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
     priceValidUntil: IsoDateSchema.optional(),
     itemCondition: z.string().optional(),
     seller: SellerSchema.optional(),

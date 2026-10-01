@@ -45,10 +45,14 @@ interface GraphOptions {
   graph?: boolean;   // default: true
   context?: string;  // default: https://schema.org
   baseUrl?: string;
+  duplicateStrategy?: 'merge' | 'error' | 'first' | 'last'; // default: merge
+  onDiagnostic?: (diagnostic: GraphDiagnostic) => void;
 }
 ```
 
-These options are accepted by `buildJsonLdGraph()` and mirror the corresponding `<Schema />` props.
+These options are accepted by `buildJsonLdGraph()`. The default `merge` strategy keeps
+complementary properties and lets the latest conflicting value win. Diagnostics are structured and
+opt-in through `onDiagnostic`; the collector does not write to the console.
 
 ## Serialization options
 

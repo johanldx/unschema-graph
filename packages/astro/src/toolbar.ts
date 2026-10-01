@@ -17,6 +17,13 @@ interface EntitySummary {
   raw: Record<string, unknown>;
 }
 
+interface ToolbarDiagnostic {
+  code: string;
+  message: string;
+  id?: string;
+  path?: string;
+}
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -37,6 +44,15 @@ function formatRef(ref: unknown): string | undefined {
   return undefined;
 }
 
+function decodeMetadata(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export default defineToolbarApp({
   init(canvas, app) {
     let isOpen = false;
@@ -48,13 +64,45 @@ export default defineToolbarApp({
         return;
       }
 
-      const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
+      const scripts = Array.from(
+        document.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]')
+      );
 
       const entities: EntitySummary[] = [];
+      const diagnostics: ToolbarDiagnostic[] = [];
       let isGraph = false;
+      let baseUrl: string | undefined;
+      let locale: string | undefined;
       const rawJsonOutputs: string[] = [];
 
       for (const script of scripts) {
+        baseUrl ??= decodeMetadata(script.dataset.unschemaBaseUrl);
+        locale ??= decodeMetadata(script.dataset.unschemaLocale);
+        if (script.dataset.unschemaDiagnostics) {
+          try {
+            const parsedDiagnostics = JSON.parse(
+              decodeMetadata(script.dataset.unschemaDiagnostics) ?? '[]'
+            );
+            if (Array.isArray(parsedDiagnostics)) {
+              for (const diagnostic of parsedDiagnostics) {
+                if (
+                  diagnostic &&
+                  typeof diagnostic === 'object' &&
+                  typeof diagnostic.code === 'string' &&
+                  typeof diagnostic.message === 'string'
+                ) {
+                  diagnostics.push(diagnostic as ToolbarDiagnostic);
+                }
+              }
+            }
+          } catch {
+            diagnostics.push({
+              code: 'invalid-diagnostic-metadata',
+              message: 'Unable to parse Schema component diagnostic metadata.',
+            });
+          }
+        }
+
         const text = script.textContent?.trim() || '';
         if (text) {
           rawJsonOutputs.push(text);
@@ -73,7 +121,10 @@ export default defineToolbarApp({
             entities.push(extractEntitySummary(json as Record<string, unknown>));
           }
         } catch {
-          // ignore parse errors
+          diagnostics.push({
+            code: 'invalid-json',
+            message: 'Unable to parse an application/ld+json script on this page.',
+          });
         }
       }
 
@@ -257,6 +308,24 @@ export default defineToolbarApp({
             margin: 0;
             color: rgba(145, 152, 173, 1);
           }
+          .asg-diagnostics {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+          }
+          .asg-diagnostic-code {
+            color: #fbbf24;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 12px;
+            font-weight: 700;
+          }
+          .asg-diagnostic-message {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+          }
         </style>
 
         <header class="asg-header">
@@ -270,9 +339,11 @@ export default defineToolbarApp({
               ${entities.length} ${entities.length === 1 ? 'entité' : 'entités'}
             </astro-dev-toolbar-badge>
             ${
-              entities.length > 0
+              entities.length > 0 && diagnostics.length === 0
                 ? '<astro-dev-toolbar-badge badge-style="green" size="large">@graph valide</astro-dev-toolbar-badge>'
-                : '<astro-dev-toolbar-badge badge-style="yellow" size="large">Aucun schéma</astro-dev-toolbar-badge>'
+                : diagnostics.length > 0
+                  ? `<astro-dev-toolbar-badge badge-style="yellow" size="large">${diagnostics.length} avertissement${diagnostics.length === 1 ? '' : 's'}</astro-dev-toolbar-badge>`
+                  : '<astro-dev-toolbar-badge badge-style="yellow" size="large">Aucun schéma</astro-dev-toolbar-badge>'
             }
           </div>
           <div class="asg-header-actions">
@@ -286,8 +357,8 @@ export default defineToolbarApp({
 
         <div class="asg-meta-bar">
           <div class="asg-meta-item">
-            <span class="asg-meta-label">Balises script:</span>
-            <span class="asg-meta-value">${scripts.length}</span>
+            <span class="asg-meta-label">Nodes:</span>
+            <span class="asg-meta-value">${entities.length}</span>
           </div>
           <div class="asg-meta-item">
             <span class="asg-meta-label">Structure:</span>
@@ -297,7 +368,37 @@ export default defineToolbarApp({
             <span class="asg-meta-label">Types:</span>
             <span class="asg-meta-value">${[...new Set(entities.map((e) => e.type))].join(', ') || 'aucun'}</span>
           </div>
+          <div class="asg-meta-item">
+            <span class="asg-meta-label">Base URL:</span>
+            <span class="asg-meta-value">${escapeHtml(baseUrl ?? 'aucune')}</span>
+          </div>
+          <div class="asg-meta-item">
+            <span class="asg-meta-label">Locale:</span>
+            <span class="asg-meta-value">${escapeHtml(locale ?? 'aucune')}</span>
+          </div>
+          <div class="asg-meta-item">
+            <span class="asg-meta-label">Warnings:</span>
+            <span class="asg-meta-value">${diagnostics.length}</span>
+          </div>
         </div>
+
+        ${
+          diagnostics.length > 0
+            ? `<div class="asg-diagnostics">
+                ${diagnostics
+                  .map(
+                    (diagnostic) => `
+                  <astro-dev-toolbar-card card-style="yellow">
+                    <div class="asg-diagnostic-code">${escapeHtml(diagnostic.code)}</div>
+                    <div class="asg-diagnostic-message">${escapeHtml(diagnostic.message)}</div>
+                    ${diagnostic.path ? `<span class="asg-pill">${escapeHtml(diagnostic.path)}</span>` : ''}
+                    ${diagnostic.id ? `<span class="asg-pill">${escapeHtml(diagnostic.id)}</span>` : ''}
+                  </astro-dev-toolbar-card>`
+                  )
+                  .join('')}
+              </div>`
+            : ''
+        }
 
         <div class="asg-list">
           ${
@@ -316,7 +417,7 @@ export default defineToolbarApp({
             <astro-dev-toolbar-card card-style="purple">
               <div class="asg-card-content">
                 <div class="asg-card-top">
-                  <div class="asg-entity-type">${entity.type}</div>
+                  <div class="asg-entity-type">${escapeHtml(entity.type)}</div>
                   <astro-dev-toolbar-badge badge-style="${entity.id ? 'purple' : 'gray'}" size="small">
                     ${entity.id ? escapeHtml(entity.id) : 'anonyme'}
                   </astro-dev-toolbar-badge>

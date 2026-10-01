@@ -1,6 +1,6 @@
 {
   "name": "@unschema-graph/astro",
-  "version": "0.2.0",
+  "version": "0.9.0",
   "description": "Astro integration, Schema component, content helpers, and dev toolbar for unschema-graph.",
   "type": "module",
   "author": "Johan Ledoux <johan.ledoux@rootage.fr> (https://github.com/johanldx)",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "https://github.com/johanldx/unschema-graph.git",
     "directory": "packages/astro"
+  },
+  "homepage": "https://unschema-graph.jhdx.dev",
+  "bugs": {
+    "url": "https://github.com/johanldx/unschema-graph/issues"
   },
   "keywords": [
     "astro",
@@ -21,6 +25,8 @@
   "engines": {
     "node": ">=22.12.0"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -40,7 +46,8 @@
     "./Schema.astro": "./dist/Schema.astro"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "files": [
     "dist"

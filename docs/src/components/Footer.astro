@@ -4,6 +4,8 @@ import LastUpdated from 'virtual:starlight/components/LastUpdated';
 import Pagination from 'virtual:starlight/components/Pagination';
 import BrandMark from './BrandMark.astro';
 
+const version = 'v0.9.0';
+
 const route = Astro.locals.starlightRoute;
 const isSplash =
   route?.entry?.data?.template === 'splash' ||
@@ -56,7 +58,7 @@ const navLinks = [
       </div>
 
       <div class="footer-bottom">
-        <span class="pill">v0.2.0</span>
+        <span class="pill">{version}</span>
         <span>MIT License</span>
         <span class="bullet" aria-hidden="true">
           ·
@@ -79,6 +81,10 @@ const navLinks = [
     </div>
     <Pagination />
     <div class="compact-bottom">
+      <span class="pill">{version}</span>
+      <span class="bullet" aria-hidden="true">
+        ·
+      </span>
       <span>MIT License</span>
       <span class="bullet" aria-hidden="true">
         ·

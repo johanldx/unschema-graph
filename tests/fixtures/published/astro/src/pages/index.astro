@@ -1,0 +1,36 @@
+---
+import { Organization, Schema } from '@unschema-graph/astro';
+import { toArticle } from '@unschema-graph/astro/content';
+import DirectSchema from '@unschema-graph/astro/Schema.astro';
+
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Published Astro consumer',
+  url: 'https://example.com',
+});
+const article = toArticle({
+  id: 'compatibility',
+  body: 'A package installed from its npm tarball.',
+  data: {
+    title: 'Published Astro compatibility',
+    datePublished: '2026-10-01',
+    author: organization,
+  },
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Published Astro compatibility</title>
+    <Schema items={[organization, article]} baseUrl="https://example.com" />
+    <DirectSchema items={[organization]} />
+  </head>
+  <body>
+    <main>
+      <h1>Published Astro compatibility</h1>
+    </main>
+  </body>
+</html>

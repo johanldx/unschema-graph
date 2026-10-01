@@ -2,6 +2,7 @@ export * from './config.js';
 export * from './core/defineSchema.js';
 export * from './core/duration.js';
 export * from './core/graph.js';
+export * from './core/schemaType.js';
 export * from './core/serialize.js';
 export * from './core/temporal.js';
 export * from './core/validator.js';

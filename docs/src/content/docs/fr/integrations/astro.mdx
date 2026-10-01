@@ -66,7 +66,12 @@ export default defineConfig({
 | Option | Type | Défaut | Description |
 | --- | --- | --- | --- |
 | `baseUrl` | `string` | `config.site` | URL canonique de base pour résoudre les fragments `#id` et URLs relatives. |
+| `inLanguage` | `string` | locale de la route | Locale BCP-47 par défaut lorsqu’aucune locale de route Astro n’est disponible. |
 | `onError` | `'throw' \| 'warn' \| 'silent'` | `build: 'throw'`, `dev: 'warn'` | Mode de sévérité de la validation. |
+
+La résolution est déterministe : la prop `<Schema baseUrl>` prime sur la `baseUrl` de
+l’intégration, qui prime sur `site` d’Astro. Pour la locale : `<Schema inLanguage>`, puis
+`Astro.currentLocale`, puis la valeur par défaut de l’intégration.
 
 ---
 
@@ -124,8 +129,13 @@ En mode développement (`astro dev`), `@unschema-graph/astro` injecte automatiqu
 ### Fonctionnalités de la Dev Toolbar :
 
 - **Inspecteur de graphe en temps réel :** Visualisez chaque entité détectée dans le `@graph` de la page courante avec son `@type` et son `@id` résolu.
-- **Alertes de validation instantanées :** Les champs manquants ou erreurs Zod apparaissent en direct au fil de vos modifications de code.
-- **Test express Google Rich Results :** Bouton de copie en un clic du JSON-LD brut pour tester immédiatement dans l'outil de test des résultats enrichis de Google.
+- **Diagnostics du graphe :** Affiche les références locales cassées et les conflits de fusion remontés pendant le rendu serveur.
+- **Contexte de rendu :** Affiche le nombre de nodes, la `baseUrl`, la locale et le nombre d’avertissements.
+- **Copie JSON-LD :** Copie la charge générée pour inspection ou test externe.
+
+Le composant reste rendu côté serveur et n’envoie aucun JavaScript client. Les
+métadonnées de la toolbar utilisent des attributs `data-*` inertes, lus uniquement par
+la toolbar de développement Astro.
 
 :::tip
 Appuyez sur `h` dans votre navigateur lors de l'exécution d'`astro dev` pour faire réapparaître la Dev Toolbar si elle est masquée.

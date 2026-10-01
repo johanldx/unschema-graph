@@ -32,7 +32,7 @@ bun add @unschema-graph/core zod
 ### 1. Build and validate Schema.org entities
 
 ```typescript
-import { Article, Organization, createGraph, serializeJsonLd } from '@unschema-graph/core';
+import { Article, Organization, buildJsonLdGraph, serializeJsonLd } from '@unschema-graph/core';
 
 // 1. Build entities with official typed builders
 const publisher = Organization({
@@ -47,15 +47,15 @@ const article = Article({
   image: 'https://example.com/cover.jpg',
   datePublished: '2026-09-29',
   author: 'Ada Lovelace',
-  publisher: '#organization', // Resolved to the Organization node
+  publisher, // Typed entity-object reference!
 });
 
-// 2. Resolve references and deduplicate under a single @graph
-const graph = createGraph([publisher, article], {
+// 2. Resolve references and deduplicate under a single @graph via automatic discovery
+const graph = buildJsonLdGraph(article, {
   baseUrl: 'https://example.com',
 });
 
-// 3. Serialize safely into JSON-LD (with Unicode anti-XSS escaping)
+// 3. Serialize safely into JSON-LD (recommended for <script type="application/ld+json"> injection)
 const jsonString = serializeJsonLd(graph);
 ```
 
@@ -98,7 +98,7 @@ console.log(`Scanned ${report.scannedFiles} HTML files with ${report.errors.leng
 
 | Environment | Supported Range | Notes |
 | :--- | :--- | :--- |
-| **Node.js** | `>=22.12.0` | Required for tooling and `@unschema-graph/core/audit`. |
+| **Node.js** | `>=22.12.0` | Oldest maintained LTS baseline tested in CI; required for tooling and `@unschema-graph/core/audit`. |
 | **Zod** | `^4.6.0` | Peer dependency for runtime validation. |
 | **TypeScript** | `>=5.0` | Strict mode recommended. |
 | **Browser** | Modern browsers | Root export is pure TypeScript/JavaScript with zero Node built-ins. |

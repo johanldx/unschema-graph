@@ -40,7 +40,7 @@ type ReviewOutput = SchemaOutput<typeof ReviewSchema, 'Review'>;
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
 | `@id` | string | No | — |
-| `author` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | Yes | non-empty |
+| `author` | unknown | Yes | — |
 | `reviewRating` | [Rating](/reference/builders/rating/) | Yes | — |
 | `datePublished` | string \| number \| Date | No | non-empty |
 | `reviewBody` | string | No | — |

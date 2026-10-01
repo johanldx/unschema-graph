@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { ImageUrlOrObject } from '../common/image.js';
+import { WebUrlSchema } from '../common/url.js';
 import { AggregateOfferSchema, OfferSchema } from './offer.js';
 import { AggregateRatingSchema, ReviewSchema } from './review.js';
 
@@ -18,7 +19,7 @@ export const SoftwareApplicationSchema = z
     review: z.union([ReviewSchema, z.array(ReviewSchema)]).optional(),
     screenshot: z.union([ImageUrlOrObject, z.array(ImageUrlOrObject)]).optional(),
     softwareVersion: z.string().optional(),
-    downloadUrl: z.string().optional(),
+    downloadUrl: WebUrlSchema.optional(),
     fileSize: z.string().optional(),
     description: z.string().optional(),
   })

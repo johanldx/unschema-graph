@@ -41,13 +41,13 @@ type WebPageOutput = SchemaOutput<typeof WebPageSchema, 'WebPage'>;
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `name` | string | Non | — |
-| `url` | string | Non | — |
+| `url` | string | Non | non-empty |
 | `headline` | string | Non | — |
 | `description` | string | Non | — |
 | `inLanguage` | string | Non | — |
 | `speakable` | string \| Array<string> \| object | Non | — |
-| `isPartOf` | string \| object | Non | — |
-| `breadcrumb` | string \| object | Non | — |
+| `isPartOf` | unknown | Non | — |
+| `breadcrumb` | unknown | Non | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

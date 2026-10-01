@@ -41,18 +41,18 @@ type StoreOutput = SchemaOutput<typeof LocalBusinessSchema, 'Store'>;
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
-| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Oui | — |
+| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Oui | non-empty |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) | Non | non-empty |
 | `telephone` | string | Non | — |
 | `priceRange` | string | Non | — |
-| `url` | string | Non | — |
-| `geo` | [GeoCoordinates](/fr/reference/builders/geo-coordinates/) | Non | — |
+| `url` | string | Non | non-empty |
+| `geo` | [GeoCoordinates](/fr/reference/builders/geo-coordinates/) \| string \| [GeoCoordinates](/fr/reference/builders/geo-coordinates/) | Non | non-empty |
 | `openingHoursSpecification` | object \| Array<object> | Non | — |
 | `currenciesAccepted` | string | Non | — |
 | `paymentAccepted` | string | Non | — |
-| `sameAs` | string \| Array<string> | Non | — |
+| `sameAs` | string \| Array<string> | Non | non-empty |
 | `servesCuisine` | string \| Array<string> | Non | — |
-| `menu` | string | Non | — |
+| `menu` | string | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

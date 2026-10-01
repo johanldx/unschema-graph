@@ -42,7 +42,7 @@ type QAQuestionOutput = SchemaOutput<typeof QAQuestionSchema, 'Question'>;
 | `@id` | string | No | — |
 | `name` | string | Yes | non-empty |
 | `text` | string | No | — |
-| `author` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | No | non-empty |
+| `author` | unknown | No | — |
 | `datePublished` | string \| number \| Date | No | non-empty |
 | `acceptedAnswer` | object | No | — |
 | `suggestedAnswer` | object \| Array<object> | No | — |

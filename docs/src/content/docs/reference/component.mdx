@@ -42,7 +42,7 @@ import { Schema } from '@unschema-graph/svelte';
 | `items` | `(SchemaOrgEntity \| null \| undefined)[]` | `undefined` | Array of entities to merge into the unified `@graph`. |
 | `item` | `SchemaOrgEntity \| null` | `undefined` | Convenience prop for passing a single entity. |
 | `data` | `SchemaOrgEntity \| SchemaOrgEntity[] \| null` | `undefined` | Universal alias accepting a single entity or an array. |
-| `baseUrl` | `string` | See priority below | Resolves relative `@id`, `url`, and `item` values against this canonical origin. |
+| `baseUrl` | `string` | See priority below | Resolves explicit relative `@id` values against this canonical origin. |
 | `inLanguage` | `string` | Astro: `Astro.currentLocale`<br/>Svelte: `undefined` | Fills missing language code on language-aware entities. |
 | `pretty` | `boolean` | `false` | Enables indented, multi-line JSON output for debugging. |
 | `indent` | `number` | `2` | Space indentation width when `pretty` is enabled. |

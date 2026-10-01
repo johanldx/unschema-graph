@@ -1,7 +1,7 @@
 # unschema-graph
 
 <p align="center">
-  <strong>Ship valid Schema.org JSON-LD without maintaining raw JSON objects by hand.</strong><br>
+  <strong>Build type-safe, validated Schema.org JSON-LD without maintaining raw JSON objects by hand.</strong><br>
   Compose typed entities in TypeScript, validate with Zod, resolve references into a single <code>@graph</code>, and serialize safely for modern web frameworks.
 </p>
 
@@ -76,11 +76,11 @@ Zero client JavaScript `<Schema />` component, Astro Content Collections helpers
 import { Article, Organization, Schema } from '@unschema-graph/astro';
 
 const org = Organization({ '@id': '#org', name: 'Acme', url: 'https://example.com' });
-const article = Article({ headline: 'Modern Astro SEO', publisher: '#org' });
+const article = Article({ headline: 'Modern Astro SEO', publisher: org });
 ---
 
-<!-- Automatically resolves relative URLs against astro.config.mjs 'site' -->
-<Schema data={[org, article]} />
+<!-- Automatically resolves relative URLs against astro.config.mjs 'site' and discovers org -->
+<Schema items={article} />
 ```
 
 👉 [Read the Astro Guide](https://unschema-graph.jhdx.dev/getting-started/quick-start/astro/)

@@ -47,6 +47,11 @@ Every custom builder automatically:
 - Obeys global and per-call `onError` severity modes (`throw`, `warn`, `silent`).
 - Exposes `.schema`, `.entityType`, and `.safeParse()`.
 
+`defineSchema()` enforces `.strict()` on its top-level Zod object even if the supplied
+object omitted it. Nested objects must still declare `.strict()` explicitly. Built-in
+schemas follow the same policy; only `TypedEntitySchema` intentionally uses
+`.passthrough()` as the extension point for custom typed entities in relationships.
+
 ---
 
 ## 2. Composing with Built-in Schemas
@@ -73,5 +78,7 @@ export const PodcastSeries = defineSchema(
 ```
 
 :::tip
-Always keep your custom schemas strict. If you need dynamic, one-off properties on an entity, use `withAdditionalProperties()` instead of weakening the Zod definition with `z.any()` or `.passthrough()`.
+Keep nested custom schemas strict. If you need dynamic, one-off properties on an entity,
+use `withAdditionalProperties()` instead of weakening the Zod definition with `z.any()`
+or `.passthrough()`. This escape hatch cannot replace `@type` or `@id`.
 :::

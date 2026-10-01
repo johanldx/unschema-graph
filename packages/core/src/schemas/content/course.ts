@@ -1,11 +1,15 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { AggregateOfferSchema, OfferSchema } from '../commerce/offer.js';
-import { createEntityRef } from '../common/reference.js';
+import { entityRef } from '../common/reference.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 
-const ProviderSchema = createEntityRef(z.union([OrganizationSchema, PersonSchema]), 'Organization');
+const ProviderSchema = entityRef({
+  schemas: [OrganizationSchema, PersonSchema],
+  types: ['Organization', 'Person'],
+  fallbackType: 'Organization',
+});
 
 /**
  * Zod schema for Schema.org `Course`.

@@ -41,11 +41,11 @@ type DiscussionForumPostingOutput = SchemaOutput<typeof DiscussionForumPostingSc
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `headline` | string | Oui | non-empty |
-| `author` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Oui | non-empty |
+| `author` | unknown | Oui | — |
 | `datePublished` | string \| number \| Date | Oui | non-empty |
 | `text` | string | Non | — |
 | `comment` | object \| Array<object> | Non | — |
-| `url` | string | Non | — |
+| `url` | string | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

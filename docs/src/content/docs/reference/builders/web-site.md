@@ -45,9 +45,9 @@ type WebSiteOutput = SchemaOutput<typeof WebSiteSchema, 'WebSite'>;
 | `alternateName` | string \| Array<string> | No | — |
 | `description` | string | No | — |
 | `inLanguage` | string | No | — |
-| `searchUrl` | string | No | — |
-| `publisher` | string \| [Organization](/reference/builders/organization/) \| EntityReference | No | non-empty |
-| `potentialAction` | string \| object \| Array<string \| object> | No | — |
+| `searchUrl` | string | No | non-empty |
+| `publisher` | unknown | No | — |
+| `potentialAction` | string \| object \| Array<string \| object> | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'WebSite'`.

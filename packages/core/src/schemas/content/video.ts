@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema, IsoDurationSchema } from '../../core/temporal.js';
 import { ImageUrlOrObject } from '../common/image.js';
+import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../common/url.js';
 
 /**
  * Zod schema for Schema.org `Clip` (video key moment/chapter).
@@ -13,7 +14,7 @@ export const ClipSchema = z
     name: z.string().min(1, 'Clip name is required'),
     startOffset: z.number().nonnegative(),
     endOffset: z.number().positive(),
-    url: z.string().optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
   })
   .strict();
 
@@ -33,8 +34,8 @@ export const VideoObjectSchema = z
     ),
     uploadDate: IsoDateSchema,
     duration: IsoDurationSchema.optional(),
-    contentUrl: z.string().optional(),
-    embedUrl: z.string().optional(),
+    contentUrl: WebUrlSchema.optional(),
+    embedUrl: WebUrlSchema.optional(),
     hasPart: z.union([ClipSchema, z.array(ClipSchema)]).optional(),
     inLanguage: z.string().optional(),
   })

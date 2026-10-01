@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { RelativeOrAbsoluteUrlSchema } from './url.js';
 
 export interface SearchActionOptions {
   target: string;
@@ -37,16 +38,16 @@ export function createSearchAction(options: string | SearchActionOptions): Recor
  * Zod schema for SearchAction.
  */
 export const SearchActionSchema = z.union([
-  z.string().transform((url) => createSearchAction(url)),
+  RelativeOrAbsoluteUrlSchema.transform((url) => createSearchAction(url)),
   z
     .object({
       '@type': z.string().default('SearchAction').optional(),
       target: z.union([
-        z.string(),
+        RelativeOrAbsoluteUrlSchema,
         z
           .object({
             '@type': z.string().default('EntryPoint').optional(),
-            urlTemplate: z.string().min(1),
+            urlTemplate: RelativeOrAbsoluteUrlSchema,
           })
           .strict(),
       ]),

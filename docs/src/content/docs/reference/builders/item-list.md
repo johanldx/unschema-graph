@@ -40,7 +40,7 @@ type ItemListOutput = SchemaOutput<typeof ItemListSchema, 'ItemList'>;
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
-| `itemListElement` | Array<object> | Yes | minimum items: 1 |
+| `itemListElement` | Array<object \| string \| object> | Yes | minimum items: 1 |
 | `name` | string | No | — |
 | `description` | string | No | — |
 | `itemListOrder` | string | No | — |
