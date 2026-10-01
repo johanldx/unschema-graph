@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { EntityIdSchema, entityRef } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
@@ -10,7 +11,7 @@ import { PersonSchema } from '../identity/person.js';
 export const DataDownloadSchema = z
   .object({
     '@type': z.literal('DataDownload').default('DataDownload').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     contentUrl: WebUrlSchema,
     encodingFormat: z.string().optional(), // e.g. 'text/csv', 'application/json'
     name: z.string().optional(),
@@ -18,12 +19,15 @@ export const DataDownloadSchema = z
   })
   .strict();
 
-const DatasetCreatorSchema = z.union([z.string(), PersonSchema, OrganizationSchema]);
+const DatasetCreatorSchema = entityRef({
+  schemas: [PersonSchema, OrganizationSchema],
+  types: ['Person', 'Organization'],
+  fallbackType: 'Person',
+});
 const CreatorSchema = z.union([DatasetCreatorSchema, z.array(DatasetCreatorSchema)]);
 
 /**
- * Zod schema for Schema.org `Dataset`.
- * Conforms to Google Search Central Dataset structured data guidelines.
+ * Curated Zod schema for Schema.org `Dataset`.
  */
 export const DatasetSchema = z
   .object({

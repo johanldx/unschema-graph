@@ -39,7 +39,7 @@ type BreadcrumbListOutput = SchemaOutput<typeof BreadcrumbListSchema, 'Breadcrum
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `itemListElement` | Array<object> | Oui | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder

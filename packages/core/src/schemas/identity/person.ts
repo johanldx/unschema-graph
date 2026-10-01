@@ -3,7 +3,7 @@ import { defineSchema } from '../../core/defineSchema.js';
 import { SchemaTypeSchema } from '../../core/schemaType.js';
 import { PostalAddressSchema } from '../common/address.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { EntityReferenceSchema, entityRef } from '../common/reference.js';
+import { EntityIdSchema, EntityReferenceSchema, entityRef } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from './organization.js';
 
@@ -14,13 +14,12 @@ const WorksForSchema = entityRef({
 });
 
 /**
- * Zod schema for Schema.org `Person`.
- * Validates properties according to Google Search Central structured data recommendations.
+ * Curated Zod schema for Schema.org `Person`.
  */
 export const PersonSchema = z
   .object({
     '@type': SchemaTypeSchema.optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     name: z.string().min(1, 'Property "name" is required for Person'),
     givenName: z.string().optional(),
     familyName: z.string().optional(),

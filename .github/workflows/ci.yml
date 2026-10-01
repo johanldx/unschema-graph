@@ -28,23 +28,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm run typecheck
-
-      - name: Lint and formatting
-        run: pnpm run lint
-
-      - name: Test
-        run: pnpm test
-
-      - name: Build packages
-        run: pnpm run build
-
-      - name: Audit JSON-LD
-        run: pnpm run audit
-
-      - name: Build documentation
-        run: pnpm run build:docs
+      - name: Verify source, packages, examples, and documentation
+        run: pnpm run verify
 
   published-package-compatibility:
     runs-on: ubuntu-latest
@@ -66,5 +51,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Test published packages against declared peers
+      - name: Test packed packages, peer bounds, and npm consumers
         run: pnpm run test:published

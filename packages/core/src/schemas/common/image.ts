@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { SchemaTypeSchema } from '../../core/schemaType.js';
+import { EntityIdSchema } from './reference.js';
 import { RelativeOrAbsoluteUrlSchema } from './url.js';
 
 const ImageUrlSchema = RelativeOrAbsoluteUrlSchema;
@@ -11,7 +12,7 @@ const ImageUrlSchema = RelativeOrAbsoluteUrlSchema;
 export const ImageObjectSchema = z
   .object({
     '@type': SchemaTypeSchema.optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     url: ImageUrlSchema,
     contentUrl: ImageUrlSchema.optional(),
     caption: z.string().optional(),

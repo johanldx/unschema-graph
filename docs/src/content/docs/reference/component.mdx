@@ -43,7 +43,7 @@ import { Schema } from '@unschema-graph/svelte';
 | `item` | `SchemaOrgEntity \| null` | `undefined` | Convenience prop for passing a single entity. |
 | `data` | `SchemaOrgEntity \| SchemaOrgEntity[] \| null` | `undefined` | Universal alias accepting a single entity or an array. |
 | `baseUrl` | `string` | See priority below | Resolves explicit relative `@id` values against this canonical origin. |
-| `inLanguage` | `string` | Astro: `Astro.currentLocale`<br/>Svelte: `undefined` | Fills missing language code on language-aware entities. |
+| `inLanguage` | `string` | See priority below | Fills missing language code on language-aware entities. |
 | `pretty` | `boolean` | `false` | Enables indented, multi-line JSON output for debugging. |
 | `indent` | `number` | `2` | Space indentation width when `pretty` is enabled. |
 | `graph` | `boolean` | `true` | Wraps entities in a root `@graph`. If `false` and only 1 entity is provided, renders flat root. |
@@ -52,13 +52,17 @@ import { Schema } from '@unschema-graph/svelte';
 
 ---
 
-## 3. Base URL Resolution Priority
+## 3. Resolution Priority
 
 When resolving relative identifiers (`#organization`, `/posts/hello#article`):
 
-1. **Astro component:** `baseUrl` prop → `Astro.site` → global configuration. The Astro integration writes its `baseUrl` option to that global configuration, or falls back to `config.site` when the option is omitted.
-2. **Svelte component:** the `baseUrl` prop only. It does not read the Core global configuration automatically.
+1. **Astro component:** `baseUrl` prop → integration/global configuration → `Astro.site` fallback. The Astro integration writes its `baseUrl` option to that global configuration, or writes `config.site` when the option is omitted.
+2. **Svelte component:** `baseUrl` prop → global configuration.
 3. **Core API:** the `baseUrl` passed in `GraphOptions`. `getGlobalConfig()` is available to application code, but `buildJsonLdGraph()` does not read it automatically.
+
+For language enrichment, an entity’s existing `inLanguage` is always preserved. Otherwise Astro
+uses the component prop, then `Astro.currentLocale`, then the integration/global default. Svelte
+uses the component prop, then the global default.
 
 ---
 

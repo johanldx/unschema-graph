@@ -1,15 +1,20 @@
 import {
   Article,
+  Book,
   BreadcrumbList,
+  buildJsonLdGraph,
+  Dataset,
   EntityIdSchema,
   Event,
   entityRef,
   isIdReference,
+  Movie,
   Offer,
   Organization,
   OrganizationSchema,
   Person,
   Product,
+  ProfilePage,
   RelativeOrAbsoluteUrlSchema,
   Review,
   Service,
@@ -23,12 +28,32 @@ import { describe, expect, it } from 'vitest';
 describe('entity relationships', () => {
   it('distinguishes entity IDs, references, and web URLs through dedicated primitives', () => {
     expect(EntityIdSchema.parse(' #organization ')).toBe('#organization');
-    expect(isIdReference('#organization')).toBe(true);
-    expect(isIdReference('/about#webpage')).toBe(true);
-    expect(isIdReference('did:example:123')).toBe(true);
-    expect(isIdReference('mailto:hello@example.com')).toBe(true);
-    expect(isIdReference('tel:+33123456789')).toBe(true);
-    expect(isIdReference('Acme Corp')).toBe(false);
+
+    for (const reference of [
+      '#organization',
+      '/about',
+      '/about#section',
+      './about',
+      '../about',
+      'https://example.com/#org',
+      'http://example.com/#org',
+      'urn:example:org',
+      'did:example:123',
+      'mailto:hello@example.com',
+      'tel:+33123456789',
+    ]) {
+      expect(isIdReference(reference), reference).toBe(true);
+    }
+
+    for (const name of [
+      'Acme Corp',
+      'AC/DC',
+      'Foo/Bar Studio',
+      'Research / Development',
+      'John Doe',
+    ]) {
+      expect(isIdReference(name), name).toBe(false);
+    }
 
     expect(WebUrlSchema.parse('https://example.com/about')).toBe('https://example.com/about');
     expect(WebUrlSchema.safeParse('/about').success).toBe(false);
@@ -129,11 +154,111 @@ describe('entity relationships', () => {
     expect(page.isPartOf).toEqual({ '@id': '#website' });
   });
 
+  it('keeps slash-containing brand names as inline named entities', () => {
+    expect(Product({ name: 'Album', brand: 'AC/DC' }).brand).toEqual({
+      '@type': 'Brand',
+      name: 'AC/DC',
+    });
+    expect(Product({ name: 'Camera', brand: 'Foo/Bar Studio' }).brand).toEqual({
+      '@type': 'Brand',
+      name: 'Foo/Bar Studio',
+    });
+  });
+
   it('normalizes entity references idempotently', () => {
     const referenceSchema = entityRef({ schemas: [OrganizationSchema] });
     const once = referenceSchema.parse('#organization');
     const twice = referenceSchema.parse(once);
 
     expect(twice).toEqual(once);
+  });
+
+  it('normalizes ProfilePage.mainEntity entity, string ID, and @id object forms', () => {
+    const person = Person({ '@id': '#person', name: 'Ada' });
+
+    expect(ProfilePage({ mainEntity: person }).mainEntity).toEqual(person);
+    expect(ProfilePage({ mainEntity: '#person' }).mainEntity).toEqual({ '@id': '#person' });
+    expect(ProfilePage({ mainEntity: { '@id': '#person' } }).mainEntity).toEqual({
+      '@id': '#person',
+    });
+  });
+
+  it('normalizes Dataset.creator entity, string ID, @id object, and array forms', () => {
+    const person = Person({ '@id': '#person', name: 'Ada' });
+    const organization = Organization({ '@id': '#organization', name: 'Acme' });
+
+    const dataset = Dataset({
+      name: 'People and organizations',
+      description: 'Entity relation fixture',
+      creator: [person, organization, '#editor', { '@id': '#reviewer' }],
+    });
+    expect(dataset.creator).toEqual([
+      person,
+      organization,
+      { '@id': '#editor' },
+      { '@id': '#reviewer' },
+    ]);
+    expect(
+      Dataset({ name: 'Named creator', description: 'Fixture', creator: 'Ada Lovelace' }).creator
+    ).toEqual({ '@type': 'Person', name: 'Ada Lovelace' });
+  });
+
+  it('keeps inline Event locations ergonomic and supports identifiable Place references', () => {
+    const baseEvent = { name: 'Launch', startDate: '2026-10-01' } as const;
+
+    expect(Event({ ...baseEvent, location: 'Paris' }).location).toBe('Paris');
+    expect(Event({ ...baseEvent, location: { '@id': '#venue' } }).location).toEqual({
+      '@id': '#venue',
+    });
+
+    const event = Event({
+      ...baseEvent,
+      location: { '@type': 'Place', '@id': '#venue', name: 'Grand Palais' },
+    });
+    expect(event.location).toEqual({
+      '@type': 'Place',
+      '@id': '#venue',
+      name: 'Grand Palais',
+    });
+
+    expect(buildJsonLdGraph(event)?.['@graph']).toEqual([
+      { '@type': 'Place', '@id': '#venue', name: 'Grand Palais' },
+      {
+        '@type': 'Event',
+        name: 'Launch',
+        startDate: '2026-10-01',
+        location: { '@id': '#venue' },
+      },
+    ]);
+  });
+
+  it('uses shared relation semantics for Book and Movie people fields', () => {
+    const person = Person({ '@id': '#person', name: 'Ada' });
+    const relationForms = [person, '#person', { '@id': '#person' }] as const;
+
+    expect(
+      Book({
+        name: 'Relations',
+        author: [...relationForms],
+        publisher: { '@id': '#publisher' },
+      }).author
+    ).toEqual([person, { '@id': '#person' }, { '@id': '#person' }]);
+    expect(Book({ name: 'Publisher object', author: person, publisher: person }).publisher).toEqual(
+      person
+    );
+    expect(
+      Book({ name: 'Publisher string', author: person, publisher: '#publisher' }).publisher
+    ).toEqual({ '@id': '#publisher' });
+
+    expect(Movie({ name: 'Cast', actor: [...relationForms] }).actor).toEqual([
+      person,
+      { '@id': '#person' },
+      { '@id': '#person' },
+    ]);
+    expect(Movie({ name: 'Direction', director: [...relationForms] }).director).toEqual([
+      person,
+      { '@id': '#person' },
+      { '@id': '#person' },
+    ]);
   });
 });

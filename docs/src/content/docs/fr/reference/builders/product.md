@@ -43,7 +43,7 @@ type ProductOutput = SchemaOutput<typeof ProductSchema, 'Product'>;
 | `name` | string | Oui | non-empty |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
 | `description` | string | Non | — |
-| `brand` | unknown | Non | — |
+| `brand` | Brand \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
 | `offers` | [Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/) \| Array<[Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/)> | Non | — |
 | `aggregateRating` | Aggregate[Rating](/fr/reference/builders/rating/) | Non | — |
 | `review` | [Review](/fr/reference/builders/review/) \| Array<[Review](/fr/reference/builders/review/)> | Non | — |

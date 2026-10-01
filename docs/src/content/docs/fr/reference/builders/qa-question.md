@@ -39,10 +39,10 @@ type QAQuestionOutput = SchemaOutput<typeof QAQuestionSchema, 'Question'>;
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
 | `text` | string | Non | — |
-| `author` | unknown | Non | — |
+| `author` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
 | `datePublished` | string \| number \| Date | Non | non-empty |
 | `acceptedAnswer` | object | Non | — |
 | `suggestedAnswer` | object \| Array<object> | Non | — |

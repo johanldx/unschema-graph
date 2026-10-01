@@ -95,8 +95,9 @@ non-mutation guarantees.
 `parseDate()` accepts `Date`, timestamps, ISO values and documented relative forms.
 `formatIsoDate()` emits normalized ISO output. `formatIsoDuration()` normalizes ISO,
 human strings and duration objects; `parseDurationToMs()`, `addDuration()` and
-`diffDuration()` provide calculations. Pass a reference date when deterministic tests
-use relative input such as `today`.
+`diffDuration()` provide calculations. A fixed reference date applies only to a direct
+`parseDate()` call; builders and transforming schemas use the live clock. Use explicit ISO
+input when their output must be reproducible.
 
 ## Serialization and threat model
 

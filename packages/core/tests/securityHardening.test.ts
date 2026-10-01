@@ -1,4 +1,4 @@
-import { buildJsonLdGraph, serializeJsonLd } from '@unschema-graph/core';
+import { buildJsonLdGraph, resolveEntityIds, serializeJsonLd } from '@unschema-graph/core';
 import { describe, expect, it } from 'vitest';
 
 describe('Step 21 — Security Hardening, Prototype Safety & Non-Serializable Types', () => {
@@ -17,22 +17,48 @@ describe('Step 21 — Security Hardening, Prototype Safety & Non-Serializable Ty
     });
 
     it('does not allow prototype pollution via __proto__, constructor, or prototype properties', () => {
-      const untrustedPayload = {
-        '@type': 'Organization',
-        '@id': '#org',
-        name: 'Safe Org',
-        __proto__: { polluted: 'true' },
-        constructor: { polluted: 'true' },
-        prototype: { polluted: 'true' },
-      };
+      const untrustedPayload = JSON.parse(`{
+        "@type": "Organization",
+        "@id": "#org",
+        "name": "Safe Org",
+        "__proto__": { "polluted": true },
+        "constructor": { "polluted": true },
+        "prototype": { "polluted": true },
+        "details": {
+          "label": "Safe nested data",
+          "__proto__": { "polluted": true },
+          "constructor": { "polluted": true },
+          "prototype": { "polluted": true }
+        }
+      }`);
 
       const graph = buildJsonLdGraph(untrustedPayload, { baseUrl: 'https://example.com' });
       expect(graph).toBeDefined();
 
+      const node = (graph!['@graph'] as Record<string, unknown>[])[0];
+      expect(Object.getPrototypeOf(node)).toBe(Object.prototype);
+      expect(Object.hasOwn(node, '__proto__')).toBe(false);
+      expect(Object.hasOwn(node, 'constructor')).toBe(false);
+      expect(Object.hasOwn(node, 'prototype')).toBe(false);
+      const details = node.details as Record<string, unknown>;
+      expect(Object.getPrototypeOf(details)).toBe(Object.prototype);
+      expect(Object.keys(details)).toEqual(['label']);
+      expect(node).toEqual({
+        '@type': 'Organization',
+        '@id': 'https://example.com/#org',
+        name: 'Safe Org',
+        details: { label: 'Safe nested data' },
+      });
+
+      const resolved = resolveEntityIds(untrustedPayload, 'https://example.com');
+      expect(Object.getPrototypeOf(resolved)).toBe(Object.prototype);
+      expect(Object.hasOwn(resolved, '__proto__')).toBe(false);
+      expect(Object.hasOwn(resolved, 'constructor')).toBe(false);
+      expect(Object.hasOwn(resolved, 'prototype')).toBe(false);
+
       // Ensure global Object prototype was not compromised
-      const plainObj: Record<string, unknown> = {};
-      expect(plainObj.polluted).toBeUndefined();
       expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+      expect((Object.prototype as Record<string, unknown>).polluted).toBeUndefined();
     });
   });
 

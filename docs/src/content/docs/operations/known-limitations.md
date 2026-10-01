@@ -8,7 +8,7 @@ description: Explicit boundaries of schema coverage, auditing, search eligibilit
 - The audit checks JSON syntax and graph structure in built HTML. It does not crawl URLs, validate every Schema.org semantic rule, or guarantee rich results.
 - Relative identities require a correct `baseUrl`; Core and Svelte do not infer an origin from framework configuration.
 - Content helpers recognize documented conventional field names. Custom CMS models require explicit overrides or mappings.
-- Relative date expressions depend on the current clock unless a reference date is supplied.
+- Relative date expressions in builders and transforming schemas depend on the live clock; only direct `parseDate()` calls accept a reference date.
 - The Node audit entry point is not browser-safe.
 - In 1.x, public APIs are governed by strict Semantic Versioning; breaking changes are reserved for major versions.
 

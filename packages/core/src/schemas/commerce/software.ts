@@ -6,8 +6,7 @@ import { AggregateOfferSchema, OfferSchema } from './offer.js';
 import { AggregateRatingSchema, ReviewSchema } from './review.js';
 
 /**
- * Zod schema for Schema.org `SoftwareApplication`.
- * Follows Google Search Central Software App guidelines.
+ * Curated Zod schema for Schema.org `SoftwareApplication`.
  */
 export const SoftwareApplicationSchema = z
   .object({

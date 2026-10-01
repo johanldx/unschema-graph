@@ -1,9 +1,15 @@
 import {
+  AnswerSchema,
+  Article,
   defineSchema,
   FAQPage,
+  ImageObjectSchema,
   LocalBusinessSchema,
+  Organization,
+  PostalAddressSchema,
   SchemaTypeSchema,
   SchemaValidationError,
+  TypedEntitySchema,
   withAdditionalProperties,
   withAdditionalTypes,
 } from '@unschema-graph/core';
@@ -55,6 +61,36 @@ describe('core/defineSchema', () => {
       operatingSystem: 'Linux',
       version: '2.0.0',
     });
+  });
+
+  it('uses the shared entity ID validation for builders and nested schemas', () => {
+    for (const id of ['', '   ']) {
+      expect(() => Organization({ '@id': id, name: 'Acme' }), JSON.stringify(id)).toThrowError(
+        SchemaValidationError
+      );
+      expect(AnswerSchema.safeParse({ '@type': 'Answer', '@id': id, text: 'Answer' }).success).toBe(
+        false
+      );
+      expect(
+        ImageObjectSchema.safeParse({ '@type': 'ImageObject', '@id': id, url: '/image.jpg' })
+          .success
+      ).toBe(false);
+      expect(PostalAddressSchema.safeParse({ '@type': 'PostalAddress', '@id': id }).success).toBe(
+        false
+      );
+      expect(TypedEntitySchema.safeParse({ '@type': 'Thing', '@id': id }).success).toBe(false);
+    }
+
+    for (const id of [
+      '#organization',
+      '/about#organization',
+      'https://example.com/#organization',
+      'urn:example:organization',
+    ]) {
+      expect(Organization({ '@id': id, name: 'Acme' })['@id']).toBe(id);
+    }
+
+    expect(Organization({ '@id': ' #organization ', name: 'Acme' })['@id']).toBe('#organization');
   });
 
   it('protects builder-owned metadata in the additional-properties escape hatch', () => {
@@ -127,6 +163,21 @@ describe('core/defineSchema', () => {
     expect(SchemaTypeSchema.parse(['Thing', 'Thing', 'Product'])).toEqual(['Thing', 'Product']);
     expect(SchemaTypeSchema.safeParse([]).success).toBe(false);
     expect(() => withAdditionalTypes(app, [''])).toThrow();
+  });
+
+  it('keeps Article as the primary type while deduplicating additional types stably', () => {
+    const article = Article({ headline: 'Typed article' });
+
+    expect(withAdditionalTypes(article, ['CreativeWork'])['@type']).toEqual([
+      'Article',
+      'CreativeWork',
+    ]);
+    expect(withAdditionalTypes(article, ['Article'])['@type']).toEqual(['Article']);
+    expect(withAdditionalTypes(article, ['CreativeWork', 'Thing'])['@type']).toEqual([
+      'Article',
+      'CreativeWork',
+      'Thing',
+    ]);
   });
 
   it('rejects unknown properties in exported and nested built-in schemas', () => {

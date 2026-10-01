@@ -216,6 +216,40 @@ header.header {
   }
 }
 
+@media (max-width: 50rem) {
+  :root[data-has-sidebar] header.header {
+    padding-inline-end: calc(24px + var(--sl-nav-gap) + var(--sl-menu-button-size)) !important;
+  }
+
+  button.sl-menu-button {
+    top: 10px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-height: 44px;
+    padding: 0.7rem !important;
+    border: 1px solid var(--ug-line) !important;
+    border-radius: 8px !important;
+    background: var(--ug-paper-raised) !important;
+    color: var(--ug-graphite) !important;
+    box-shadow: none !important;
+  }
+
+  button.sl-menu-button:has(~ :popover-open) {
+    background: var(--ug-pastel-lavender) !important;
+    color: var(--ug-pastel-lavender-ink) !important;
+  }
+}
+
+@media (max-width: 30rem) {
+  header.header {
+    padding-inline: 12px !important;
+  }
+
+  :root[data-has-sidebar] header.header {
+    padding-inline-end: calc(12px + var(--sl-nav-gap) + var(--sl-menu-button-size)) !important;
+  }
+}
+
 /* =========================================================================
    SEARCH MODAL POPUP POSITIONING
    Displays in the horizontal middle, shifted down from the top (cmd-k style)

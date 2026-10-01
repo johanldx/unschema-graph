@@ -40,7 +40,7 @@ type ProfilePageOutput = SchemaOutput<typeof ProfilePageSchema, 'ProfilePage'>;
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
-| `mainEntity` | object | Oui | — |
+| `mainEntity` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Oui | — |
 | `name` | string | Non | — |
 | `url` | string | Non | non-empty |
 | `description` | string | Non | — |

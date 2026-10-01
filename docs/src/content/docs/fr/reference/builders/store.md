@@ -51,8 +51,6 @@ type StoreOutput = SchemaOutput<typeof LocalBusinessSchema, 'Store'>;
 | `currenciesAccepted` | string | Non | — |
 | `paymentAccepted` | string | Non | — |
 | `sameAs` | string \| Array<string> | Non | non-empty |
-| `servesCuisine` | string \| Array<string> | Non | — |
-| `menu` | string | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

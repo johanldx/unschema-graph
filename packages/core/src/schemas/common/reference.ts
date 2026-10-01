@@ -1,5 +1,8 @@
 import { z } from 'zod';
+import { EntityIdSchema } from '../../core/entityId.js';
 import { SchemaTypeSchema } from '../../core/schemaType.js';
+
+export { EntityIdSchema } from '../../core/entityId.js';
 
 /**
  * Checks if a string looks like an ID reference (fragment, relative URL, or absolute URI).
@@ -11,13 +14,9 @@ export function isIdReference(str: string): boolean {
     value.startsWith('/') ||
     value.startsWith('./') ||
     value.startsWith('../') ||
-    value.includes('/') ||
     /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value)
   );
 }
-
-/** Zod schema for a non-empty JSON-LD entity identifier. */
-export const EntityIdSchema = z.string().trim().min(1, 'Entity ID cannot be empty');
 
 /**
  * Zod schema matching an explicit ID reference object `{ '@id': string }`.
@@ -35,7 +34,7 @@ export const IdObjectSchema = z
 export const TypedEntitySchema = z
   .object({
     '@type': SchemaTypeSchema,
-    '@id': z.string().min(1).optional(),
+    '@id': EntityIdSchema.optional(),
   })
   // Intentional extension point for custom Schema.org entities used in relationships.
   .passthrough();

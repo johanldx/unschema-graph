@@ -5,17 +5,16 @@ import { IsoDateSchema } from '../../core/temporal.js';
 import { PostalAddressSchema } from '../common/address.js';
 import { ContactPointSchema } from '../common/contact.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { EntityReferenceSchema } from '../common/reference.js';
+import { EntityIdSchema, EntityReferenceSchema } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 
 /**
- * Zod schema for Schema.org `Organization`.
- * Validates properties according to Google Search Central Logo and Organization guidelines.
+ * Curated Zod schema for Schema.org `Organization`.
  */
 export const OrganizationSchema = z
   .object({
     '@type': SchemaTypeSchema.optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     name: z.string().min(1, 'Property "name" is required for Organization'),
     legalName: z.string().optional(),
     url: RelativeOrAbsoluteUrlSchema.optional(),

@@ -43,7 +43,7 @@ type JobPostingOutput = SchemaOutput<typeof JobPostingSchema, 'JobPosting'>;
 | `title` | string | Oui | non-empty |
 | `description` | string | Oui | non-empty |
 | `datePosted` | string \| number \| Date | Oui | non-empty |
-| `hiringOrganization` | unknown | Oui | — |
+| `hiringOrganization` | [Organization](/fr/reference/builders/organization/) \| EntityReference | Oui | — |
 | `jobLocation` | Place \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference \| string \| string \| Place \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Non | non-empty |
 | `validThrough` | string \| number \| Date | Non | non-empty |
 | `employmentType` | string \| Array<string> | Non | — |

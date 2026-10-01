@@ -80,9 +80,9 @@ When `buildJsonLdGraph` runs, it:
 
 ### Identifier String Shorthands
 
-A string is treated as a reference when it looks like a fragment (`#org`), a relative
-path (`/about#org`, `docs/page`), or an absolute URI with any valid scheme (`https:`,
-`urn:`, `mailto:`, `tel:`, and so on). It is then transformed into an
+A string is treated as a reference when it starts with a fragment (`#org`), an explicit
+path prefix (`/about#org`, `./docs/page`, `../docs/page`), or an absolute URI with any
+valid scheme (`https:`, `urn:`, `mailto:`, `tel:`, and so on). It is then transformed into an
 `{ "@id": "..." }` pointer:
 
 ```ts
@@ -95,6 +95,7 @@ Otherwise, when the relation declares a `fallbackType`, the string becomes an in
 named entity. Without a fallback type, it remains an `@id` shorthand:
 - `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
 - `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
+- `brand: 'AC/DC'` → `{ "@type": "Brand", "name": "AC/DC" }`
 
 
 ---

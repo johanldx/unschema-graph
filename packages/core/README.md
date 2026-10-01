@@ -103,6 +103,9 @@ console.log(`Scanned ${report.scannedFiles} HTML files with ${report.errors.leng
 | **TypeScript** | `>=5.0` | Strict mode recommended. |
 | **Browser** | Modern browsers | Root export is pure TypeScript/JavaScript with zero Node built-ins. |
 
+Built-in schemas model a curated subset of the Schema.org `30.1` vocabulary baseline;
+this is not a claim of complete vocabulary or Google rich-result coverage.
+
 ---
 
 ## Documentation

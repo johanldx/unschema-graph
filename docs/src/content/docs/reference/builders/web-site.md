@@ -46,7 +46,7 @@ type WebSiteOutput = SchemaOutput<typeof WebSiteSchema, 'WebSite'>;
 | `description` | string | No | — |
 | `inLanguage` | string | No | — |
 | `searchUrl` | string | No | non-empty |
-| `publisher` | unknown | No | — |
+| `publisher` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | No | — |
 | `potentialAction` | string \| object \| Array<string \| object> | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a

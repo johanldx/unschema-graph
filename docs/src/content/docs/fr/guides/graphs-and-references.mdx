@@ -80,9 +80,9 @@ Lorsque `buildJsonLdGraph` s'exécute :
 
 ### Raccourcis de chaînes d'identification
 
-Une chaîne est traitée comme référence lorsqu’elle ressemble à un fragment (`#org`),
-un chemin relatif (`/a-propos#org`, `docs/page`) ou une URI absolue avec n’importe quel
-schéma valide (`https:`, `urn:`, `mailto:`, `tel:`, etc.). Elle est alors transformée
+Une chaîne est traitée comme référence lorsqu’elle commence par un fragment (`#org`),
+un préfixe de chemin explicite (`/a-propos#org`, `./docs/page`, `../docs/page`) ou une URI
+absolue avec n’importe quel schéma valide (`https:`, `urn:`, `mailto:`, `tel:`, etc.). Elle est alors transformée
 en pointeur `{ "@id": "..." }` :
 
 ```ts
@@ -95,6 +95,7 @@ Sinon, lorsque la relation déclare un `fallbackType`, la chaîne devient une en
 nommée inline. Sans type de fallback, elle reste un raccourci `@id` :
 - `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
 - `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
+- `brand: 'AC/DC'` → `{ "@type": "Brand", "name": "AC/DC" }`
 
 
 ---

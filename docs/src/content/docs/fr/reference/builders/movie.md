@@ -42,8 +42,8 @@ type MovieOutput = SchemaOutput<typeof MovieSchema, 'Movie'>;
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
-| `director` | string \| object \| Array<string \| object> | Non | — |
-| `actor` | string \| object \| Array<string \| object> | Non | — |
+| `director` | [Person](/fr/reference/builders/person/) \| EntityReference \| Array<[Person](/fr/reference/builders/person/) \| EntityReference> | Non | — |
+| `actor` | [Person](/fr/reference/builders/person/) \| EntityReference \| Array<[Person](/fr/reference/builders/person/) \| EntityReference> | Non | — |
 | `dateCreated` | string \| number \| Date | Non | non-empty |
 | `duration` | string \| number \| DurationObject | Non | non-empty; greater than 0 |
 | `trailer` | [VideoObject](/fr/reference/builders/video-object/) | Non | — |
@@ -72,7 +72,10 @@ const entity = Movie({
 {
   "@type": "Movie",
   "name": "Journey to the Stars",
-  "director": "Ada Lovelace"
+  "director": {
+    "@type": "Person",
+    "name": "Ada Lovelace"
+  }
 }
 ```
 

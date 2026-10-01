@@ -43,7 +43,7 @@ import { Schema } from '@unschema-graph/svelte';
 | `item` | `SchemaOrgEntity \| null` | `undefined` | Raccourci pour transmettre une seule entité. |
 | `data` | `SchemaOrgEntity \| SchemaOrgEntity[] \| null` | `undefined` | Alias universel acceptant une entité unique ou un tableau. |
 | `baseUrl` | `string` | Voir priorité ci-dessous | Résout les valeurs `@id` relatives explicites par rapport à cette origine. |
-| `inLanguage` | `string` | Astro: `Astro.currentLocale`<br/>Svelte: `undefined` | Renseigne la langue par défaut pour les entités compatibles. |
+| `inLanguage` | `string` | Voir priorité ci-dessous | Renseigne la langue par défaut pour les entités compatibles. |
 | `pretty` | `boolean` | `false` | Active le formatage indenté du JSON pour le débogage. |
 | `indent` | `number` | `2` | Nombre d'espaces d'indentation si `pretty` est actif. |
 | `graph` | `boolean` | `true` | Enveloppe les entités dans un `@graph`. Si `false` et 1 seule entité, rendu à plat. |
@@ -52,13 +52,17 @@ import { Schema } from '@unschema-graph/svelte';
 
 ---
 
-## 3. Priorité de résolution de la Base URL
+## 3. Priorités de résolution
 
 Lors de la résolution des identifiants relatifs (`#organization`, `/articles/guide#article`) :
 
-1. **Composant Astro :** prop `baseUrl` → `Astro.site` → configuration globale. L'intégration Astro écrit son option `baseUrl` dans cette configuration globale ou utilise `config.site` lorsque l'option est absente.
-2. **Composant Svelte :** uniquement la prop `baseUrl`. Il ne lit pas automatiquement la configuration globale du Core.
+1. **Composant Astro :** prop `baseUrl` → configuration intégration/globale → repli `Astro.site`. L’intégration Astro écrit son option `baseUrl` dans cette configuration globale ou y écrit `config.site` lorsque l’option est absente.
+2. **Composant Svelte :** prop `baseUrl` → configuration globale.
 3. **API Core :** la valeur `baseUrl` transmise dans `GraphOptions`. `getGlobalConfig()` reste accessible au code de l'application, mais `buildJsonLdGraph()` ne la lit pas automatiquement.
+
+Pour l’enrichissement linguistique, la valeur `inLanguage` déjà présente sur une entité est
+toujours conservée. Sinon, Astro utilise la prop du composant, puis `Astro.currentLocale`, puis le
+défaut intégration/global. Svelte utilise la prop du composant, puis le défaut global.
 
 ---
 

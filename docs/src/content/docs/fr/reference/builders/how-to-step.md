@@ -39,7 +39,7 @@ type HowToStepOutput = SchemaOutput<typeof HowToStepSchema, 'HowToStep'>;
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `name` | string | Non | — |
 | `text` | string | Oui | non-empty |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) | Non | non-empty |

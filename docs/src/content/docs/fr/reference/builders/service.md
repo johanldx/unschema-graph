@@ -41,7 +41,7 @@ type ServiceOutput = SchemaOutput<typeof ServiceSchema, 'Service'>;
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
-| `provider` | unknown | Non | — |
+| `provider` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| [LocalBusiness](/fr/reference/builders/local-business/) \| EntityReference | Non | — |
 | `serviceType` | string | Non | — |
 | `description` | string | Non | — |
 | `areaServed` | string \| object \| Array<string \| object> | Non | non-empty; minimum items: 1 |

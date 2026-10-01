@@ -37,19 +37,21 @@ structured data; `1.0` will not turn it into a general-purpose SEO framework.
 | --- | --- | --- | --- |
 | Core | Node `>=22.12.0`, Zod `^4.6.0` | Framework-neutral | Browser-safe root export; `core/audit` is Node-only. |
 | Astro | Astro `^5.0.0 || ^6.0.0 || ^7.0.0`, Node `>=22.12.0` | Static and SSR | Component adds no client JavaScript. Integration supplies build/dev defaults. |
-| Svelte | Svelte `^5.0.0`, Node `>=22.12.0` for tooling | SSR and reactive client navigation | Native runes component using `svelte:head`. |
-| SvelteKit | Svelte 5-compatible releases | SSR, prerendering, client navigation | No separate adapter; use the Svelte package. |
-| Schema.org | Baseline `28.1` (`SCHEMA_ORG_BASELINE`) | Vocabulary definition | Official vocabulary version target for all built-in entity builders. |
+| Svelte | Svelte `^5.15.0`, Node `>=22.12.0` for tooling | SSR and reactive client navigation | Native runes component using `svelte:head`; the lower bound is tested from the packed package. |
+| SvelteKit | Representative current `2.x` consumer fixture | SSR, prerendering, client navigation | No independent peer range or adapter is promised; use the Svelte package. |
+| Schema.org | Baseline `30.1` (`SCHEMA_ORG_BASELINE`) | Vocabulary definition | Built-in schemas model a curated subset of this vocabulary, not the complete vocabulary. |
 | Zod | `^4.6.0` | Runtime validation | Peer dependency of Core. |
 
-The repository currently tests with Astro 7.3, Svelte 5, TypeScript 6 and Zod 4.6.
-That records the development environment; peer ranges above define package acceptance.
+CI runs on Node `22.12.0`. Packed-package fixtures install the exact boundary/current
+pairs Astro `5.0.0`, `6.0.0`, and `7.3.5`; Svelte `5.15.0` and `5.57.1`; and Zod
+`4.6.0` and `4.6.5`. npm consumer fixtures additionally exercise Core with current Zod
+and Astro `7.3.5`. The peer ranges above remain the package acceptance contract.
 
 ### Temporal, dates, and timezone policy
 
 - **Pure dates (`YYYY-MM-DD`)**: preserved as pure date strings without time or timezone conversion.
 - **Explicit datetimes (`YYYY-MM-DDTHH:mm:ssZ` or with offset `+02:00`)**: preserved strictly with their explicit offset to respect author intent.
-- **Relative expressions (`today`, `tomorrow`, `+30d`)**: evaluated at execution time; in CI or unit tests, pass a fixed reference date to ensure deterministic builds.
+- **Relative expressions (`today`, `tomorrow`, `+30d`)**: evaluated against the live execution-time clock by builders, `IsoDateSchema`, and `formatIsoDate()`. Only direct `parseDate(input, referenceDate)` calls accept a fixed reference. Use explicit ISO values in builder input for reproducible builds.
 
 The Node `>=22.12.0` floor is deliberate. At the v1 compatibility freeze, Node 22 is the
 oldest maintained LTS line and is exercised by both CI and the published-package fixtures.
@@ -115,7 +117,7 @@ context graph       baseUrl     inLanguage  debug
 
 `data`, `item` and `items` are supported aliases. When several are provided, their
 entities are combined in that order. In Astro, an explicit `baseUrl` takes precedence
-over `Astro.site`, which takes precedence over the global Core configuration.
+over the integration/global default, with `Astro.site` as the final fallback.
 
 The Svelte-specific contract includes `Schema` and the complete Core re-export. Its
 `<Schema />` component accepts the shared props (`data`, `item`, `items`, `pretty`,
@@ -127,8 +129,8 @@ and should not be imported directly. Always rely on the documented public surfac
 
 ## Semantic Versioning policy in `1.x`
 
-> **Version 0.9.0 — v1 Candidate**
-> Release `0.9.0` serves as the official release candidate leading to 1.0.0. The public API surface is frozen and governed under the following SemVer rules.
+> **Version 0.9.0 — v1 stabilization candidate**
+> Release `0.9.0` is the pre-v1 stabilization release. The actual Release Candidate is `1.0.0-rc.1`, followed by stable `1.0.0`; breaking corrections can therefore still occur before the RC contract is frozen.
 
 - **PATCH** fixes a defect without removing an API or changing documented valid input
   into invalid input.

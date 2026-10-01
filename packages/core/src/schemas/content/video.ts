@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema, IsoDurationSchema } from '../../core/temporal.js';
 import { ImageUrlOrObject } from '../common/image.js';
+import { EntityIdSchema } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../common/url.js';
 
 /**
@@ -10,7 +11,7 @@ import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../common/url.js';
 export const ClipSchema = z
   .object({
     '@type': z.literal('Clip').default('Clip').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     name: z.string().min(1, 'Clip name is required'),
     startOffset: z.number().nonnegative(),
     endOffset: z.number().positive(),
@@ -19,8 +20,7 @@ export const ClipSchema = z
   .strict();
 
 /**
- * Zod schema for Schema.org `VideoObject`.
- * Follows Google Search Central Video structured data specifications.
+ * Curated Zod schema for Schema.org `VideoObject`.
  */
 export const VideoObjectSchema = z
   .object({

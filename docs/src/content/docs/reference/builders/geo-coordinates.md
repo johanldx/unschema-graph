@@ -39,7 +39,7 @@ type GeoCoordinatesOutput = SchemaOutput<typeof GeoCoordinatesSchema, 'GeoCoordi
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `latitude` | number \| string | Yes | — |
 | `longitude` | number \| string | Yes | — |
 | `elevation` | number \| string | No | — |

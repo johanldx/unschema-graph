@@ -43,7 +43,7 @@ type DatasetOutput = SchemaOutput<typeof DatasetSchema, 'Dataset'>;
 | `name` | string | Yes | non-empty |
 | `description` | string | Yes | non-empty |
 | `url` | string | No | non-empty |
-| `creator` | string \| object \| Array<string \| object> | No | — |
+| `creator` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<[Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | No | — |
 | `distribution` | [DataDownload](/reference/builders/data-download/) \| Array<[DataDownload](/reference/builders/data-download/)> | No | — |
 | `license` | string | No | non-empty |
 | `keywords` | string \| Array<string> | No | — |

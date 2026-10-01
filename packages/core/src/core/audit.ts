@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { isSameDocumentReference, resolveReferenceId } from './referenceResolution.js';
 
 export type AuditDiagnosticCode =
   | 'empty-script'
@@ -55,6 +56,25 @@ function extractJsonLdBlocks(html: string): string[] {
   return blocks;
 }
 
+function extractCanonicalUrl(html: string): string | undefined {
+  const linkTags = html.match(/<link\b[^>]*>/gi) ?? [];
+  for (const tag of linkTags) {
+    const rel = tag.match(/\brel\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+    const relValue = rel?.[1] ?? rel?.[2] ?? rel?.[3];
+    if (!relValue?.toLowerCase().split(/\s+/).includes('canonical')) continue;
+
+    const href = tag.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+    return href?.[1] ?? href?.[2] ?? href?.[3];
+  }
+  return undefined;
+}
+
+function comparableId(id: string, documentUrl?: string): string {
+  return documentUrl && isSameDocumentReference(id, documentUrl)
+    ? resolveReferenceId(id, documentUrl)
+    : id;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -102,6 +122,7 @@ export function auditHtmlContent(html: string, filePath = 'index.html'): AuditCo
   const warnings: AuditDiagnostic[] = [];
   const rawBlocks = extractJsonLdBlocks(html);
   const rootEntities: Record<string, unknown>[] = [];
+  const documentUrl = extractCanonicalUrl(html);
   let blocks = 0;
   let entities = 0;
 
@@ -211,7 +232,8 @@ export function auditHtmlContent(html: string, filePath = 'index.html'): AuditCo
       if (idOnlyReference) {
         references.push({ id, path: currentPath });
       } else {
-        const previous = definitions.get(id);
+        const definitionId = comparableId(id, documentUrl);
+        const previous = definitions.get(definitionId);
         if (previous) {
           const conflictingKeys = Object.keys(value)
             .filter((key) => key !== '@id' && key in previous.node)
@@ -242,7 +264,7 @@ export function auditHtmlContent(html: string, filePath = 'index.html'): AuditCo
             });
           }
         } else {
-          definitions.set(id, { node: value, path: currentPath, file: filePath });
+          definitions.set(definitionId, { node: value, path: currentPath, file: filePath });
         }
       }
     }
@@ -261,13 +283,8 @@ export function auditHtmlContent(html: string, filePath = 'index.html'): AuditCo
 
   let resolvedLocalReferences = 0;
   for (const reference of references) {
-    const isLocal =
-      reference.id.startsWith('#') ||
-      reference.id.startsWith('/') ||
-      reference.id.startsWith('./') ||
-      reference.id.startsWith('../');
-    if (!isLocal) continue;
-    if (definitions.has(reference.id)) {
+    if (!isSameDocumentReference(reference.id, documentUrl)) continue;
+    if (definitions.has(comparableId(reference.id, documentUrl))) {
       resolvedLocalReferences++;
     } else {
       errors.push({

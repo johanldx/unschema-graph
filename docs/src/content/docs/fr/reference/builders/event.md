@@ -42,15 +42,15 @@ type EventOutput = SchemaOutput<typeof EventSchema, 'Event'>;
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
 | `startDate` | string \| number \| Date | Oui | non-empty |
-| `location` | string \| object | Oui | non-empty |
+| `location` | string \| Place \| VirtualLocation \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Oui | non-empty |
 | `endDate` | string \| number \| Date | Non | non-empty |
 | `duration` | string \| number \| DurationObject | Non | non-empty; greater than 0 |
 | `description` | string | Non | — |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
 | `eventStatus` | string | Non | — |
 | `eventAttendanceMode` | string | Non | — |
-| `organizer` | Array<unknown> | Non | — |
-| `performer` | Array<unknown> | Non | — |
+| `organizer` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference \| Array<[Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Non | — |
+| `performer` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference \| Array<[Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Non | — |
 | `offers` | [Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/) \| Array<[Offer](/fr/reference/builders/offer/) \| Aggregate[Offer](/fr/reference/builders/offer/)> | Non | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder

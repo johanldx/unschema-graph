@@ -9,6 +9,7 @@ description: Complete integration, builder, graph, and component configuration r
 interface SchemaGraphOptions {
   onError?: 'throw' | 'warn' | 'silent';
   baseUrl?: string;
+  inLanguage?: string;
 }
 ```
 
@@ -16,6 +17,7 @@ interface SchemaGraphOptions {
 | --- | --- | --- |
 | `onError` | `throw` for build, `warn` otherwise | Global builder validation behavior. |
 | `baseUrl` | Astro `site` | Canonical origin for relative identifiers and URLs. |
+| `inLanguage` | `undefined` | Default BCP-47 language tag used after any Astro route locale. |
 
 ```js
 schemaGraph({
@@ -66,13 +68,19 @@ interface SerializeOptions {
 ## Global configuration helpers
 
 `getGlobalConfig()`, `setGlobalConfig()`, and `resetGlobalConfig()` are exported for tooling and
-tests. Application code should normally configure behavior through `schemaGraph()` rather than
-mutating the module-level configuration directly.
+tests. This is mutable module-level convenience state, not a request-scoped configuration object.
+Application code should normally configure it once through `schemaGraph()` rather than mutate it
+directly. Builders read its validation default, and framework components read its URL and language
+defaults. `buildJsonLdGraph()` does not read it implicitly: pass graph options explicitly whenever
+the result must be independent of adapter state.
 
 ## Resolution precedence
 
 | Setting | Highest to lowest priority |
 | --- | --- |
 | Validation severity | builder call → integration → `throw` |
-| Base URL while rendering | component prop → `Astro.site` → integration |
-| Entity language | existing entity value → component prop → `Astro.currentLocale` |
+| Base URL in Astro | component prop → integration/global default → `Astro.site` fallback |
+| Entity language in Astro | existing entity value → component prop → `Astro.currentLocale` → integration/global default |
+| Base URL in Svelte | component prop → global default |
+| Entity language in Svelte | existing entity value → component prop → global default |
+| Core graph options | explicit `buildJsonLdGraph()` options only |

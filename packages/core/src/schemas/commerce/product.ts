@@ -27,7 +27,7 @@ const BrandSchema = entityRef({
 });
 
 /**
- * Zod schema for Schema.org `Product` based on Google Search Central guidelines.
+ * Curated Zod schema for Schema.org `Product`.
  */
 export const ProductSchema = z
   .object({

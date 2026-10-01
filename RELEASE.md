@@ -24,7 +24,7 @@ To guarantee maximum reliability and prevent premature breaking changes in the s
 [x] Documentation v1 & Onboarding journey (Step 23)
 [x] Backwards compatibility & 0.x migration tests (Step 24)
  ↓
-0.9.0 (Feature-complete stabilization release)
+0.9.0 (v1 stabilization candidate)
  ↓
 1.0.0-rc.1 (Release Candidate)
  ↓
@@ -52,8 +52,15 @@ This automated gate runs:
 1. **Linting & formatting check:** `biome check --error-on-warnings .`
 2. **Typecheck:** `pnpm run typecheck` across all 7 workspace packages.
 3. **Unit & integration test suites:** `vitest run` (24 suites, 224+ tests).
-4. **HTML output audit:** `unschema-graph audit examples/astro/dist --strict`.
-5. **Real-world tarball installation test:** `node scripts/test-published-packages.mjs` (packs actual `.tgz` archives and verifies consumption under Astro 5, 6, 7 and SvelteKit).
+4. **Package builds:** all three publishable packages are compiled.
+5. **Strict Astro output audit:** `pnpm run audit:strict` fails on warnings as well as errors.
+6. **Example verification:** the Core example is built and audited, and the Svelte example is built.
+7. **Documentation verification:** locale parity, recipe and compatibility checks, generated Markdown, and internal links are validated around the production docs build.
+8. **Real-world tarball installation test:** `node scripts/test-published-packages.mjs` packs actual `.tgz` archives and verifies consumption under Astro 5, 6, 7 and SvelteKit.
+
+For local development, `pnpm run audit` runs the same build and audit without `--strict`, so
+warnings remain visible without blocking iteration. CI and every release path share the
+`pnpm run verify` gate, whose Astro audit is strict.
 
 ---
 

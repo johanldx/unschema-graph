@@ -24,8 +24,7 @@ const JobLocationSchema = z.union([
 ]);
 
 /**
- * Zod schema for Schema.org `JobPosting`.
- * Conforms to Google for Jobs rich result specifications.
+ * Curated Zod schema for Schema.org `JobPosting`.
  */
 export const JobPostingSchema = z
   .object({

@@ -5,8 +5,8 @@ description: Upgrade guide, architectural evolutions, and migration patterns for
 
 `unschema-graph` 1.0 stabilizes the public API, introduces relational entity-object references, enforces strict Schema.org validation with Zod, and brings deterministic graph discovery.
 
-> **Note on Version 0.9.0 (v1 Release Candidate)**
-> Release **0.9.0** serves as the official feature-complete release candidate ahead of 1.0.0. It stabilizes the complete architecture and public API. If you are upgrading from an earlier pre-1.0 setup, this guide covers all architectural evolutions and best practices.
+> **Version 0.9.0 — v1 stabilization candidate**
+> Release **0.9.0** is the pre-v1 stabilization release. The actual Release Candidate will be `1.0.0-rc.1`, followed by stable `1.0.0`. If you are upgrading from an earlier pre-1.0 setup, this guide covers the relevant architectural changes.
 
 ---
 
@@ -50,16 +50,34 @@ const graph = buildJsonLdGraph(webpage, {
 
 ### 3. Strict Schema.org Typing & Additional Properties
 
-All 51 builders enforce strict Schema.org properties. Unknown properties that do not exist on the Schema.org definition are rejected at build time.
+The curated built-in schemas are modeled against the Schema.org 30.1 vocabulary baseline and reject properties outside each library schema. This is not a claim of complete Schema.org coverage.
 
 If your CMS or API requires custom properties:
 - Use `withAdditionalProperties`:
   ```ts
   import { Article, withAdditionalProperties } from '@unschema-graph/core';
 
-  const CustomArticle = withAdditionalProperties(Article, ['customField']);
+  const article = Article({ headline: 'Hello World' });
+  const customArticle = withAdditionalProperties(article, { customField: 'value' });
   ```
 - Or define custom types with `defineSchema`.
+
+### 3.1. Schema.org 30.1 vocabulary corrections
+
+The 0.9 contract replaces the superseded `Restaurant.menu` property with `hasMenu`:
+
+```ts
+const restaurant = Restaurant({
+  name: 'Chez Pierre',
+  address: '15 Boulevard Saint-Germain, Paris',
+  hasMenu: '/menu',
+});
+```
+
+`servesCuisine` and `hasMenu` are accepted by `Restaurant`, not by the generic
+`LocalBusiness`, `Store`, or lodging builders. `FAQPage.questions` and
+`WebSite.searchUrl` remain documented input conveniences: they emit the current
+`mainEntity` and `potentialAction` vocabulary respectively.
 
 ### 4. Structured Graph Diagnostics (`onDiagnostic`)
 

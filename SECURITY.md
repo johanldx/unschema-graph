@@ -2,13 +2,13 @@
 
 ## Supported Versions
 
-Only the latest active major and minor releases of `@unschema-graph` packages receive security updates:
+Only the current `0.9.x` stabilization line receives security updates. Support for `1.x`
+will begin when the first `1.x` release is published.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.x     | :white_check_mark: |
-| 0.2.x   | :white_check_mark: |
-| < 0.2   | :x:                |
+| 0.9.x   | :white_check_mark: |
+| < 0.9   | :x:                |
 
 ## Reporting a Vulnerability
 

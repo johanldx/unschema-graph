@@ -37,19 +37,21 @@ périmètre reste les données structurées : `1.0` n’en fera pas un framework
 | --- | --- | --- | --- |
 | Core | Node `>=22.12.0`, Zod `^4.6.0` | Indépendant du framework | Export racine compatible navigateur ; `core/audit` requiert Node. |
 | Astro | Astro `^5.0.0 || ^6.0.0 || ^7.0.0`, Node `>=22.12.0` | Statique et SSR | Aucun JavaScript client pour le composant. L’intégration fournit les défauts build/dev. |
-| Svelte | Svelte `^5.0.0`, Node `>=22.12.0` pour l’outillage | SSR et navigation réactive | Composant runes natif via `svelte:head`. |
-| SvelteKit | Versions compatibles Svelte 5 | SSR, prérendu et navigation cliente | Aucun adaptateur séparé ; utilisez le package Svelte. |
-| Schema.org | Baseline `28.1` (`SCHEMA_ORG_BASELINE`) | Définition du vocabulaire | Version officielle du vocabulaire Schema.org ciblée par tous les builders intégrés. |
+| Svelte | Svelte `^5.15.0`, Node `>=22.12.0` pour l’outillage | SSR et navigation réactive | Composant runes natif via `svelte:head` ; la borne basse est testée depuis le paquet généré. |
+| SvelteKit | Fixture représentative d’un consommateur `2.x` courant | SSR, prérendu et navigation cliente | Aucun peer range indépendant ni adaptateur n’est promis ; utilisez le package Svelte. |
+| Schema.org | Baseline `30.1` (`SCHEMA_ORG_BASELINE`) | Définition du vocabulaire | Les schémas intégrés modélisent un sous-ensemble sélectionné, pas tout le vocabulaire. |
 | Zod | `^4.6.0` | Validation à l’exécution | Peer dependency de Core. |
 
-Le dépôt teste actuellement Astro 7.3, Svelte 5, TypeScript 6 et Zod 4.6. Cela décrit
-l’environnement de développement ; les peer ranges ci-dessus définissent l’acceptation.
+La CI utilise Node `22.12.0`. Les fixtures des paquets générés installent exactement Astro
+`5.0.0`, `6.0.0` et `7.3.5`, Svelte `5.15.0` et `5.57.1`, ainsi que Zod `4.6.0` et
+`4.6.5`. Des consommateurs npm vérifient en plus Core avec le Zod courant et Astro
+`7.3.5`. Les peer ranges ci-dessus restent le contrat d’acceptation des paquets.
 
 ### Politique temporelle, dates et fuseaux horaires
 
 - **Dates pures (`YYYY-MM-DD`)** : préservées sous forme de chaînes de dates pures sans conversion d'heure ni décalage de fuseau horaire.
 - **Horodatages explicites (`YYYY-MM-DDTHH:mm:ssZ` ou avec décalage `+02:00`)** : strictement préservés avec leur offset explicite pour respecter l'intention de l'auteur.
-- **Expressions relatives (`today`, `tomorrow`, `+30d`)** : évaluées à l'exécution du build ; en CI ou tests unitaires, fournissez une date de référence fixe pour garantir des builds déterministes.
+- **Expressions relatives (`today`, `tomorrow`, `+30d`)** : les builders, `IsoDateSchema` et `formatIsoDate()` les évaluent avec l’horloge réelle au moment de l’exécution. Seul un appel direct à `parseDate(input, referenceDate)` accepte une référence fixe. Utilisez des valeurs ISO explicites dans les builders pour des builds reproductibles.
 
 Le minimum Node `>=22.12.0` est volontaire. Au gel de compatibilité de la v1, Node 22 est
 la plus ancienne ligne LTS encore maintenue et elle est testée par la CI ainsi que par les
@@ -115,7 +117,7 @@ context graph       baseUrl     inLanguage  debug
 
 `data`, `item` et `items` sont des alias pris en charge. Si plusieurs sont fournis, leurs
 entités sont combinées dans cet ordre. Dans Astro, un `baseUrl` explicite est prioritaire
-sur `Astro.site`, lui-même prioritaire sur la configuration globale du Core.
+sur le défaut intégration/global, avec `Astro.site` comme dernier repli.
 
 Le contrat propre à Svelte comprend `Schema` et le réexport complet du Core. Son composant
 `<Schema />` accepte les props partagées (`data`, `item`, `items`, `pretty`, `indent`,
@@ -127,8 +129,8 @@ et ne doivent pas être importés directement. Fiez-vous toujours à la surface 
 
 ## Politique de versionnage sémantique sous `1.x`
 
-> **Version 0.9.0 — Candidate v1**
-> La version `0.9.0` constitue la version candidate officielle préparant la v1.0.0. L'API publique est d'ores et déjà gelée et régie par les règles de versionnage sémantique ci-dessous.
+> **Version 0.9.0 — candidate de stabilisation v1**
+> La version `0.9.0` est la publication de stabilisation pré-v1. La véritable Release Candidate sera `1.0.0-rc.1`, puis viendra la version stable `1.0.0` ; des corrections incompatibles restent donc possibles avant le gel du contrat RC.
 
 - **PATCH** corrige un défaut sans supprimer d’API ni rendre invalide une entrée valide
   documentée.

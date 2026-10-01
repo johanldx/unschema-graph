@@ -482,7 +482,7 @@ export const builderGroups = [
       {
         name: 'Restaurant',
         slug: 'restaurant',
-        schema: 'LocalBusinessSchema',
+        schema: 'RestaurantSchema',
         required: ['name', 'address'],
         optional: [
           'image',
@@ -495,10 +495,10 @@ export const builderGroups = [
           'currenciesAccepted',
           'sameAs',
           'servesCuisine',
-          'menu',
+          'hasMenu',
         ],
-        input: { ...businessInput, servesCuisine: 'French' },
-        summary: 'Creates a Restaurant using the LocalBusiness schema.',
+        input: { ...businessInput, servesCuisine: 'French', hasMenu: '/menu' },
+        summary: 'Creates a Restaurant with food-establishment properties.',
       },
       {
         name: 'Store',

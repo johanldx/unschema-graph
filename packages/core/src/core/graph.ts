@@ -1,4 +1,11 @@
 import type { SchemaDiagnostic } from '../types/index.js';
+import { isSameDocumentReference, resolveReferenceId } from './referenceResolution.js';
+
+const PROTOTYPE_SENSITIVE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function isPrototypeSensitiveKey(key: string): boolean {
+  return PROTOTYPE_SENSITIVE_KEYS.has(key);
+}
 
 /** Strategy applied when several graph nodes share the same resolved `@id`. */
 export type DuplicateStrategy = 'merge' | 'error' | 'first' | 'last';
@@ -83,37 +90,7 @@ export class DuplicateEntityError extends Error {
  * ```
  */
 export function resolveId(id: string, baseUrl?: string): string {
-  if (!baseUrl || !id || typeof id !== 'string') {
-    return id;
-  }
-
-  const trimmed = id.trim();
-
-  // If already absolute under any URI scheme, return as-is.
-  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
-    return trimmed;
-  }
-
-  try {
-    const base = baseUrl.trim();
-    const baseWithScheme = /^https?:\/\//i.test(base) ? base : `https://${base}`;
-    // For standalone fragment (#organization), normalize base URL to guarantee consistent trailing slash
-    // so baseUrl "https://example.com/docs" and "https://example.com/docs/" yield the same canonical ID.
-    const resolvedUrl = trimmed.startsWith('#')
-      ? new URL(trimmed, baseWithScheme.endsWith('/') ? baseWithScheme : `${baseWithScheme}/`)
-      : new URL(trimmed, baseWithScheme);
-
-    return resolvedUrl.href;
-  } catch {
-    const cleanBase = baseUrl.trim().replace(/\/+$/, '');
-    if (trimmed.startsWith('#')) {
-      return `${cleanBase}/${trimmed}`;
-    }
-    if (trimmed.startsWith('/')) {
-      return `${cleanBase}${trimmed}`;
-    }
-    return `${cleanBase}/${trimmed}`;
-  }
+  return resolveReferenceId(id, baseUrl);
 }
 
 /**
@@ -148,6 +125,9 @@ export function resolveEntityIds<T>(obj: T, baseUrl?: string): T {
     const copy: Record<string, unknown> = {};
     copies.set(value, copy);
     for (const [key, child] of Object.entries(value)) {
+      if (isPrototypeSensitiveKey(key)) {
+        continue;
+      }
       copy[key] =
         key === '@id' && typeof child === 'string' && baseUrl
           ? resolveId(child, baseUrl)
@@ -235,9 +215,18 @@ function mergeEntities(
   existing: Record<string, unknown>,
   incoming: Record<string, unknown>
 ): Record<string, unknown> {
-  const merged: Record<string, unknown> = { ...existing };
+  const merged: Record<string, unknown> = {};
+
+  for (const [key, existingValue] of Object.entries(existing)) {
+    if (!isPrototypeSensitiveKey(key)) {
+      merged[key] = existingValue;
+    }
+  }
 
   for (const [key, incomingValue] of Object.entries(incoming)) {
+    if (isPrototypeSensitiveKey(key)) {
+      continue;
+    }
     if (!Object.hasOwn(merged, key) || merged[key] === undefined) {
       merged[key] = incomingValue;
       continue;
@@ -271,29 +260,6 @@ function mergeEntities(
 
 function isIdOnlyReference(value: Record<string, unknown>): value is { '@id': string } {
   return hasEntityId(value) && Object.keys(value).every((key) => key === '@id');
-}
-
-function isLocalReference(id: string, baseUrl?: string): boolean {
-  if (
-    id.startsWith('#') ||
-    id.startsWith('/') ||
-    id.startsWith('./') ||
-    id.startsWith('../') ||
-    !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(id)
-  ) {
-    return true;
-  }
-
-  if (!baseUrl || !/^https?:/i.test(id)) {
-    return false;
-  }
-
-  try {
-    const normalizedBase = /^https?:\/\//i.test(baseUrl) ? baseUrl : `https://${baseUrl}`;
-    return new URL(id).origin === new URL(normalizedBase).origin;
-  } catch {
-    return false;
-  }
 }
 
 function entityTypeLabel(entity: Record<string, unknown>): string {
@@ -440,7 +406,7 @@ export function buildJsonLdGraph(
     const normalized: Record<string, unknown> = {};
 
     for (const [childKey, childValue] of Object.entries(value)) {
-      if (childKey === '@context') {
+      if (childKey === '@context' || isPrototypeSensitiveKey(childKey)) {
         continue;
       }
       normalized[childKey] = normalizeValue(childValue, childKey);
@@ -464,7 +430,7 @@ export function buildJsonLdGraph(
     activeObjects.add(item);
     const entity: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(item)) {
-      if (key === '@context') {
+      if (key === '@context' || isPrototypeSensitiveKey(key)) {
         continue;
       }
       entity[key] = normalizeValue(value, key);
@@ -494,7 +460,7 @@ export function buildJsonLdGraph(
 
     if (isIdOnlyReference(value)) {
       const id = value['@id'];
-      if (isLocalReference(id, baseUrl) && !registeredIds.has(id)) {
+      if (isSameDocumentReference(id, baseUrl) && !registeredIds.has(id)) {
         onDiagnostic?.({
           code: 'broken-reference',
           severity: 'warning',

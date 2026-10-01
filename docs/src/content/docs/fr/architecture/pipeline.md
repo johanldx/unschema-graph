@@ -91,7 +91,9 @@ dépendez que des garanties d’identité, de résultat et de non-mutation.
 `parseDate()` accepte `Date`, timestamps, ISO et formes relatives documentées.
 `formatIsoDate()` normalise en ISO. `formatIsoDuration()` traite ISO, texte humain et
 objets durée ; `parseDurationToMs()`, `addDuration()` et `diffDuration()` calculent les
-durées. Fournissez une date de référence pour tester `today` de façon déterministe.
+durées. Une référence fixe ne s’applique qu’à un appel direct à `parseDate()` ; les builders
+et schémas de transformation utilisent l’horloge réelle. Utilisez une entrée ISO explicite
+pour une sortie reproductible.
 
 ## Sérialisation et modèle de menace
 

@@ -39,7 +39,7 @@ type QuestionOutput = SchemaOutput<typeof QuestionSchema, 'Question'>;
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
 | `acceptedAnswer` | object \| string | Oui | — |
 

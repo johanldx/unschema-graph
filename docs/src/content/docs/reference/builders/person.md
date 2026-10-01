@@ -39,7 +39,7 @@ type PersonOutput = SchemaOutput<typeof PersonSchema, 'Person'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `givenName` | string | No | — |
 | `familyName` | string | No | — |

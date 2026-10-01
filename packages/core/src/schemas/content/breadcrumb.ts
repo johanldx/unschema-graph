@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { EntityIdSchema } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 
 /**
@@ -8,7 +9,7 @@ import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 export const ListItemSchema = z
   .object({
     '@type': z.literal('ListItem').default('ListItem'),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     position: z.number().int().positive().optional(),
     name: z.string().min(1, 'Property "name" is required for Breadcrumb item'),
     item: RelativeOrAbsoluteUrlSchema.optional(),
@@ -34,7 +35,7 @@ const BreadcrumbItemInputSchema = z
 export const BreadcrumbListSchema = z
   .object({
     '@type': z.literal('BreadcrumbList').default('BreadcrumbList').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     itemListElement: z
       .array(z.union([ListItemSchema, BreadcrumbItemInputSchema]))
       .transform((elements) =>

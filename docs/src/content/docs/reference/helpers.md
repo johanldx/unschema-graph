@@ -51,6 +51,10 @@ description: Reference for graph, validation, temporal, serialization, content, 
 | `IsoDateSchema`, `IsoDurationSchema` | Reusable transforming Zod schemas. |
 | `DurationInput`, `DurationObject` | Public duration input types. |
 
+`referenceDate` controls only a direct `parseDate()` call. Relative values passed through
+builders, `IsoDateSchema`, or `formatIsoDate()` use the live execution-time clock; prefer
+explicit ISO input for reproducible output.
+
 ## Serialization
 
 | Export | Purpose |
@@ -67,7 +71,7 @@ description: Reference for graph, validation, temporal, serialization, content, 
 | `EntityIdReference` | Shape of an explicit `{ '@id': string }` relation pointer. |
 | `entityRef({ schemas, types?, fallbackType? })` | Creates the shared Zod relation schema used by built-in builders. |
 | `isIdReference(value)` | Detects fragment, path, HTTP(S), and URN reference strings. |
-| `EntityIdSchema` | Validates a non-empty JSON-LD entity identifier. |
+| `EntityIdSchema` | Trims and validates a non-empty JSON-LD entity identifier; whitespace-only IDs are rejected. |
 | `WebUrlSchema` | Validates an absolute HTTP(S) URL. |
 | `RelativeOrAbsoluteUrlSchema` | Validates an absolute URI or relative URL/path. |
 | `createEntityRef(schema, fallbackType?)` | Deprecated compatibility alias for `entityRef()`. |

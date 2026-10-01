@@ -45,6 +45,10 @@ if (!result.passed) {
 }
 ```
 
+When a page contains a canonical link element, the audit uses its `href` URL to validate
+fragment and absolute same-document `@id` references. An absolute reference to another path on
+the same origin is treated as external to the current graph.
+
 ---
 
 ## Auditing Raw HTML Strings

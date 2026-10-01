@@ -16,7 +16,7 @@ function createIo(cwd: string) {
 }
 
 describe('audit CLI', () => {
-  it('returns stable text and JSON output with CI exit codes', () => {
+  it('keeps warnings non-fatal normally but fails them in strict release mode', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'unschema-audit-cli-'));
     try {
       const dist = path.join(root, 'dist');
@@ -71,6 +71,31 @@ describe('audit CLI', () => {
       const invalid = createIo(root);
       expect(runAuditCli(['audit', '--unknown'], invalid.io)).toBe(2);
       expect(invalid.stderr.join('\n')).toContain('Unknown option: --unknown');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails for a missing absolute reference to the canonical document', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'unschema-audit-canonical-'));
+    try {
+      const dist = path.join(root, 'dist');
+      fs.mkdirSync(dist);
+      fs.writeFileSync(
+        path.join(dist, 'index.html'),
+        `<link rel="canonical" href="https://example.com/">
+        <script type="application/ld+json">{
+          "@context":"https://schema.org",
+          "@type":"WebSite",
+          "publisher":{"@id":"https://example.com/#missing"}
+        }</script>`
+      );
+
+      const output = createIo(root);
+      expect(runAuditCli(['audit', 'dist'], output.io)).toBe(1);
+      expect(output.stderr.join('\n')).toContain(
+        'Broken @id reference: https://example.com/#missing'
+      );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

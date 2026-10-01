@@ -39,7 +39,7 @@ type OrganizationOutput = SchemaOutput<typeof OrganizationSchema, 'Organization'
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `legalName` | string | No | — |
 | `url` | string | No | non-empty |

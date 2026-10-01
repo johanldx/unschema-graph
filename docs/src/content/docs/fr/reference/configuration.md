@@ -9,6 +9,7 @@ description: Référence complète de la configuration de l’intégration, des 
 interface SchemaGraphOptions {
   onError?: 'throw' | 'warn' | 'silent';
   baseUrl?: string;
+  inLanguage?: string;
 }
 ```
 
@@ -16,6 +17,7 @@ interface SchemaGraphOptions {
 | --- | --- | --- |
 | `onError` | `throw` au build, `warn` sinon | Comportement global de validation. |
 | `baseUrl` | Paramètre Astro `site` | Origine canonique des identifiants et URL relatifs. |
+| `inLanguage` | `undefined` | Langue BCP-47 par défaut, utilisée après l’éventuelle locale de route Astro. |
 
 ```js
 schemaGraph({
@@ -66,13 +68,20 @@ interface SerializeOptions {
 ## Helpers de configuration globale
 
 `getGlobalConfig()`, `setGlobalConfig()` et `resetGlobalConfig()` sont exportés pour l’outillage et
-les tests. Le code applicatif devrait normalement utiliser `schemaGraph()` plutôt que modifier cet
-état de module directement.
+les tests. Il s’agit d’un état mutable au niveau du module, fourni par commodité, et non d’une
+configuration isolée par requête. Le code applicatif devrait normalement le configurer une fois via
+`schemaGraph()` plutôt que le modifier directement. Les builders y lisent le mode de validation et
+les composants de framework les valeurs par défaut d’URL et de langue. `buildJsonLdGraph()` ne le
+lit pas implicitement : transmettez explicitement les options du graphe lorsque le résultat doit
+rester indépendant de l’état de l’adaptateur.
 
 ## Ordres de priorité
 
 | Paramètre | Priorité décroissante |
 | --- | --- |
 | Niveau de validation | appel du builder → intégration → `throw` |
-| URL de base au rendu | prop du composant → `Astro.site` → intégration |
-| Langue de l’entité | valeur existante → prop du composant → `Astro.currentLocale` |
+| URL de base dans Astro | prop du composant → défaut intégration/global → repli `Astro.site` |
+| Langue de l’entité dans Astro | valeur existante → prop du composant → `Astro.currentLocale` → défaut intégration/global |
+| URL de base dans Svelte | prop du composant → défaut global |
+| Langue de l’entité dans Svelte | valeur existante → prop du composant → défaut global |
+| Options du graphe Core | uniquement les options explicites de `buildJsonLdGraph()` |

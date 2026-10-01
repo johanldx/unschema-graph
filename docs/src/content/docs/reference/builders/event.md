@@ -42,15 +42,15 @@ type EventOutput = SchemaOutput<typeof EventSchema, 'Event'>;
 | `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `startDate` | string \| number \| Date | Yes | non-empty |
-| `location` | string \| object | Yes | non-empty |
+| `location` | string \| Place \| VirtualLocation \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | Yes | non-empty |
 | `endDate` | string \| number \| Date | No | non-empty |
 | `duration` | string \| number \| DurationObject | No | non-empty; greater than 0 |
 | `description` | string | No | — |
 | `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | No | non-empty |
 | `eventStatus` | string | No | — |
 | `eventAttendanceMode` | string | No | — |
-| `organizer` | Array<unknown> | No | — |
-| `performer` | Array<unknown> | No | — |
+| `organizer` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<[Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | No | — |
+| `performer` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<[Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | No | — |
 | `offers` | [Offer](/reference/builders/offer/) \| Aggregate[Offer](/reference/builders/offer/) \| Array<[Offer](/reference/builders/offer/) \| Aggregate[Offer](/reference/builders/offer/)> | No | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a

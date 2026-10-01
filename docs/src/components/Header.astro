@@ -5,6 +5,7 @@ import SiteTitle from 'virtual:starlight/components/SiteTitle';
 const pathname = Astro.url.pathname;
 const isFr = pathname.startsWith('/fr/') || pathname === '/fr';
 const localePrefix = isFr ? '/fr' : '';
+const { hasSidebar } = Astro.locals.starlightRoute;
 
 const links = [
   {
@@ -56,7 +57,7 @@ try {
 }
 ---
 
-<div class="topbar">
+<div class:list={['topbar', { 'has-sidebar': hasSidebar }]}>
   <div class="header-left">
     <div class="brand">
       <SiteTitle />
@@ -186,6 +187,26 @@ try {
         </a>
       </div>
     </div>
+
+    {!hasSidebar && (
+      <details class="mobile-nav">
+        <summary aria-label={isFr ? 'Ouvrir la navigation' : 'Open navigation'}>
+          <svg class="menu-open" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+          <svg class="menu-close" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18"></path>
+          </svg>
+        </summary>
+        <nav class="mobile-nav-panel" aria-label={isFr ? 'Navigation mobile' : 'Mobile navigation'}>
+          {links.map((link) => (
+            <a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </details>
+    )}
   </div>
 </div>
 
@@ -263,13 +284,15 @@ if (starsEl) {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  flex-shrink: 0;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .search {
@@ -278,6 +301,7 @@ if (starsEl) {
   min-width: 8.5rem;
   max-width: 14rem;
   flex-grow: 0;
+  flex-shrink: 1;
 }
 
 .header-right {
@@ -325,6 +349,94 @@ if (starsEl) {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+}
+
+.mobile-nav {
+  position: relative;
+  display: none;
+  flex: 0 0 auto;
+}
+
+.mobile-nav summary {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--ug-line);
+  border-radius: 8px;
+  background: var(--ug-paper-raised);
+  color: var(--ug-graphite);
+  cursor: pointer;
+  list-style: none outside none;
+  place-items: center;
+}
+
+.mobile-nav summary::marker {
+  display: none;
+  content: "";
+}
+
+.mobile-nav summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-nav summary:hover,
+.mobile-nav summary:focus-visible {
+  border-color: var(--ug-violet);
+  color: var(--ug-violet-strong);
+}
+
+.mobile-nav summary:focus-visible {
+  outline: 2px solid var(--ug-violet);
+  outline-offset: 2px;
+}
+
+.mobile-nav svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.mobile-nav .menu-close,
+.mobile-nav[open] .menu-open {
+  display: none;
+}
+
+.mobile-nav[open] .menu-close {
+  display: block;
+}
+
+.mobile-nav-panel {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  inset-inline-end: 0;
+  display: grid;
+  width: min(18rem, calc(100vw - 2rem));
+  padding: 0.5rem;
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-md);
+  background: color-mix(in srgb, var(--ug-paper-raised) 96%, transparent);
+  box-shadow: var(--ug-shadow-lg);
+  backdrop-filter: blur(18px);
+}
+
+.mobile-nav-panel a {
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--ug-radius-sm);
+  color: var(--ug-graphite);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mobile-nav-panel a:hover,
+.mobile-nav-panel a:focus-visible,
+.mobile-nav-panel a[aria-current="page"] {
+  background: var(--ug-pastel-lavender);
+  color: var(--ug-pastel-lavender-ink);
 }
 
 /* Semi-rounded Theme Switch (border-radius: 6px / check: 4px) */
@@ -504,12 +616,85 @@ if (starsEl) {
   .primary-nav {
     display: none;
   }
+
+  .divider {
+    margin-inline: 12px !important;
+  }
+
+  .primary-nav + .divider {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: block;
+    margin-inline-start: 0.75rem;
+  }
 }
 
-@media (max-width: 48rem) {
+/* Match Starlight's own mobile-navigation breakpoint exactly. */
+@media (max-width: 50rem) {
+  .topbar {
+    gap: 0.5rem;
+  }
+
+  .header-left {
+    flex: 1 1 auto;
+    gap: 0.65rem;
+  }
+
   .search {
     min-width: 0;
-    flex-grow: 1;
+    max-width: 10rem;
+    margin-inline-start: auto;
+  }
+
+  .divider,
+  .social-links {
+    display: none;
+  }
+
+  .header-right {
+    gap: 0.5rem;
+  }
+
+  .has-sidebar .appearance,
+  .has-sidebar .translations {
+    display: none;
+  }
+
+  .theme-switch,
+  .lang-switch {
+    min-height: 44px;
+  }
+
+  .theme-switch {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+  }
+
+  .theme-switch .check,
+  :global([data-theme="dark"]) .theme-switch .check {
+    top: 50%;
+    left: 50%;
+    width: 28px;
+    height: 28px;
+    transform: translate(-50%, -50%);
+  }
+
+  .lang-option {
+    min-width: 34px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 36rem) {
+  .brand :global(a.brand > span) {
+    display: none;
+  }
+
+  .appearance {
+    display: none;
   }
 }
 </style>

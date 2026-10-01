@@ -41,11 +41,11 @@ type BookOutput = SchemaOutput<typeof BookSchema, 'Book'>;
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
-| `author` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | Yes | — |
+| `author` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<[Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | Yes | — |
 | `isbn` | string | No | — |
 | `bookFormat` | string | No | — |
 | `datePublished` | string \| number \| Date | No | non-empty |
-| `publisher` | string \| [Organization](/reference/builders/organization/) \| EntityReference | No | — |
+| `publisher` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | No | — |
 | `inLanguage` | string | No | — |
 | `numberOfPages` | number | No | integer; greater than 0; maximum: 9007199254740991 |
 | `description` | string | No | — |
@@ -72,7 +72,10 @@ const entity = Book({
 {
   "@type": "Book",
   "name": "The Astro Handbook",
-  "author": "Ada Lovelace"
+  "author": {
+    "@type": "Person",
+    "name": "Ada Lovelace"
+  }
 }
 ```
 

@@ -58,6 +58,11 @@ npx @unschema-graph/core audit dist --strict
 npx @unschema-graph/core audit dist --format json
 ```
 
+In the `unschema-graph` repository, the root scripts deliberately separate the two modes:
+
+- `pnpm run audit` is the convenient local-development check; it reports warnings without failing.
+- `pnpm run audit:strict` is used by CI and `pnpm run release:check`; warnings and errors both fail the gate.
+
 ---
 
 ## 2. What the Audit Validates
@@ -139,5 +144,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
       - name: Audit Schema.org JSON-LD
-        run: npx @unschema-graph/core audit dist
+        run: npx @unschema-graph/core audit dist --strict
 ```

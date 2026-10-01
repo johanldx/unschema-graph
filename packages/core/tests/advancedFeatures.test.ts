@@ -246,6 +246,56 @@ describe('Advanced Feature 3: Static Build Audit Engine', () => {
     });
   });
 
+  it('reports a missing absolute reference to the canonical document', () => {
+    const result = auditHtmlContent(
+      `<html><head>
+        <link href="https://example.com/" rel="canonical">
+        <script type="application/ld+json">{
+          "@context":"https://schema.org",
+          "@graph":[
+            {
+              "@type":"WebSite",
+              "@id":"#website",
+              "publisher":{"@id":"https://example.com/#missing"}
+            }
+          ]
+        }</script>
+      </head></html>`,
+      'canonical-reference.html'
+    );
+
+    expect(result.resolvedLocalReferences).toBe(0);
+    expect(result.errors).toEqual([
+      {
+        code: 'broken-reference',
+        severity: 'error',
+        file: 'canonical-reference.html',
+        id: 'https://example.com/#missing',
+        path: 'WebSite.publisher',
+        message:
+          'Broken @id reference: https://example.com/#missing\nReferenced from: WebSite.publisher',
+      },
+    ]);
+  });
+
+  it('does not treat a same-origin different-document reference as locally broken', () => {
+    const result = auditHtmlContent(
+      `<html><head>
+        <link href="https://example.com/" rel="canonical">
+        <script type="application/ld+json">{
+          "@context":"https://schema.org",
+          "@type":"WebSite",
+          "@id":"#website",
+          "publisher":{"@id":"https://example.com/about#organization"}
+        }</script>
+      </head></html>`,
+      'different-document-reference.html'
+    );
+
+    expect(result.resolvedLocalReferences).toBe(0);
+    expect(result.errors).toHaveLength(0);
+  });
+
   it('should distinguish duplicate declarations from conflicting @id values', () => {
     const duplicate = auditHtmlContent(
       `<script type="application/ld+json">{

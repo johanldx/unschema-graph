@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { SchemaTypeSchema } from '../../core/schemaType.js';
+import { EntityIdSchema } from './reference.js';
 
 /**
  * Zod schema for Schema.org `PostalAddress`.
@@ -8,7 +9,7 @@ import { SchemaTypeSchema } from '../../core/schemaType.js';
 export const PostalAddressSchema = z
   .object({
     '@type': SchemaTypeSchema.optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     streetAddress: z.string().optional(),
     addressLocality: z.string().optional(),
     addressRegion: z.string().optional(),

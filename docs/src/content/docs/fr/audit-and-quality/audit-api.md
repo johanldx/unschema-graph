@@ -45,6 +45,10 @@ if (!result.passed) {
 }
 ```
 
+Lorsqu’une page contient un élément de lien canonique, l’audit utilise son URL `href` pour
+valider les références `@id` absolues ou sous forme de fragment qui ciblent le même document. Une
+URL absolue vers un autre chemin de la même origine est considérée comme externe au graphe courant.
+
 ---
 
 ## Auditer des chaînes HTML brutes

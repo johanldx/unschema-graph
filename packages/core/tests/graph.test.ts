@@ -157,28 +157,33 @@ describe('core/graph', () => {
     ]);
   });
 
-  it('checks same-origin references after base URL resolution', () => {
+  it.each([
+    ['#missing', 'https://example.com/', true],
+    ['/#missing', 'https://example.com/', true],
+    ['https://example.com/#missing', 'https://example.com/', true],
+    ['https://example.com/about#missing', 'https://example.com/', false],
+    ['https://example.com/products/42#missing', 'https://example.com/', false],
+    ['https://external.example/#missing', 'https://example.com/', false],
+    ['urn:test:missing', 'https://example.com/', false],
+    ['https://example.com/docs/page/#missing', 'https://example.com/docs/page/', true],
+  ])('classifies %s against document %s as same-document=%s', (reference, baseUrl, isLocal) => {
     const diagnostics: GraphDiagnostic[] = [];
 
     buildJsonLdGraph(
       {
         '@type': 'WebPage',
         '@id': '#page',
-        isPartOf: { '@id': '/#missing-website' },
+        isPartOf: { '@id': reference },
       },
       {
-        baseUrl: 'https://example.com',
+        baseUrl,
         onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
       }
     );
 
-    expect(diagnostics).toMatchObject([
-      {
-        code: 'broken-reference',
-        id: 'https://example.com/#missing-website',
-        path: 'WebPage.isPartOf',
-      },
-    ]);
+    expect(diagnostics.filter((diagnostic) => diagnostic.code === 'broken-reference')).toHaveLength(
+      isLocal ? 1 : 0
+    );
   });
 
   it('flattens nested arrays and ignores null or undefined items', () => {

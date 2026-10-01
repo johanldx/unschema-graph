@@ -56,6 +56,6 @@
     "@unschema-graph/core": "workspace:*"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.15.0"
   }
 }

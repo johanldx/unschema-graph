@@ -46,7 +46,7 @@ type WebSiteOutput = SchemaOutput<typeof WebSiteSchema, 'WebSite'>;
 | `description` | string | Non | — |
 | `inLanguage` | string | Non | — |
 | `searchUrl` | string | Non | non-empty |
-| `publisher` | unknown | Non | — |
+| `publisher` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
 | `potentialAction` | string \| object \| Array<string \| object> | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder

@@ -39,7 +39,7 @@ type RatingOutput = SchemaOutput<typeof RatingSchema, 'Rating'>;
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `ratingValue` | number \| string | Oui | — |
 | `bestRating` | number \| string | Non | default: 5 |
 | `worstRating` | number \| string | Non | default: 1 |

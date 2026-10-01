@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/johanldx/unschema-graph/releases"><img src="https://img.shields.io/badge/version-v0.9.0_(RC_v1)-6366f1.svg?style=flat-square" alt="Version 0.9.0" /></a>
+  <a href="https://github.com/johanldx/unschema-graph/releases"><img src="https://img.shields.io/badge/version-v0.9.0_(stabilization)-6366f1.svg?style=flat-square" alt="Version 0.9.0" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/core"><img src="https://img.shields.io/npm/v/@unschema-graph/core?color=6366f1&label=%40unschema-graph%2Fcore&style=flat-square" alt="Core npm version" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/astro"><img src="https://img.shields.io/npm/v/@unschema-graph/astro?color=f97316&label=%40unschema-graph%2Fastro&style=flat-square" alt="Astro npm version" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/svelte"><img src="https://img.shields.io/npm/v/@unschema-graph/svelte?color=ff3e00&label=%40unschema-graph%2Fsvelte&style=flat-square" alt="Svelte npm version" /></a>
@@ -50,14 +50,14 @@ However, writing JSON-LD by hand or using basic type definitions is a minefield:
 
 ---
 
-## ⚡ Quick Example: 5 Lines to a Connected Graph
+## ⚡ Quick Example: Direct Entity Graphing
 
-Create fully validated, interconnected structured data in seconds:
+Create fully validated, interconnected structured data with zero boilerplate:
 
 ```ts
 import { Article, Organization, buildJsonLdGraph, serializeJsonLd } from '@unschema-graph/core';
 
-// 1. Declare your entities with strict TypeScript autocompletion and Zod validation
+// 1. Declare typed entities — reference other entities directly as objects!
 const publisher = Organization({
   '@id': '#organization',
   name: 'Acme Media',
@@ -68,11 +68,12 @@ const article = Article({
   headline: 'Building Modern Search-Optimized Web Apps',
   description: 'How to structure JSON-LD data for search engines and AI agents.',
   author: 'Johan Ledoux',
-  publisher: '#organization' // Automatically linked and resolved into the graph
+  publisher, // 👈 Directly pass the entity object! (Or use '#organization' fragment)
 });
 
-// 2. Resolve relationships, hoist nodes, and serialize safely for HTML
-const jsonLd = serializeJsonLd(buildJsonLdGraph([publisher, article]));
+// 2. buildJsonLdGraph crawls connected entities, hoists them, and builds a clean @graph
+const graph = buildJsonLdGraph(article, { baseUrl: 'https://example.com' });
+const jsonLd = serializeJsonLd(graph, { pretty: true });
 ```
 
 ### The Output (Clean, Unified, Safe):
@@ -104,13 +105,13 @@ const jsonLd = serializeJsonLd(buildJsonLdGraph([publisher, article]));
 
 ## 🚀 Key Advantages in Version 0.9.0
 
-`unschema-graph` **v0.9.0** is the official **v1 Release Candidate**, delivering the complete hardened architecture:
+`unschema-graph` **v0.9.0** is the **v1 stabilization candidate**. The actual prerelease milestone is `1.0.0-rc.1`, followed by stable `1.0.0`.
 
 ### 1. 🛡️ 51 Schema.org Builders Powered by Zod
-Forget guessing field names or reading outdated specifications. Every builder validates inputs synchronously against Schema.org and Google Search guidelines. Missing an Article's `headline` or an Event's `startDate`? You get an explicit error at build time, not in production.
+The curated builder catalog targets the Schema.org 30.1 vocabulary baseline and validates inputs synchronously. Explicitly named profiles such as `GoogleArticle` and `GoogleRecipe` add library-maintained Google constraints without implying rich-result eligibility.
 
 ### 2. 🕸️ Relational Graph Engine (`@graph`)
-Search engines love connected knowledge graphs. Define an author or publisher once with an `@id`, reference it anywhere using `#id` fragments, and `unschema-graph` hoists shared nodes and merges duplicates deterministically into a single `@graph`.
+Search engines love connected knowledge graphs. Pass entities directly as nested objects (`publisher: organization`) or reference them via `#id` fragments. `unschema-graph` automatically crawls the object graph, hoists shared nodes to the top level, resolves relative `#id` fragments against your canonical `baseUrl`, and merges duplicate entities deterministically into a single `@graph`.
 
 ### 3. 🔒 Zero-Trust Anti-XSS Protection
 Never inject unescaped JSON into your HTML. Our serializer substitutes `<` and `>` with Unicode escapes (`\u003c`, `\u003e`), guaranteeing that untrusted CMS fields or comments cannot break out of `<script>` blocks or execute arbitrary JavaScript.
@@ -119,7 +120,7 @@ Never inject unescaped JSON into your HTML. Our serializer substitutes `<` and `
 Structured data is exclusively parsed and rendered at compile time (SSG) or during server-side rendering (SSR). It adds **exactly zero bytes** to your client-side JavaScript bundles.
 
 ### 5. 🔍 Built-in CI/CD Audit CLI
-Run `npx @unschema-graph/core audit dist` in your deployment pipeline. The CLI crawls your generated HTML, extracts JSON-LD blocks, verifies graph integrity, checks for broken references, and validates Schema.org semantics before you deploy.
+Run `npx @unschema-graph/core audit dist` in your deployment pipeline. The CLI crawls your generated HTML, extracts JSON-LD blocks, verifies graph integrity, checks for broken references, and validates Schema.org semantics before you deploy. In this repository, `pnpm run audit` is the warning-friendly development check, while CI and `pnpm run release:check` use `pnpm run audit:strict` so every warning blocks publication.
 
 ### 6. 🛠️ Astro Dev Toolbar & Svelte 5 Runes
 - **Astro:** Zero-configuration `<Schema />` component, automatic canonical URL resolution from `astro.config.mjs`, and an interactive **Dev Toolbar** app to inspect entities directly in your browser.

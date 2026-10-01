@@ -215,6 +215,7 @@ describe('Advanced & Sectoral Schemas (12 Pack)', () => {
 
       expect(book['@type']).toBe('Book');
       expect(book.isbn).toBe('978-2-1234-5680-3');
+      expect(book.author).toEqual({ '@type': 'Person', name: 'Johan Ledoux' });
     });
 
     it('creates a valid Movie entity with director', () => {
@@ -225,7 +226,7 @@ describe('Advanced & Sectoral Schemas (12 Pack)', () => {
       });
 
       expect(movie['@type']).toBe('Movie');
-      expect(movie.director).toBe('Christopher Nolan');
+      expect(movie.director).toEqual({ '@type': 'Person', name: 'Christopher Nolan' });
     });
   });
 

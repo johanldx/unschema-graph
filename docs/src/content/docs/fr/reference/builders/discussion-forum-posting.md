@@ -41,7 +41,7 @@ type DiscussionForumPostingOutput = SchemaOutput<typeof DiscussionForumPostingSc
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `headline` | string | Oui | non-empty |
-| `author` | unknown | Oui | — |
+| `author` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Oui | — |
 | `datePublished` | string \| number \| Date | Oui | non-empty |
 | `text` | string | Non | — |
 | `comment` | object \| Array<object> | Non | — |

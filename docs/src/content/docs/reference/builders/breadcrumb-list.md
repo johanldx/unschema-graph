@@ -39,7 +39,7 @@ type BreadcrumbListOutput = SchemaOutput<typeof BreadcrumbListSchema, 'Breadcrum
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `itemListElement` | Array<object> | Yes | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a

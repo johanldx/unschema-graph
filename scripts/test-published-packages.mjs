@@ -9,6 +9,16 @@ const fixturesRoot = join(root, 'tests', 'fixtures', 'published');
 const workspace = await mkdtemp(join(tmpdir(), 'unschema-graph-published-'));
 const packsDirectory = join(workspace, 'packs');
 
+const peerVersions = {
+  astro: {
+    5: '5.0.0',
+    6: '6.0.0',
+    7: '7.3.5',
+  },
+  svelte: ['5.15.0', '5.57.1'],
+  zod: ['4.6.0', '4.6.5'],
+};
+
 function run(command, args, cwd = root, capture = false) {
   const result = spawnSync(command, args, {
     cwd,
@@ -159,6 +169,22 @@ async function installAndBuild(directory) {
   run('pnpm', ['run', 'build'], directory);
 }
 
+async function installAndBuildWithNpm(directory) {
+  await rm(join(directory, 'pnpm-workspace.yaml'), { force: true });
+  run('npm', ['install', '--no-package-lock', '--no-audit', '--no-fund'], directory);
+  run('npm', ['run', 'build'], directory);
+}
+
+async function assertInstalledVersion(directory, packageName, expectedVersion) {
+  const manifestPath = join(directory, 'node_modules', packageName, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  if (manifest.version !== expectedVersion) {
+    throw new Error(
+      `${packageName} resolved to ${manifest.version} in ${directory}; expected ${expectedVersion}`
+    );
+  }
+}
+
 try {
   const [nodeMajor, nodeMinor] = process.versions.node.split('.').map(Number);
   if (nodeMajor < 22 || (nodeMajor === 22 && nodeMinor < 12)) {
@@ -218,7 +244,7 @@ try {
     name: '@unschema-graph/svelte',
     directory: 'packages/svelte',
     files: ['dist'],
-    peerDependencies: { svelte: '^5.0.0' },
+    peerDependencies: { svelte: '^5.15.0' },
   });
 
   await writeFile(
@@ -230,56 +256,92 @@ try {
     '@unschema-graph/core': coreDependency,
   };
 
-  const coreFixture = await materializeFixture(
-    'core',
-    {
-      dependencies: {
-        '@unschema-graph/core': coreDependency,
-        zod: '^4.6.0',
+  for (const zodVersion of peerVersions.zod) {
+    const coreFixture = await materializeFixture(
+      'core',
+      {
+        dependencies: {
+          '@unschema-graph/core': coreDependency,
+          zod: zodVersion,
+        },
       },
-    },
-    '',
-    workspaceOverrides
-  );
-  await installAndBuild(coreFixture);
+      `-zod-${zodVersion}`,
+      workspaceOverrides
+    );
+    await installAndBuild(coreFixture);
+    await assertInstalledVersion(coreFixture, 'zod', zodVersion);
+  }
 
   for (const major of requestedAstroMajors()) {
+    const astroVersion = peerVersions.astro[major];
     const astroFixture = await materializeFixture(
       'astro',
       {
         dependencies: {
           '@unschema-graph/astro': pathToFileURL(astroTarball).href,
           '@unschema-graph/core': coreDependency,
-          astro: `^${major}.0.0`,
-          zod: '^4.6.0',
+          astro: astroVersion,
+          zod: peerVersions.zod.at(-1),
         },
       },
       `-${major}`,
       workspaceOverrides
     );
     await installAndBuild(astroFixture);
+    await assertInstalledVersion(astroFixture, 'astro', astroVersion);
   }
 
-  const svelteFixture = await materializeFixture(
-    'sveltekit',
+  for (const svelteVersion of peerVersions.svelte) {
+    const svelteFixture = await materializeFixture(
+      'sveltekit',
+      {
+        dependencies: {
+          '@sveltejs/adapter-auto': '^6.0.0',
+          '@sveltejs/kit': '^2.0.0',
+          '@unschema-graph/core': coreDependency,
+          '@unschema-graph/svelte': pathToFileURL(svelteTarball).href,
+          svelte: svelteVersion,
+          vite: '^7.0.0',
+          zod: peerVersions.zod.at(-1),
+        },
+      },
+      `-svelte-${svelteVersion}`,
+      workspaceOverrides
+    );
+    await installAndBuild(svelteFixture);
+    await assertInstalledVersion(svelteFixture, 'svelte', svelteVersion);
+  }
+
+  const npmCoreFixture = await materializeFixture(
+    'core',
     {
       dependencies: {
-        '@sveltejs/adapter-auto': '^6.0.0',
-        '@sveltejs/kit': '^2.0.0',
         '@unschema-graph/core': coreDependency,
-        '@unschema-graph/svelte': pathToFileURL(svelteTarball).href,
-        svelte: '^5.0.0',
-        vite: '^7.0.0',
-        zod: '^4.6.0',
+        zod: peerVersions.zod.at(-1),
       },
     },
-    '',
-    workspaceOverrides
+    '-npm'
   );
-  await installAndBuild(svelteFixture);
+  await installAndBuildWithNpm(npmCoreFixture);
+  await assertInstalledVersion(npmCoreFixture, 'zod', peerVersions.zod.at(-1));
+
+  const npmAstroFixture = await materializeFixture(
+    'astro',
+    {
+      dependencies: {
+        '@unschema-graph/astro': pathToFileURL(astroTarball).href,
+        '@unschema-graph/core': coreDependency,
+        astro: peerVersions.astro[7],
+        zod: peerVersions.zod.at(-1),
+      },
+    },
+    '-npm'
+  );
+  await installAndBuildWithNpm(npmAstroFixture);
+  await assertInstalledVersion(npmAstroFixture, 'astro', peerVersions.astro[7]);
 
   console.log(
-    `Published package fixtures passed for Astro ${requestedAstroMajors().join(', ')}, Svelte 5/SvelteKit, and Node ${process.versions.node}.`
+    `Published package fixtures passed with pnpm peer bounds and npm consumers for Astro ${requestedAstroMajors().join(', ')}, Svelte 5/SvelteKit, Zod 4, and Node ${process.versions.node}.`
   );
 } finally {
   await rm(workspace, { recursive: true, force: true });

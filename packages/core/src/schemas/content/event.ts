@@ -1,29 +1,34 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
-import { SchemaTypeSchema } from '../../core/schemaType.js';
 import { addDuration, IsoDateSchema, IsoDurationSchema } from '../../core/temporal.js';
 import { AggregateOfferSchema, OfferSchema } from '../commerce/offer.js';
 import { PostalAddressSchema } from '../common/address.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { entityRef } from '../common/reference.js';
+import { EntityIdSchema, entityRef } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 
-/**
- * Location schema supporting Place, PostalAddress, VirtualLocation, or plain string.
- */
+const EventPlaceSchema = z
+  .object({
+    '@type': z.enum(['Place', 'VirtualLocation']).optional(),
+    '@id': EntityIdSchema.optional(),
+    name: z.string().optional(),
+    address: z.union([z.string(), PostalAddressSchema]).optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
+  })
+  .strict();
+
+const EventPlaceReferenceSchema = entityRef({
+  schemas: [EventPlaceSchema],
+  types: ['Place', 'VirtualLocation'],
+});
+
+/** Location value supporting inline addresses/places and identifiable place references. */
 const EventLocationSchema = z.union([
   z.string().min(1, 'Location cannot be empty'),
   PostalAddressSchema,
-  z
-    .object({
-      '@type': SchemaTypeSchema.optional(),
-      name: z.string().optional(),
-      address: z.union([z.string(), PostalAddressSchema]).optional(),
-      url: RelativeOrAbsoluteUrlSchema.optional(),
-    })
-    .strict(),
+  EventPlaceReferenceSchema,
 ]);
 
 /**
@@ -36,8 +41,7 @@ const PerformerOrOrganizerSchema = entityRef({
 });
 
 /**
- * Zod schema for Schema.org `Event`.
- * Follows Google Search Central Event structured data requirements.
+ * Curated Zod schema for Schema.org `Event`.
  */
 export const EventSchema = z
   .object({

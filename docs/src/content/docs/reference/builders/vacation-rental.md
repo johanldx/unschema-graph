@@ -51,8 +51,6 @@ type VacationRentalOutput = SchemaOutput<typeof LodgingBusinessSchema, 'Vacation
 | `currenciesAccepted` | string | No | — |
 | `paymentAccepted` | string | No | — |
 | `sameAs` | string \| Array<string> | No | non-empty |
-| `servesCuisine` | string \| Array<string> | No | — |
-| `menu` | string | No | non-empty |
 | `checkinTime` | string | No | — |
 | `checkoutTime` | string | No | — |
 | `numberOfRooms` | number | No | integer; greater than 0; maximum: 9007199254740991 |

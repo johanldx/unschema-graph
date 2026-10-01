@@ -11,19 +11,12 @@ import {
   Organization,
   Person,
   Product,
+  Service,
+  WebPage,
   WebSite,
 } from '@unschema-graph/core';
 
-// 1. WebSite with Sitelinks Searchbox
-const website = WebSite({
-  '@id': '#website',
-  name: 'Rootage Media',
-  url: 'https://example.com',
-  searchUrl: 'https://example.com/search?q={search_term_string}',
-  publisher: '#organization',
-});
-
-// 2. Identity & Publisher
+// 1. Identity and publisher
 const publisher = Organization({
   '@id': '#organization',
   name: 'Rootage Media',
@@ -32,7 +25,31 @@ const publisher = Organization({
   foundingDate: '2024-01-15',
 });
 
-// 3. Author
+// 2. WebSite with an object reference to its publisher
+const website = WebSite({
+  '@id': '#website',
+  name: 'Rootage Media',
+  url: 'https://example.com',
+  searchUrl: 'https://example.com/search?q={search_term_string}',
+  publisher,
+});
+
+// 3. WebPage and Service reuse the same connected entities
+const webpage = WebPage({
+  '@id': '#webpage',
+  name: 'Rootage Media — Accueil',
+  url: '/',
+  isPartOf: website,
+});
+
+const service = Service({
+  '@id': '#service',
+  name: 'Conseil en données structurées',
+  serviceType: 'Schema.org JSON-LD consulting',
+  provider: publisher,
+});
+
+// 4. Author
 const author = Person({
   '@id': '#author',
   name: 'Johan Ledoux',
@@ -40,7 +57,7 @@ const author = Person({
   jobTitle: 'Lead Software Architect',
 });
 
-// 4. Article with magic @id publisher & author + speakable for Voice/AI
+// 5. Article with entity references and speakable for Voice/AI
 const article = Article({
   '@id': '#article',
   headline: 'Architecture et SEO moderne avec Astro 5 et JSON-LD',
@@ -49,12 +66,12 @@ const article = Article({
   datePublished: 'today',
   dateModified: 'now',
   author: '#author',
-  publisher: '#organization',
+  publisher,
   keywords: ['astro', 'seo', 'json-ld', 'schema-org'],
   speakable: ['h1', '.subtitle'],
 });
 
-// 5. Event with automatic endDate calculation from duration
+// 6. Event with automatic endDate calculation from duration
 const event = Event({
   '@id': '#event',
   name: 'Astro Paris Meetup 2026',
@@ -66,19 +83,19 @@ const event = Event({
   eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
 });
 
-// 6. JobPosting with relative validThrough
+// 7. JobPosting with relative validThrough
 const job = JobPosting({
   '@id': '#job',
   title: 'Senior Frontend Engineer (Astro & TypeScript)',
   description: 'Rejoignez notre équipe pour construire la nouvelle génération de web apps Astro.',
   datePosted: 'today',
   validThrough: '+30d', // Valide 30 jours à partir d'aujourd'hui
-  hiringOrganization: '#organization',
+  hiringOrganization: publisher,
   employmentType: 'FULL_TIME',
   jobLocationType: 'TELECOMMUTE',
 });
 
-// 7. E-commerce Product with Offer & Rating
+// 8. E-commerce Product with Offer & Rating
 const product = Product({
   '@id': '#product',
   name: 'Astro Pro Mechanical Keyboard',
@@ -97,7 +114,7 @@ const product = Product({
   }),
 });
 
-// 8. Breadcrumbs with relative paths
+// 9. Breadcrumbs with relative paths
 const breadcrumbs = BreadcrumbList({
   itemListElement: [
     { name: 'Accueil', item: '/' },
@@ -106,7 +123,7 @@ const breadcrumbs = BreadcrumbList({
   ],
 });
 
-// 9. FAQPage
+// 10. FAQPage
 const faq = FAQPage({
   questions: [
     {
@@ -127,7 +144,19 @@ const faq = FAQPage({
   ],
 });
 
-const allEntities = [website, publisher, author, article, event, job, product, breadcrumbs, faq];
+const allEntities = [
+  webpage,
+  service,
+  publisher,
+  website,
+  author,
+  article,
+  event,
+  job,
+  product,
+  breadcrumbs,
+  faq,
+];
 ---
 
 <!doctype html>

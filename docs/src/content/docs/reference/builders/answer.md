@@ -39,7 +39,7 @@ type AnswerOutput = SchemaOutput<typeof AnswerSchema, 'Answer'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `text` | string | Yes | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a

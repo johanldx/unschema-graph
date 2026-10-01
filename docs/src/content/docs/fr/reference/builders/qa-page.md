@@ -40,7 +40,7 @@ type QAPageOutput = SchemaOutput<typeof QAPageSchema, 'QAPage'>;
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
-| `mainEntity` | object | Oui | — |
+| `mainEntity` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Oui | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

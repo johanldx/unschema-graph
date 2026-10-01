@@ -39,7 +39,7 @@ type ContactPointOutput = SchemaOutput<typeof ContactPointSchema, 'ContactPoint'
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `telephone` | string | Non | — |
 | `contactType` | string | Non | — |
 | `email` | string | Non | format: email |

@@ -15,8 +15,7 @@ const PublisherSchema = entityRef({
 });
 
 /**
- * Zod schema for Schema.org `WebSite`.
- * Follows Google Search Central sitelinks searchbox and site identity standards.
+ * Curated Zod schema for Schema.org `WebSite`.
  */
 export const WebSiteSchema = z
   .object({

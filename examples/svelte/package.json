@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@unschema-graph/svelte": "workspace:*",
-    "svelte": "^5.0.0"
+    "svelte": "^5.15.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",

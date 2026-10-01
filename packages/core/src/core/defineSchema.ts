@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { SchemaOrgEntity, SchemaValidationResult, ValidationOptions } from '../types/index.js';
+import { EntityIdSchema } from './entityId.js';
 import { normalizeSchemaTypes } from './schemaType.js';
 import { safeValidateSchema, validateSchema } from './validator.js';
 
@@ -62,20 +63,17 @@ type PrimarySchemaType<TEntity extends SchemaOrgEntity> = TEntity['@type'] exten
     : string;
 
 /** Adds extra Schema.org types while preserving the builder's primary type. */
-export function withAdditionalTypes<
-  TEntity extends SchemaOrgEntity,
-  const TAdditionalTypes extends readonly [string, ...string[]],
->(
+export function withAdditionalTypes<TEntity extends SchemaOrgEntity>(
   entity: TEntity,
-  additionalTypes: TAdditionalTypes
+  additionalTypes: readonly [string, ...string[]]
 ): Omit<TEntity, '@type'> & {
-  '@type': [PrimarySchemaType<TEntity>, ...TAdditionalTypes];
+  '@type': [PrimarySchemaType<TEntity>, ...string[]];
 } {
   return {
     ...entity,
     '@type': normalizeSchemaTypes(entity['@type'], additionalTypes),
   } as unknown as Omit<TEntity, '@type'> & {
-    '@type': [PrimarySchemaType<TEntity>, ...TAdditionalTypes];
+    '@type': [PrimarySchemaType<TEntity>, ...string[]];
   };
 }
 
@@ -180,7 +178,7 @@ export function defineSchema<TSchema extends z.ZodTypeAny, TType extends string 
 ): SchemaBuilder<TSchema, TType> {
   const metadataSchema = z
     .object({
-      '@id': z.string().min(1).optional(),
+      '@id': EntityIdSchema.optional(),
       '@type': z
         .never({ error: `Property "@type" is owned by the ${entityType} builder` })
         .optional(),

@@ -39,14 +39,14 @@ type OfferOutput = SchemaOutput<typeof OfferSchema, 'Offer'>;
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `price` | number \| string | Oui | — |
 | `priceCurrency` | string | Oui | minimum length: 3; maximum length: 3 |
 | `availability` | string | Non | — |
 | `url` | string | Non | non-empty |
 | `priceValidUntil` | string \| number \| Date | Non | non-empty |
 | `itemCondition` | string | Non | — |
-| `seller` | unknown | Non | — |
+| `seller` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

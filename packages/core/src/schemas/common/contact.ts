@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { SchemaTypeSchema } from '../../core/schemaType.js';
+import { EntityIdSchema } from './reference.js';
 import { RelativeOrAbsoluteUrlSchema } from './url.js';
 
 /**
@@ -9,7 +10,7 @@ import { RelativeOrAbsoluteUrlSchema } from './url.js';
 export const ContactPointSchema = z
   .object({
     '@type': SchemaTypeSchema.optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     telephone: z.string().optional(),
     contactType: z.string().optional(),
     email: z.string().email().optional(),

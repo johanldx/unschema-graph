@@ -51,8 +51,6 @@ type LocalBusinessOutput = SchemaOutput<typeof LocalBusinessSchema, 'LocalBusine
 | `currenciesAccepted` | string | No | — |
 | `paymentAccepted` | string | No | — |
 | `sameAs` | string \| Array<string> | No | non-empty |
-| `servesCuisine` | string \| Array<string> | No | — |
-| `menu` | string | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'LocalBusiness'`.

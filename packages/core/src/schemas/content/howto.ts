@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDurationSchema } from '../../core/duration.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { EntityReferenceSchema } from '../common/reference.js';
+import { EntityIdSchema, EntityReferenceSchema } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 
 /**
@@ -11,7 +11,7 @@ import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 export const HowToStepSchema = z
   .object({
     '@type': z.literal('HowToStep').default('HowToStep').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     name: z.string().optional(),
     text: z.string().min(1, 'Property "text" is required for HowToStep'),
     image: ImageUrlOrObject.optional(),
@@ -25,7 +25,7 @@ export const HowToStepSchema = z
 export const HowToSectionSchema = z
   .object({
     '@type': z.literal('HowToSection').default('HowToSection').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     name: z.string().min(1, 'Property "name" is required for HowToSection'),
     itemListElement: z.array(HowToStepSchema),
   })

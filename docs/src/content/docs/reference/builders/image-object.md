@@ -39,7 +39,7 @@ type ImageObjectOutput = SchemaOutput<typeof ImageObjectSchema, 'ImageObject'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `url` | string | Yes | non-empty |
 | `contentUrl` | string | No | non-empty |
 | `caption` | string | No | — |

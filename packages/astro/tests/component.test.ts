@@ -9,10 +9,14 @@ import {
   withAdditionalTypes,
 } from '@unschema-graph/core';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Schema.astro Component Rendering', () => {
   beforeEach(() => {
+    resetGlobalConfig();
+  });
+
+  afterEach(() => {
     resetGlobalConfig();
   });
 
@@ -103,6 +107,25 @@ describe('Schema.astro Component Rendering', () => {
     });
 
     expect(html).toContain('"@id":"https://mon-site.fr/#faq"');
+  });
+
+  it('gives component props precedence over global integration defaults', async () => {
+    const container = await AstroContainer.create();
+    setGlobalConfig({ baseUrl: 'https://global.example', inLanguage: 'fr-FR' });
+    const article = Article({ '@id': '#article', headline: 'Explicit rendering options' });
+
+    const html = await container.renderToString(Schema, {
+      props: {
+        item: article,
+        baseUrl: 'https://prop.example',
+        inLanguage: 'en-GB',
+      },
+    });
+
+    expect(html).toContain('"@id":"https://prop.example/#article"');
+    expect(html).toContain('"inLanguage":"en-GB"');
+    expect(html).not.toContain('https://global.example');
+    expect(html).not.toContain('fr-FR');
   });
 
   it('applies anti-XSS protection to rendered script tag', async () => {

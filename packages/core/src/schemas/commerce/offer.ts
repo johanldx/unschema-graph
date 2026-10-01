@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema } from '../../core/temporal.js';
-import { entityRef } from '../common/reference.js';
+import { EntityIdSchema, entityRef } from '../common/reference.js';
 import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
@@ -16,13 +16,12 @@ const SellerSchema = entityRef({
 });
 
 /**
- * Zod schema for Schema.org `Offer`.
- * Validates price, 3-letter currency code, and availability for Google Rich Results.
+ * Curated Zod schema for Schema.org `Offer`.
  */
 export const OfferSchema = z
   .object({
     '@type': z.literal('Offer').default('Offer').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     price: z.union([z.number(), z.string()], {
       message: 'Property "price" is required for Offer',
     }),
@@ -44,7 +43,7 @@ export const OfferSchema = z
 export const AggregateOfferSchema = z
   .object({
     '@type': z.literal('AggregateOffer').default('AggregateOffer').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     lowPrice: z.union([z.number(), z.string()], {
       message: 'Property "lowPrice" is required for AggregateOffer',
     }),

@@ -5,8 +5,8 @@ description: Guide de mise à niveau, évolutions architecturales et patterns de
 
 `unschema-graph` 1.0 stabilise l'API publique, introduit les références relationnelles d'entités objets, applique une validation stricte Schema.org avec Zod et apporte une découverte déterministe du graphe.
 
-> **Note sur la version 0.9.0 (Release Candidate v1)**
-> La version **0.9.0** constitue la version candidate officielle (« feature-complete ») préparant la v1.0.0. Elle stabilise l'architecture et l'ensemble de l'API publique. Si vous mettez à niveau une installation existante ou une version pré-1.0 initiale, ce guide répertorie l'ensemble des évolutions architecturales et des bonnes pratiques.
+> **Version 0.9.0 — candidate de stabilisation v1**
+> La version **0.9.0** est la publication de stabilisation pré-v1. La véritable Release Candidate sera `1.0.0-rc.1`, puis viendra la version stable `1.0.0`. Ce guide couvre les changements utiles depuis les versions pré-1.0 antérieures.
 
 ---
 
@@ -50,16 +50,34 @@ const graph = buildJsonLdGraph(webpage, {
 
 ### 3. Typage strict Schema.org et propriétés additionnelles
 
-Les 51 builders appliquent un contrôle strict des propriétés Schema.org. Toute propriété inconnue qui ne figure pas dans le standard Schema.org est rejetée à la compilation.
+Les schémas intégrés constituent un sous-ensemble sélectionné, modélisé sur la baseline du vocabulaire Schema.org 30.1. Ils rejettent les propriétés absentes du schéma de bibliothèque concerné, sans prétendre couvrir tout Schema.org.
 
 Si votre CMS ou API requiert des propriétés personnalisées :
 - Utilisez `withAdditionalProperties` :
   ```ts
   import { Article, withAdditionalProperties } from '@unschema-graph/core';
 
-  const CustomArticle = withAdditionalProperties(Article, ['customField']);
+  const article = Article({ headline: 'Bonjour le monde' });
+  const articlePersonnalise = withAdditionalProperties(article, { customField: 'value' });
   ```
 - Ou définissez un nouveau type avec `defineSchema`.
+
+### 3.1. Corrections de vocabulaire Schema.org 30.1
+
+Le contrat 0.9 remplace la propriété supplantée `Restaurant.menu` par `hasMenu` :
+
+```ts
+const restaurant = Restaurant({
+  name: 'Chez Pierre',
+  address: '15 Boulevard Saint-Germain, Paris',
+  hasMenu: '/menu',
+});
+```
+
+`servesCuisine` et `hasMenu` sont acceptés par `Restaurant`, mais pas par les builders
+génériques `LocalBusiness`, `Store` ou d’hébergement. `FAQPage.questions` et
+`WebSite.searchUrl` restent des facilités d’entrée documentées : elles produisent
+respectivement le vocabulaire courant `mainEntity` et `potentialAction`.
 
 ### 4. Diagnostics de graphe structurés (`onDiagnostic`)
 

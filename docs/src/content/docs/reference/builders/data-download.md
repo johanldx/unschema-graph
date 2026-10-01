@@ -39,7 +39,7 @@ type DataDownloadOutput = SchemaOutput<typeof DataDownloadSchema, 'DataDownload'
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `contentUrl` | string | Yes | non-empty |
 | `encodingFormat` | string | No | — |
 | `name` | string | No | — |

@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('Step 21 — Executable Documentation Snippets in CI', () => {
   it('exports valid Schema.org vocabulary baseline version', () => {
-    expect(SCHEMA_ORG_BASELINE).toBe('28.1');
+    expect(SCHEMA_ORG_BASELINE).toBe('30.1');
   });
 
   it('runs Core Quick Start example verbatim', () => {

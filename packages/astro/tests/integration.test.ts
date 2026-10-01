@@ -6,11 +6,16 @@ import {
   resetGlobalConfig,
   resolveEntityIds,
   resolveId,
+  setGlobalConfig,
 } from '@unschema-graph/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Astro Integration & @id Resolution', () => {
   beforeEach(() => {
+    resetGlobalConfig();
+  });
+
+  afterEach(() => {
     resetGlobalConfig();
   });
 
@@ -71,6 +76,7 @@ describe('Astro Integration & @id Resolution', () => {
 
   describe('buildJsonLdGraph with baseUrl', () => {
     it('applies baseUrl to resolve all entity IDs in the graph', () => {
+      setGlobalConfig({ baseUrl: 'https://global.example' });
       const org = {
         '@type': 'Organization',
         '@id': '#organization',
@@ -135,7 +141,7 @@ describe('Astro Integration & @id Resolution', () => {
 
       setupHook({
         command: 'build',
-        config: { site: 'https://mon-site.fr' },
+        config: { site: 'https://astro-site.example' },
         logger: fakeLogger,
       });
 
@@ -181,7 +187,6 @@ describe('Astro Integration & @id Resolution', () => {
       expect(GoogleArticle({ headline: 'Incomplete' })).toBeNull();
       expect(warn).toHaveBeenCalledOnce();
       warn.mockRestore();
-      resetGlobalConfig();
     });
   });
 });

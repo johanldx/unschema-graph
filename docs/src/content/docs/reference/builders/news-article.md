@@ -44,8 +44,8 @@ type NewsArticleOutput = SchemaOutput<typeof ArticleSchema, 'NewsArticle'>;
 | `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | No | non-empty |
 | `datePublished` | string \| number \| Date | No | non-empty |
 | `dateModified` | string \| number \| Date | No | non-empty |
-| `author` | Array<unknown> | No | — |
-| `publisher` | unknown | No | — |
+| `author` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<[Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | No | — |
+| `publisher` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | No | — |
 | `description` | string | No | — |
 | `articleBody` | string | No | — |
 | `articleSection` | string \| Array<string> | No | — |

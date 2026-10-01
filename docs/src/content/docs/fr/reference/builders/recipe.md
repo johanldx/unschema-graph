@@ -44,7 +44,7 @@ type RecipeOutput = SchemaOutput<typeof RecipeSchema, 'Recipe'>;
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
 | `recipeIngredient` | Array<string> | Non | minimum items: 1 |
 | `recipeInstructions` | Array<string \| object> \| string | Non | minimum items: 1 |
-| `author` | unknown | Non | — |
+| `author` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
 | `datePublished` | string \| number \| Date | Non | non-empty |
 | `description` | string | Non | — |
 | `prepTime` | string \| number \| DurationObject | Non | non-empty; greater than 0 |

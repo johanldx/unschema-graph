@@ -39,7 +39,7 @@ type ClipOutput = SchemaOutput<typeof ClipSchema, 'Clip'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `startOffset` | number | Yes | minimum: 0 |
 | `endOffset` | number | Yes | greater than 0 |

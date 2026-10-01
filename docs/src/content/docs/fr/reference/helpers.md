@@ -51,6 +51,10 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | `IsoDateSchema`, `IsoDurationSchema` | Schémas Zod de transformation réutilisables. |
 | `DurationInput`, `DurationObject` | Types publics d’entrée des durées. |
 
+`referenceDate` ne contrôle qu’un appel direct à `parseDate()`. Les valeurs relatives
+transmises aux builders, à `IsoDateSchema` ou à `formatIsoDate()` utilisent l’horloge réelle
+au moment de l’exécution ; préférez une entrée ISO explicite pour une sortie reproductible.
+
 ## Sérialisation
 
 | Export | Rôle |
@@ -67,7 +71,7 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | `EntityIdReference` | Forme d’un pointeur relationnel explicite `{ '@id': string }`. |
 | `entityRef({ schemas, types?, fallbackType? })` | Crée le schéma Zod relationnel partagé par les builders intégrés. |
 | `isIdReference(value)` | Détecte les fragments, chemins, URL HTTP(S) et URN. |
-| `EntityIdSchema` | Valide un identifiant d’entité JSON-LD non vide. |
+| `EntityIdSchema` | Nettoie et valide un identifiant d’entité JSON-LD non vide ; les identifiants composés uniquement d’espaces sont rejetés. |
 | `WebUrlSchema` | Valide une URL HTTP(S) absolue. |
 | `RelativeOrAbsoluteUrlSchema` | Valide une URI absolue ou une URL/chemin relatif. |
 | `createEntityRef(schema, fallbackType?)` | Alias de compatibilité déprécié de `entityRef()`. |
