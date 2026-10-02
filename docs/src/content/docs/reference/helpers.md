@@ -10,7 +10,6 @@ description: Reference for graph, validation, temporal, serialization, content, 
 | `defineSchema(type, schema, defaults?)` | Creates a strict callable builder from a Zod schema. |
 | `withAdditionalProperties(entity, properties)` | Adds explicitly chosen properties after validation. Cannot replace `@type` or `@id`. |
 | `withAdditionalTypes(entity, types)` | Adds one or more secondary Schema.org types while retaining the primary type. |
-| `SchemaTypeSchema`, `normalizeSchemaTypes()` | Enforce a non-empty, deduplicated, stable `@type` value. |
 | `SchemaBuilder` | Callable builder interface with `.schema`, `.entityType`, and `.safeParse()`. |
 | `SchemaInput`, `SchemaOutput` | Infers builder input and output from a Zod schema. |
 
@@ -19,8 +18,6 @@ description: Reference for graph, validation, temporal, serialization, content, 
 | Export | Purpose |
 | --- | --- |
 | `buildJsonLdGraph(items, options?)` | Flattens, resolves, deduplicates, and wraps entities. |
-| `resolveId(id, baseUrl?)` | Resolves a relative identifier against a canonical URL. |
-| `resolveEntityIds(value, baseUrl?)` | Recursively resolves explicit `@id` values in a copied structure. |
 | `GraphOptions` | Graph wrapping, ID resolution, duplicate strategy, and diagnostics options. |
 | `GraphDiagnostic` | Structured duplicate-conflict or broken-reference diagnostic. |
 | `DuplicateStrategy` | Duplicate policy: `merge`, `error`, `first`, or `last`. |
@@ -32,8 +29,6 @@ description: Reference for graph, validation, temporal, serialization, content, 
 | --- | --- |
 | `validateSchema(schema, data, options?)` | Parses with `throw`, `warn`, or `silent` failure handling. |
 | `safeValidateSchema(schema, data, options?)` | Returns a discriminated success/error result. |
-| `formatZodError(error, entityType?, data?)` | Produces the terminal-friendly diagnostic string. |
-| `normalizeZodIssues(error, entityType?, data?)` | Produces stable structured issue details. |
 | `SchemaValidationError` | Error with `code`, `entityType`, raw `issues`, normalized `details`, and formatted message. |
 | `GoogleArticle`, `GoogleRecipe` | Opt-in builders for the implemented Google consumer profiles. |
 | `GoogleArticleSchema`, `GoogleRecipeSchema` | Composable profile schemas; passing them does not guarantee rich-result eligibility. |
@@ -48,12 +43,11 @@ description: Reference for graph, validation, temporal, serialization, content, 
 | `formatIsoDate(input)` | Returns normalized ISO date/time output or throws. |
 | `addDuration(date, duration)` | Adds a duration and returns an ISO string. |
 | `diffDuration(start, end)` | Returns the difference as an ISO duration. |
-| `IsoDateSchema`, `IsoDurationSchema` | Reusable transforming Zod schemas. |
 | `DurationInput`, `DurationObject` | Public duration input types. |
 
 `referenceDate` controls only a direct `parseDate()` call. Relative values passed through
-builders, `IsoDateSchema`, or `formatIsoDate()` use the live execution-time clock; prefer
-explicit ISO input for reproducible output.
+builders or `formatIsoDate()` use the live execution-time clock; prefer explicit ISO input
+for reproducible output.
 
 ## Serialization
 
@@ -70,13 +64,7 @@ explicit ISO input for reproducible output.
 | `EntityReference<T>` | Typed relation input: a compatible entity, an ID string, or an explicit `{ '@id' }` object. |
 | `EntityIdReference` | Shape of an explicit `{ '@id': string }` relation pointer. |
 | `entityRef({ schemas, types?, fallbackType? })` | Creates the shared Zod relation schema used by built-in builders. |
-| `isIdReference(value)` | Detects fragment, path, HTTP(S), and URN reference strings. |
-| `EntityIdSchema` | Trims and validates a non-empty JSON-LD entity identifier; whitespace-only IDs are rejected. |
-| `WebUrlSchema` | Validates an absolute HTTP(S) URL. |
-| `RelativeOrAbsoluteUrlSchema` | Validates an absolute URI or relative URL/path. |
-| `createEntityRef(schema, fallbackType?)` | Deprecated compatibility alias for `entityRef()`. |
 | `createSearchAction(options)` | Creates a SearchAction and EntryPoint for a URL template. |
-| `SpeakableSchema` | Validates and transforms CSS selectors or XPath into SpeakableSpecification. |
 
 Use a specialized schema for each property instead of accepting every Schema.org entity:
 

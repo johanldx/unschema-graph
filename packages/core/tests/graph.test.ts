@@ -2,11 +2,10 @@ import {
   buildJsonLdGraph,
   DuplicateEntityError,
   type GraphDiagnostic,
-  resolveEntityIds,
-  resolveId,
   serializeJsonLd,
 } from '@unschema-graph/core';
 import { describe, expect, it } from 'vitest';
+import { resolveEntityIds, resolveId } from '../src/core/graph.js';
 
 describe('core/graph', () => {
   it.each([

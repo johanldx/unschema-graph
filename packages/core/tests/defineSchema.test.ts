@@ -7,14 +7,14 @@ import {
   LocalBusinessSchema,
   Organization,
   PostalAddressSchema,
-  SchemaTypeSchema,
   SchemaValidationError,
-  TypedEntitySchema,
   withAdditionalProperties,
   withAdditionalTypes,
 } from '@unschema-graph/core';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
+import { SchemaTypeSchema } from '../src/core/schemaType.js';
+import { TypedEntitySchema } from '../src/schemas/common/reference.js';
 
 describe('core/defineSchema', () => {
   const SoftwareApplication = defineSchema(

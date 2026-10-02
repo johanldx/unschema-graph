@@ -2,10 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   Article,
   buildJsonLdGraph,
-  createEntityRef,
-  entityRef,
   Organization,
-  OrganizationSchema,
   Person,
   Product,
   serializeJsonLd,
@@ -149,16 +146,5 @@ describe('0.x to v1 migration & backwards compatibility', () => {
       name: 'Acme Corp',
     });
     expect(productWithStringBrand.brand).toEqual(productWithBrand.brand);
-  });
-
-  it('keeps createEntityRef functioning identically to entityRef', () => {
-    const legacyRef = createEntityRef(OrganizationSchema, 'Organization');
-    const modernRef = entityRef({ schemas: [OrganizationSchema], fallbackType: 'Organization' });
-
-    const org = Organization({ '@id': '#org', name: 'Test Org' });
-    expect(legacyRef.parse(org)).toEqual(modernRef.parse(org));
-    expect(legacyRef.parse('#org')).toEqual(modernRef.parse('#org'));
-    expect(legacyRef.parse({ '@id': '#org' })).toEqual(modernRef.parse({ '@id': '#org' }));
-    expect(legacyRef.parse('Plain Org')).toEqual(modernRef.parse('Plain Org'));
   });
 });

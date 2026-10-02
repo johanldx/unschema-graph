@@ -189,10 +189,3 @@ export function entityRef<const TSchemas extends EntitySchemas>({
 
 /** Generic relationship schema retained for value-object unions and custom schemas. */
 export const EntityReferenceSchema = entityRef({ schemas: [TypedEntitySchema] });
-
-/**
- * @deprecated Use `entityRef({ schemas: [entitySchema], fallbackType })`.
- */
-export function createEntityRef<T extends z.ZodTypeAny>(entitySchema: T, fallbackType?: string) {
-  return entityRef({ schemas: [entitySchema], fallbackType });
-}

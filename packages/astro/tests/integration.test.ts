@@ -5,8 +5,6 @@ import {
   GoogleArticle,
   getGlobalConfig,
   resetGlobalConfig,
-  resolveEntityIds,
-  resolveId,
   setGlobalConfig,
 } from '@unschema-graph/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -18,61 +16,6 @@ describe('Astro Integration & @id Resolution', () => {
 
   afterEach(() => {
     resetGlobalConfig();
-  });
-
-  describe('resolveId', () => {
-    it('resolves hash @ids using baseUrl', () => {
-      expect(resolveId('#organization', 'https://example.com')).toBe(
-        'https://example.com/#organization'
-      );
-      expect(resolveId('#organization', 'https://example.com/')).toBe(
-        'https://example.com/#organization'
-      );
-    });
-
-    it('resolves relative path @ids', () => {
-      expect(resolveId('/authors/johan#person', 'https://example.com')).toBe(
-        'https://example.com/authors/johan#person'
-      );
-      expect(resolveId('blog/post#article', 'https://example.com')).toBe(
-        'https://example.com/blog/post#article'
-      );
-    });
-
-    it('leaves absolute URIs unmodified', () => {
-      expect(resolveId('https://schema.org/Person', 'https://example.com')).toBe(
-        'https://schema.org/Person'
-      );
-      expect(resolveId('urn:isbn:0451450523', 'https://example.com')).toBe('urn:isbn:0451450523');
-      expect(resolveId('mailto:info@example.com', 'https://example.com')).toBe(
-        'mailto:info@example.com'
-      );
-      expect(resolveId('did:example:123', 'https://example.com')).toBe('did:example:123');
-    });
-
-    it('returns original id if baseUrl is undefined', () => {
-      expect(resolveId('#org')).toBe('#org');
-    });
-  });
-
-  describe('resolveEntityIds (deep)', () => {
-    it('recursively resolves nested @id properties', () => {
-      const article = {
-        '@type': 'Article',
-        '@id': '#article',
-        publisher: { '@id': '#organization' },
-        authors: [{ '@id': '/authors/johan#person', name: 'Johan' }],
-      };
-
-      const resolved = resolveEntityIds(article, 'https://mon-site.fr');
-
-      expect(resolved).toEqual({
-        '@type': 'Article',
-        '@id': 'https://mon-site.fr/#article',
-        publisher: { '@id': 'https://mon-site.fr/#organization' },
-        authors: [{ '@id': 'https://mon-site.fr/authors/johan#person', name: 'Johan' }],
-      });
-    });
   });
 
   describe('buildJsonLdGraph with baseUrl', () => {

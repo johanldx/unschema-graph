@@ -1,10 +1,6 @@
-import {
-  DataDownload,
-  ProfilePage,
-  RelativeOrAbsoluteUrlSchema,
-  WebUrlSchema,
-} from '@unschema-graph/core';
+import { DataDownload, ProfilePage } from '@unschema-graph/core';
 import { describe, expect, it } from 'vitest';
+import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../src/schemas/common/url.js';
 
 describe('URL schemas', () => {
   it('distinguishes absolute web resources from relative or generic URI values', () => {

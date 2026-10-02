@@ -36,6 +36,16 @@
   },
   "overrides": [
     {
+      "includes": ["**/tests/**/*.test-d.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/tests/**/*.ts"],
       "linter": {
         "rules": {

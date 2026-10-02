@@ -5,8 +5,35 @@ description: Guide de mise à niveau, évolutions architecturales et patterns de
 
 `unschema-graph` 1.0 stabilise l'API publique, introduit les références relationnelles d'entités objets, applique une validation stricte Schema.org avec Zod et apporte une découverte déterministe du graphe.
 
-> **Version 0.9.0 — candidate de stabilisation v1**
-> La version **0.9.0** est la publication de stabilisation pré-v1. La véritable Release Candidate sera `1.0.0-rc.1`, puis viendra la version stable `1.0.0`. Ce guide couvre les changements utiles depuis les versions pré-1.0 antérieures.
+> **Version 0.10.0 — Gel de l'API publique**
+> La version **0.10.0** fige le contrat d'API publique pour Core, Astro et Svelte avant `1.0.0-rc.1`. Si vous effectuez une mise à niveau depuis `0.9.x` ou des versions antérieures, ce guide détaille ce nettoyage et les évolutions architecturales.
+
+---
+
+## 0.9.x → 0.10.0 — Nettoyage de l'API publique
+
+La version `0.10.0` retire intentionnellement les exports racine accidentels et les primitives internes avant `1.0.0-rc.1`.
+
+### 1. `createEntityRef` supprimé au profit de `entityRef`
+
+L'alias déprécié `createEntityRef` a été supprimé. Utilisez `entityRef` à la place :
+
+```ts
+// Avant (déprécié) :
+import { createEntityRef } from '@unschema-graph/core';
+
+// En 0.10.0+ :
+import { entityRef } from '@unschema-graph/core';
+```
+
+### 2. Helpers internes retirés des exports racine
+
+Les primitives d'implémentation de bas niveau ont été retirées des barils racine pour protéger les évolutions internes :
+
+- `resolveId` et `resolveEntityIds` : passez `baseUrl` à `buildJsonLdGraph(entities, { baseUrl })` au lieu de résoudre manuellement les identifiants.
+- `EntityIdSchema`, `isIdReference`, `IdObjectSchema`, `TypedEntitySchema` et `EntityReferenceSchema` : utilisez la validation des builders, `entityRef()` ou `withAdditionalProperties()` plutôt que de valider directement des chaînes d'ID ou des formats de référence.
+- `normalizeZodIssues` et `formatZodError` : les erreurs de validation sont automatiquement formatées par `SchemaValidationError` levée par les builders et `validateSchema()`.
+- Les schémas internes communs (`WebUrlSchema`, `RelativeOrAbsoluteUrlSchema`, `SearchActionSchema`, `SpeakableSchema`, `ImageUrlOrObject`, `IsoDateSchema`, `IsoDurationSchema`) ne font plus partie de l’API publique : utilisez les APIs haut niveau documentées comme `createSearchAction()`, `ImageObject()`, `formatIsoDate()` et `formatIsoDuration()` lorsque cela s’applique.
 
 ---
 

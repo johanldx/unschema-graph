@@ -1,10 +1,175 @@
-export * from './config.js';
-export * from './core/defineSchema.js';
-export * from './core/duration.js';
-export * from './core/graph.js';
-export * from './core/schemaType.js';
-export * from './core/serialize.js';
-export * from './core/temporal.js';
-export * from './core/validator.js';
-export * from './schemas/index.js';
-export * from './types/index.js';
+// Configuration
+export {
+  getGlobalConfig,
+  resetGlobalConfig,
+  SCHEMA_ORG_BASELINE,
+  setGlobalConfig,
+} from './config.js';
+
+// Schema definition & extension
+export {
+  defineSchema,
+  type SchemaBuilder,
+  type SchemaInput,
+  type SchemaOutput,
+  withAdditionalProperties,
+  withAdditionalTypes,
+} from './core/defineSchema.js';
+// Graph resolution
+export {
+  buildJsonLdGraph,
+  DuplicateEntityError,
+  type DuplicateStrategy,
+  type GraphDiagnostic,
+  type GraphOptions,
+} from './core/graph.js';
+// Serialization
+export {
+  escapeJsonLd,
+  type SerializeOptions,
+  serializeJsonLd,
+} from './core/serialize.js';
+// Temporal / duration
+export {
+  addDuration,
+  type DurationInput,
+  type DurationObject,
+  diffDuration,
+  formatIsoDate,
+  formatIsoDuration,
+  parseDate,
+  parseDurationToMs,
+} from './core/temporal.js';
+
+// Validation
+export {
+  safeValidateSchema,
+  validateSchema,
+} from './core/validator.js';
+export {
+  type EntityRefOptions,
+  entityRef,
+} from './schemas/common/reference.js';
+export {
+  createSearchAction,
+  type SearchActionOptions,
+} from './schemas/common/searchAction.js';
+// 51 Curated Schema.org Builders & 2 Google Profile Builders
+export {
+  AggregateOffer,
+  AggregateOfferSchema,
+  AggregateRating,
+  AggregateRatingSchema,
+  Answer,
+  AnswerSchema,
+  // Content & Creative Works
+  Article,
+  ArticleSchema,
+  BlogPosting,
+  Book,
+  BookSchema,
+  BreadcrumbList,
+  BreadcrumbListSchema,
+  Clip,
+  ClipSchema,
+  Comment,
+  CommentSchema,
+  // Identity & Places
+  ContactPoint,
+  ContactPointSchema,
+  Course,
+  CourseSchema,
+  DataDownload,
+  DataDownloadSchema,
+  Dataset,
+  DatasetSchema,
+  DiscussionForumPosting,
+  DiscussionForumPostingSchema,
+  Event,
+  EventSchema,
+  FAQPage,
+  FAQPageSchema,
+  GeoCoordinates,
+  GeoCoordinatesSchema,
+  GoogleArticle,
+  GoogleArticleSchema,
+  GoogleRecipe,
+  GoogleRecipeSchema,
+  Hotel,
+  HowTo,
+  HowToSchema,
+  HowToSection,
+  HowToSectionSchema,
+  HowToStep,
+  HowToStepSchema,
+  ImageObject,
+  ImageObjectSchema,
+  ItemList,
+  ItemListSchema,
+  // Commerce & Service
+  JobPosting,
+  JobPostingSchema,
+  ListItem,
+  ListItemSchema,
+  LocalBusiness,
+  LocalBusinessSchema,
+  LodgingBusiness,
+  LodgingBusinessSchema,
+  MobileApplication,
+  Movie,
+  MovieSchema,
+  NewsArticle,
+  Offer,
+  OfferSchema,
+  Organization,
+  OrganizationSchema,
+  Person,
+  PersonSchema,
+  PostalAddress,
+  PostalAddressSchema,
+  Product,
+  ProductSchema,
+  ProfilePage,
+  ProfilePageSchema,
+  QAPage,
+  QAPageSchema,
+  QAQuestion,
+  QAQuestionSchema,
+  Question,
+  QuestionSchema,
+  Rating,
+  RatingSchema,
+  Recipe,
+  RecipeSchema,
+  Restaurant,
+  RestaurantSchema,
+  Review,
+  ReviewSchema,
+  Service,
+  ServiceSchema,
+  SoftwareApplication,
+  SoftwareApplicationSchema,
+  Store,
+  VacationRental,
+  VideoObject,
+  VideoObjectSchema,
+  WebApplication,
+  WebPage,
+  WebPageSchema,
+  WebSite,
+  WebSiteSchema,
+} from './schemas/index.js';
+export {
+  type EntityIdReference,
+  type EntityReference,
+  type SchemaDiagnostic,
+  type SchemaGraphOptions,
+  type SchemaOrgEntity,
+  type SchemaProps,
+  SchemaValidationError,
+  type SchemaValidationErrorCode,
+  type SchemaValidationIssue,
+  type SchemaValidationResult,
+  type Severity,
+  type ValidationOptions,
+} from './types/index.js';

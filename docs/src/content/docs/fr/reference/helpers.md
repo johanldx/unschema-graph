@@ -10,7 +10,6 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | `defineSchema(type, schema, defaults?)` | Crée un builder strict et appelable depuis un schéma Zod. |
 | `withAdditionalProperties(entity, properties)` | Ajoute des propriétés choisies après validation, sans remplacer `@type` ou `@id`. |
 | `withAdditionalTypes(entity, types)` | Ajoute des types Schema.org secondaires en conservant le type principal. |
-| `SchemaTypeSchema`, `normalizeSchemaTypes()` | Garantissent un `@type` non vide, dédupliqué et stable. |
 | `SchemaBuilder` | Interface appelable avec `.schema`, `.entityType` et `.safeParse()`. |
 | `SchemaInput`, `SchemaOutput` | Infère les entrées et sorties depuis un schéma Zod. |
 
@@ -19,8 +18,6 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | Export | Rôle |
 | --- | --- |
 | `buildJsonLdGraph(items, options?)` | Aplatit, résout, déduplique et encapsule les entités. |
-| `resolveId(id, baseUrl?)` | Résout un identifiant relatif depuis une URL canonique. |
-| `resolveEntityIds(value, baseUrl?)` | Résout récursivement les valeurs `@id` explicites dans une copie. |
 | `GraphOptions` | Options d’encapsulation, résolution d’ID, doublons et diagnostics. |
 | `GraphDiagnostic` | Diagnostic structuré de conflit ou référence cassée. |
 | `DuplicateStrategy` | Politique de doublon : `merge`, `error`, `first` ou `last`. |
@@ -32,8 +29,6 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | --- | --- |
 | `validateSchema(schema, data, options?)` | Analyse avec les modes `throw`, `warn` ou `silent`. |
 | `safeValidateSchema(schema, data, options?)` | Retourne une union discriminée succès/erreur. |
-| `formatZodError(error, entityType?, data?)` | Produit le diagnostic lisible dans le terminal. |
-| `normalizeZodIssues(error, entityType?, data?)` | Produit des détails d’erreur structurés et stables. |
 | `SchemaValidationError` | Erreur avec `code`, `entityType`, `issues`, `details` et message formaté. |
 | `GoogleArticle`, `GoogleRecipe` | Builders opt-in des profils consommateurs Google implémentés. |
 | `GoogleArticleSchema`, `GoogleRecipeSchema` | Schémas de profils composables, sans garantie d’éligibilité aux résultats enrichis. |
@@ -48,12 +43,11 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | `formatIsoDate(input)` | Retourne une date ISO normalisée ou lève une erreur. |
 | `addDuration(date, duration)` | Ajoute une durée et retourne une chaîne ISO. |
 | `diffDuration(start, end)` | Retourne la différence comme durée ISO. |
-| `IsoDateSchema`, `IsoDurationSchema` | Schémas Zod de transformation réutilisables. |
 | `DurationInput`, `DurationObject` | Types publics d’entrée des durées. |
 
 `referenceDate` ne contrôle qu’un appel direct à `parseDate()`. Les valeurs relatives
-transmises aux builders, à `IsoDateSchema` ou à `formatIsoDate()` utilisent l’horloge réelle
-au moment de l’exécution ; préférez une entrée ISO explicite pour une sortie reproductible.
+transmises aux builders ou à `formatIsoDate()` utilisent l’horloge réelle au moment
+de l’exécution ; préférez une entrée ISO explicite pour une sortie reproductible.
 
 ## Sérialisation
 
@@ -70,13 +64,7 @@ au moment de l’exécution ; préférez une entrée ISO explicite pour une sort
 | `EntityReference<T>` | Entrée relationnelle typée : entité compatible, chaîne d’identifiant ou objet `{ '@id' }` explicite. |
 | `EntityIdReference` | Forme d’un pointeur relationnel explicite `{ '@id': string }`. |
 | `entityRef({ schemas, types?, fallbackType? })` | Crée le schéma Zod relationnel partagé par les builders intégrés. |
-| `isIdReference(value)` | Détecte les fragments, chemins, URL HTTP(S) et URN. |
-| `EntityIdSchema` | Nettoie et valide un identifiant d’entité JSON-LD non vide ; les identifiants composés uniquement d’espaces sont rejetés. |
-| `WebUrlSchema` | Valide une URL HTTP(S) absolue. |
-| `RelativeOrAbsoluteUrlSchema` | Valide une URI absolue ou une URL/chemin relatif. |
-| `createEntityRef(schema, fallbackType?)` | Alias de compatibilité déprécié de `entityRef()`. |
 | `createSearchAction(options)` | Crée une SearchAction et son EntryPoint. |
-| `SpeakableSchema` | Valide et convertit des sélecteurs CSS ou XPath en SpeakableSpecification. |
 
 Utilisez un schéma spécialisé pour chaque propriété plutôt que d’accepter toute entité
 Schema.org :
