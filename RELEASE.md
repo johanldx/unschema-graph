@@ -8,9 +8,21 @@ This document defines the versioning policy, quality gates, and release procedur
 
 All publishable packages (`@unschema-graph/core`, `@unschema-graph/astro`, `@unschema-graph/svelte`) follow [Semantic Versioning 2.0.0](https://semver.org/):
 
-- **PATCH** (`0.10.x` / `1.0.x`): Bug fixes, internal performance optimizations, documentation adjustments, without changing public API signatures or making documented valid input invalid.
-- **MINOR** (`0.x.0` / `1.x.0`): Backward-compatible additions (new Schema.org builders, optional schema properties, new utility helpers, new documented entry points).
-- **MAJOR** (`x.0.0`): Breaking changes (removal/renaming of public symbols, changing output AST/JSON-LD structure, rejecting previously valid inputs, changing graph resolution semantics).
+### Pre-1.0 policy
+
+Before `1.0.0`, the public API is still stabilizing:
+
+- `0.x.y` PATCH releases are reserved for bug fixes and documentation/internal changes.
+- `0.x.0` MINOR releases may include documented breaking API changes when required to prepare the stable v1 contract (such as the `0.10.0` public API freeze).
+- Breaking changes must be explicitly described in migration notes and Changesets.
+
+### 1.x+ policy
+
+From `1.0.0` onward:
+
+- **PATCH**: Backward-compatible bug fixes without changing public API signatures or making documented valid input invalid.
+- **MINOR**: Backward-compatible additions (new Schema.org builders, optional schema properties, new utility helpers, new documented entry points).
+- **MAJOR**: Breaking changes (removal/renaming of public symbols, changing output AST/JSON-LD structure, rejecting previously valid inputs, changing graph resolution semantics).
 
 ### Public API Surface
 

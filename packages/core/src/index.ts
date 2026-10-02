@@ -121,7 +121,6 @@ export {
   NewsArticle,
   Offer,
   OfferSchema,
-  OpeningHoursSpecificationSchema,
   Organization,
   OrganizationSchema,
   Person,

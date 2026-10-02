@@ -33,7 +33,7 @@ Les primitives d'implémentation de bas niveau ont été retirées des barils ra
 - `resolveId` et `resolveEntityIds` : passez `baseUrl` à `buildJsonLdGraph(entities, { baseUrl })` au lieu de résoudre manuellement les identifiants.
 - `EntityIdSchema`, `isIdReference`, `IdObjectSchema`, `TypedEntitySchema` et `EntityReferenceSchema` : utilisez la validation des builders, `entityRef()` ou `withAdditionalProperties()` plutôt que de valider directement des chaînes d'ID ou des formats de référence.
 - `normalizeZodIssues` et `formatZodError` : les erreurs de validation sont automatiquement formatées par `SchemaValidationError` levée par les builders et `validateSchema()`.
-- Schémas internes communs (`WebUrlSchema`, `RelativeOrAbsoluteUrlSchema`, `SearchActionSchema`, `SpeakableSchema`, `ImageUrlOrObject`, `IsoDateSchema`, `IsoDurationSchema`) : utilisez les builders de haut niveau (`SearchAction()`, `ImageObject()`) ou les helpers temporels (`formatIsoDate()`, `formatIsoDuration()`).
+- Les schémas internes communs (`WebUrlSchema`, `RelativeOrAbsoluteUrlSchema`, `SearchActionSchema`, `SpeakableSchema`, `ImageUrlOrObject`, `IsoDateSchema`, `IsoDurationSchema`) ne font plus partie de l’API publique : utilisez les APIs haut niveau documentées comme `createSearchAction()`, `ImageObject()`, `formatIsoDate()` et `formatIsoDuration()` lorsque cela s’applique.
 
 ---
 

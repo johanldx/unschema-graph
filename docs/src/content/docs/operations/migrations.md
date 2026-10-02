@@ -33,7 +33,7 @@ Lower-level implementation primitives have been removed from the package roots t
 - `resolveId` and `resolveEntityIds`: pass `baseUrl` to `buildJsonLdGraph(entities, { baseUrl })` instead of resolving IDs manually.
 - `EntityIdSchema`, `isIdReference`, `IdObjectSchema`, `TypedEntitySchema`, and `EntityReferenceSchema`: use builder validation, `entityRef()`, or `withAdditionalProperties()` instead of validating ID strings or reference shapes directly.
 - `normalizeZodIssues` and `formatZodError`: validation errors are automatically formatted by `SchemaValidationError` thrown by builders and `validateSchema()`.
-- Common internal schemas (`WebUrlSchema`, `RelativeOrAbsoluteUrlSchema`, `SearchActionSchema`, `SpeakableSchema`, `ImageUrlOrObject`, `IsoDateSchema`, `IsoDurationSchema`): use high-level builders (`SearchAction()`, `ImageObject()`) or temporal helpers (`formatIsoDate()`, `formatIsoDuration()`).
+- Common internal schemas (`WebUrlSchema`, `RelativeOrAbsoluteUrlSchema`, `SearchActionSchema`, `SpeakableSchema`, `ImageUrlOrObject`, `IsoDateSchema`, `IsoDurationSchema`): use documented high-level APIs such as `createSearchAction()`, `ImageObject()`, `formatIsoDate()`, and `formatIsoDuration()` where applicable.
 
 ---
 

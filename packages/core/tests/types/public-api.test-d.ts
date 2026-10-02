@@ -41,7 +41,6 @@ import type {
   LodgingBusinessSchema,
   MovieSchema,
   OfferSchema,
-  OpeningHoursSpecificationSchema,
   PersonSchema,
   PostalAddressSchema,
   ProductSchema,

@@ -87,24 +87,32 @@ parseDate                    formatIsoDate
 addDuration                  diffDuration
 ```
 
-The contract also includes every builder and corresponding schema in the
-[builder catalog](/reference/builders/), the `SchemaValidationError` class, and these
-public utility types:
+The contract also includes the `SCHEMA_ORG_BASELINE` constant, `DuplicateEntityError`,
+every builder and corresponding schema in the [builder catalog](/reference/builders/),
+the `SchemaValidationError` class, and these public utility types:
 
 ```text
 SchemaInput                  SchemaOutput
 SchemaBuilder                SchemaOrgEntity
 SchemaProps                  SchemaGraphOptions
 ValidationOptions            GraphOptions
+GraphDiagnostic              DuplicateStrategy
 SerializeOptions             Severity
 SchemaValidationErrorCode    SchemaValidationIssue
 SchemaValidationResult       DurationInput
 DurationObject               SearchActionOptions
-EntityReference              EntityIdReference
+EntityRefOptions             EntityReference
+EntityIdReference
 ```
 
 The `@unschema-graph/core/audit` contract includes `auditHtmlContent()`,
-`auditHtmlDirectory()`, `getHtmlFiles()`, `AuditError` and `AuditResult`.
+`auditHtmlDirectory()`, `getHtmlFiles()`, and these audit types:
+
+```text
+AuditDiagnostic              AuditDiagnosticCode
+AuditError                   AuditResult
+AuditContentResult
+```
 
 The Astro-specific contract includes `Schema`, `schemaGraph()`, `toArticle()`,
 `toBlogPosting()`, `toNewsArticle()`, `ContentEntryLike` and `ArticleMappingOptions`.
