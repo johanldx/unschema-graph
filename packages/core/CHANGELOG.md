@@ -1,5 +1,11 @@
 # @unschema-graph/core
 
+## 0.10.0
+
+### Minor Changes
+
+- e93f389: Finalize the pre-v1 public API surface: replace accidental root exports with an explicit supported contract, remove deprecated createEntityRef, and align Astro/Svelte re-exports and documentation ahead of 1.0.0-rc.1.
+
 ## 0.9.0
 
 ### Minor Changes
