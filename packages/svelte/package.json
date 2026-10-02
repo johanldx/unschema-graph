@@ -1,6 +1,6 @@
 {
   "name": "@unschema-graph/svelte",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Svelte 5 Schema component and full unschema-graph core tooling for Svelte and SvelteKit.",
   "type": "module",
   "main": "./dist/index.js",
