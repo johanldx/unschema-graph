@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/johanldx/unschema-graph/releases"><img src="https://img.shields.io/badge/version-v0.9.0_(stabilization)-6366f1.svg?style=flat-square" alt="Version 0.9.0" /></a>
+  <a href="https://github.com/johanldx/unschema-graph/releases"><img src="https://img.shields.io/badge/version-v0.10.0_(API_freeze)-6366f1.svg?style=flat-square" alt="Version 0.10.0" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/core"><img src="https://img.shields.io/npm/v/@unschema-graph/core?color=6366f1&label=%40unschema-graph%2Fcore&style=flat-square" alt="Core npm version" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/astro"><img src="https://img.shields.io/npm/v/@unschema-graph/astro?color=f97316&label=%40unschema-graph%2Fastro&style=flat-square" alt="Astro npm version" /></a>
   <a href="https://www.npmjs.com/package/@unschema-graph/svelte"><img src="https://img.shields.io/npm/v/@unschema-graph/svelte?color=ff3e00&label=%40unschema-graph%2Fsvelte&style=flat-square" alt="Svelte npm version" /></a>
@@ -103,9 +103,9 @@ const jsonLd = serializeJsonLd(graph, { pretty: true });
 
 ---
 
-## 🚀 Key Advantages in Version 0.9.0
+## 🚀 Key Advantages in Version 0.10.0
 
-`unschema-graph` **v0.9.0** is the **v1 stabilization candidate**. The actual prerelease milestone is `1.0.0-rc.1`, followed by stable `1.0.0`.
+`unschema-graph` **v0.10.0** freezes the intended public API surface ahead of `1.0.0-rc.1`, while preserving the stabilized graph, validation, serialization, Astro and Svelte behavior introduced during the 0.9 cycle.
 
 ### 1. 🛡️ 51 Schema.org Builders Powered by Zod
 The curated builder catalog targets the Schema.org 30.1 vocabulary baseline and validates inputs synchronously. Explicitly named profiles such as `GoogleArticle` and `GoogleRecipe` add library-maintained Google constraints without implying rich-result eligibility.
