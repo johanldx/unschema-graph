@@ -39,7 +39,7 @@ type AggregateOfferOutput = SchemaOutput<typeof AggregateOfferSchema, 'Aggregate
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `lowPrice` | number \| string | Yes | — |
 | `highPrice` | number \| string | No | — |
 | `priceCurrency` | string | Yes | minimum length: 3; maximum length: 3 |

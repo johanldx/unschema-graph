@@ -35,9 +35,9 @@ préproduction et de production :
 | `https://profiles.example/ada` | identité absolue inchangée |
 | `urn:isbn:9780000000000` | identité URN inchangée |
 
-Astro utilise la prop du composant, puis `Astro.site`, puis la configuration globale de
-l'intégration. Svelte exige la prop `baseUrl` du composant. Core utilise la valeur
-`baseUrl` passée à `buildJsonLdGraph()`.
+Astro utilise la prop du composant, puis le défaut intégration/global, puis `Astro.site`.
+Svelte utilise sa prop puis le défaut global. Core utilise uniquement la `baseUrl` explicite
+transmise à `buildJsonLdGraph()`.
 
 ## Référencer une entité existante
 

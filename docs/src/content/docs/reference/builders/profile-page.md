@@ -40,9 +40,9 @@ type ProfilePageOutput = SchemaOutput<typeof ProfilePageSchema, 'ProfilePage'>;
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
-| `mainEntity` | object | Yes | — |
+| `mainEntity` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | Yes | — |
 | `name` | string | No | — |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 | `description` | string | No | — |
 | `dateCreated` | string \| number \| Date | No | non-empty |
 | `dateModified` | string \| number \| Date | No | non-empty |
@@ -58,6 +58,7 @@ import { ProfilePage } from '@unschema-graph/core';
 
 const entity = ProfilePage({
   "mainEntity": {
+    "@type": "Person",
     "name": "Ada Lovelace"
   }
 });
@@ -69,6 +70,7 @@ const entity = ProfilePage({
 {
   "@type": "ProfilePage",
   "mainEntity": {
+    "@type": "Person",
     "name": "Ada Lovelace"
   }
 }

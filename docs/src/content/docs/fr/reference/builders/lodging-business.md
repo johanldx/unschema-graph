@@ -41,23 +41,21 @@ type LodgingBusinessOutput = SchemaOutput<typeof LodgingBusinessSchema, 'Lodging
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
-| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Oui | — |
+| `address` | string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/fr/reference/builders/postal-address/) \| EntityReference | Oui | non-empty |
 | `image` | string \| [ImageObject](/fr/reference/builders/image-object/) | Non | non-empty |
 | `telephone` | string | Non | — |
 | `priceRange` | string | Non | — |
-| `url` | string | Non | — |
-| `geo` | [GeoCoordinates](/fr/reference/builders/geo-coordinates/) | Non | — |
+| `url` | string | Non | non-empty |
+| `geo` | [GeoCoordinates](/fr/reference/builders/geo-coordinates/) \| string \| [GeoCoordinates](/fr/reference/builders/geo-coordinates/) | Non | non-empty |
 | `openingHoursSpecification` | object \| Array<object> | Non | — |
 | `currenciesAccepted` | string | Non | — |
 | `paymentAccepted` | string | Non | — |
-| `sameAs` | string \| Array<string> | Non | — |
-| `servesCuisine` | string \| Array<string> | Non | — |
-| `menu` | string | Non | — |
+| `sameAs` | string \| Array<string> | Non | non-empty |
 | `checkinTime` | string | Non | — |
 | `checkoutTime` | string | Non | — |
 | `numberOfRooms` | number | Non | integer; greater than 0; maximum: 9007199254740991 |
 | `petsAllowed` | boolean \| string | Non | — |
-| `amenityFeature` | string \| Array<string> \| object \| Array<object> | Non | — |
+| `amenityFeature` | string \| Array<string> \| string \| object \| Array<string \| object> | Non | non-empty |
 | `starRating` | object | Non | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder

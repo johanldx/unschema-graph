@@ -39,7 +39,7 @@ type PostalAddressOutput = SchemaOutput<typeof PostalAddressSchema, 'PostalAddre
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `streetAddress` | string | No | — |
 | `addressLocality` | string | No | — |
 | `addressRegion` | string | No | — |

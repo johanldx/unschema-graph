@@ -39,20 +39,20 @@ type PersonOutput = SchemaOutput<typeof PersonSchema, 'Person'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `givenName` | string | No | — |
 | `familyName` | string | No | — |
 | `additionalName` | string | No | — |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 | `image` | string \| [ImageObject](/reference/builders/image-object/) | No | non-empty |
 | `jobTitle` | string | No | — |
-| `worksFor` | string \| object | No | — |
-| `sameAs` | string \| Array<string> | No | — |
+| `worksFor` | unknown | No | — |
+| `sameAs` | string \| Array<string> | No | non-empty |
 | `email` | string | No | format: email |
 | `telephone` | string | No | — |
 | `description` | string | No | — |
-| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | No | — |
+| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'Person'`.

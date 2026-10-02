@@ -4,12 +4,22 @@ import {
   BreadcrumbList,
   FAQPage,
   Organization,
+  resetGlobalConfig,
+  setGlobalConfig,
   withAdditionalTypes,
 } from '@unschema-graph/core';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('Schema.astro Component Rendering', () => {
+  beforeEach(() => {
+    resetGlobalConfig();
+  });
+
+  afterEach(() => {
+    resetGlobalConfig();
+  });
+
   it('renders a valid <script type="application/ld+json"> tag into HTML', async () => {
     const container = await AstroContainer.create();
 
@@ -99,6 +109,25 @@ describe('Schema.astro Component Rendering', () => {
     expect(html).toContain('"@id":"https://mon-site.fr/#faq"');
   });
 
+  it('gives component props precedence over global integration defaults', async () => {
+    const container = await AstroContainer.create();
+    setGlobalConfig({ baseUrl: 'https://global.example', inLanguage: 'fr-FR' });
+    const article = Article({ '@id': '#article', headline: 'Explicit rendering options' });
+
+    const html = await container.renderToString(Schema, {
+      props: {
+        item: article,
+        baseUrl: 'https://prop.example',
+        inLanguage: 'en-GB',
+      },
+    });
+
+    expect(html).toContain('"@id":"https://prop.example/#article"');
+    expect(html).toContain('"inLanguage":"en-GB"');
+    expect(html).not.toContain('https://global.example');
+    expect(html).not.toContain('fr-FR');
+  });
+
   it('applies anti-XSS protection to rendered script tag', async () => {
     const container = await AstroContainer.create();
 
@@ -158,5 +187,64 @@ describe('Schema.astro Component Rendering', () => {
 
     expect(html).toContain('"inLanguage":"en"');
     expect(article.inLanguage).toBeUndefined();
+  });
+
+  it('renders stable zero-JS output with deterministic global defaults and no mutation', async () => {
+    const container = await AstroContainer.create();
+    setGlobalConfig({ baseUrl: 'https://configured.example', inLanguage: 'fr-FR' });
+    const article = Object.freeze(
+      Article({
+        '@id': '#article',
+        headline: 'Stable article',
+        author: 'Ada',
+      })
+    );
+
+    const first = await container.renderToString(Schema, { props: { item: article } });
+    const second = await container.renderToString(Schema, { props: { item: article } });
+
+    expect(second).toBe(first);
+    expect(first).toContain('"@id":"https://configured.example/#article"');
+    expect(first).toContain('"inLanguage":"fr-FR"');
+    expect(first).toContain('data-unschema-base-url="https%3A%2F%2Fconfigured.example"');
+    expect(first).toContain('data-unschema-locale="fr-FR"');
+    expect(first).not.toMatch(/client:|astro-island|type="module"/);
+    expect((first.match(/<script/g) ?? []).length).toBe(1);
+    expect(article['@id']).toBe('#article');
+    expect(article.inLanguage).toBeUndefined();
+  });
+
+  it('exposes merge and broken-reference diagnostics to the dev toolbar safely', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(Schema, {
+      props: {
+        items: [
+          { '@type': 'Organization', '@id': '#org', name: 'First' },
+          { '@type': 'Organization', '@id': '#org', name: 'Second' },
+          { '@type': 'WebSite', publisher: { '@id': '#missing' } },
+        ],
+      },
+    });
+
+    expect(html).toContain('data-unschema-diagnostics=');
+    expect(html).toContain('duplicate-conflict');
+    expect(html).toContain('broken-reference');
+    expect((html.match(/<script/g) ?? []).length).toBe(1);
+  });
+
+  it('escapes untrusted debug metadata as well as JSON-LD content', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(Schema, {
+      props: {
+        item: Article({ headline: 'Safe' }),
+        baseUrl: 'https://example.com/--><script>alert(1)</script>',
+        inLanguage: '--><img src=x onerror=alert(1)>',
+        debug: true,
+      },
+    });
+
+    expect((html.match(/<script/g) ?? []).length).toBe(1);
+    expect(html).not.toContain('<img src=x');
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
   });
 });

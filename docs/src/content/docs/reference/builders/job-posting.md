@@ -43,13 +43,13 @@ type JobPostingOutput = SchemaOutput<typeof JobPostingSchema, 'JobPosting'>;
 | `title` | string | Yes | non-empty |
 | `description` | string | Yes | non-empty |
 | `datePosted` | string \| number \| Date | Yes | non-empty |
-| `hiringOrganization` | string \| [Organization](/reference/builders/organization/) \| EntityReference | Yes | non-empty |
-| `jobLocation` | Place \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference \| string | No | — |
+| `hiringOrganization` | [Organization](/reference/builders/organization/) \| EntityReference | Yes | — |
+| `jobLocation` | Place \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference \| string \| string \| Place \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | No | non-empty |
 | `validThrough` | string \| number \| Date | No | non-empty |
 | `employmentType` | string \| Array<string> | No | — |
 | `jobLocationType` | string | No | — |
-| `applicantLocationRequirements` | string \| object | No | — |
-| `baseSalary` | object | No | — |
+| `applicantLocationRequirements` | string \| string \| object | No | non-empty |
+| `baseSalary` | object \| string \| object | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'JobPosting'`.

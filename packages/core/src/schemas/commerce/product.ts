@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema } from '../../core/temporal.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { createEntityRef } from '../common/reference.js';
+import { entityRef } from '../common/reference.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 import { AggregateOfferSchema, OfferSchema } from './offer.js';
@@ -11,8 +11,8 @@ import { AggregateRatingSchema, ReviewSchema } from './review.js';
 /**
  * Brand representation: string, Organization, Person, or Brand object.
  */
-const BrandSchema = createEntityRef(
-  z.union([
+const BrandSchema = entityRef({
+  schemas: [
     OrganizationSchema,
     PersonSchema,
     z
@@ -21,12 +21,13 @@ const BrandSchema = createEntityRef(
         name: z.string(),
       })
       .strict(),
-  ]),
-  'Brand'
-);
+  ],
+  types: ['Organization', 'Person', 'Brand'],
+  fallbackType: 'Brand',
+});
 
 /**
- * Zod schema for Schema.org `Product` based on Google Search Central guidelines.
+ * Curated Zod schema for Schema.org `Product`.
  */
 export const ProductSchema = z
   .object({

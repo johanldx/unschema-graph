@@ -1,8 +1,10 @@
 import {
   formatZodError,
+  Product,
   SchemaValidationError,
   safeValidateSchema,
   validateSchema,
+  WebSite,
 } from '@unschema-graph/core';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -96,6 +98,30 @@ describe('core/validator', () => {
       expect(result.data).toBeUndefined();
       expect(result.error).toBeInstanceOf(SchemaValidationError);
       expect(result.error?.entityType).toBe('User');
+    });
+
+    it('returns actionable structured details for invalid entity relationships', () => {
+      const result = WebSite.safeParse({
+        name: 'Acme',
+        url: 'https://example.com',
+        publisher: Product({ name: 'Keyboard' }),
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.details).toEqual([
+        {
+          code: 'custom',
+          path: 'WebSite.publisher',
+          message: 'Invalid entity relationship',
+          expected: 'Organization | Person | @id reference',
+          received: 'Product',
+          suggestion:
+            "Pass Organization(...), Person(...), '#organization', or { '@id': '#organization' }.",
+        },
+      ]);
+      expect(result.error?.message).toContain('Property "WebSite.publisher"');
+      expect(result.error?.message).toContain('Expected: Organization | Person | @id reference');
+      expect(result.error?.message).toContain('Received: Product');
     });
   });
 

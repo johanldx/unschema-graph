@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { EntityIdSchema } from '../common/reference.js';
 
 /**
  * Zod schema for Schema.org `Answer`.
@@ -7,7 +8,7 @@ import { defineSchema } from '../../core/defineSchema.js';
 export const AnswerSchema = z
   .object({
     '@type': z.literal('Answer').default('Answer').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     text: z.string().min(1, 'Property "text" is required for Answer'),
   })
   .strict();
@@ -18,7 +19,7 @@ export const AnswerSchema = z
 export const QuestionSchema = z
   .object({
     '@type': z.literal('Question').default('Question').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     name: z.string().min(1, 'Property "name" (the question) is required for Question'),
     acceptedAnswer: z.union([
       AnswerSchema,
@@ -30,10 +31,12 @@ export const QuestionSchema = z
 /**
  * Simplified shorthand representation for question-answer pairs.
  */
-const SimpleQAPairSchema = z.object({
-  question: z.string().min(1, 'Question string cannot be empty'),
-  answer: z.string().min(1, 'Answer string cannot be empty'),
-});
+const SimpleQAPairSchema = z
+  .object({
+    question: z.string().min(1, 'Question string cannot be empty'),
+    answer: z.string().min(1, 'Answer string cannot be empty'),
+  })
+  .strict();
 
 /**
  * Zod schema for Schema.org `FAQPage`.

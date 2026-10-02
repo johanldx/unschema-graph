@@ -40,7 +40,7 @@ type QAPageOutput = SchemaOutput<typeof QAPageSchema, 'QAPage'>;
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
-| `mainEntity` | object | Yes | — |
+| `mainEntity` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | Yes | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'QAPage'`.

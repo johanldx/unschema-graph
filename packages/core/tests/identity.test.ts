@@ -153,14 +153,50 @@ describe('schemas/identity', () => {
         name: 'Chez Pierre',
         address: '15 Boulevard Saint-Germain, Paris',
         servesCuisine: ['French', 'Bistro'],
+        hasMenu: '/menu',
       });
-      expect(bistro['@type']).toBe('Restaurant');
+      expect(bistro).toMatchObject({
+        '@type': 'Restaurant',
+        servesCuisine: ['French', 'Bistro'],
+        hasMenu: '/menu',
+      });
 
       const boutique = Store({
         name: 'Mode & Style',
         address: '25 Rue de Rivoli, Paris',
       });
       expect(boutique['@type']).toBe('Store');
+    });
+
+    it('keeps food-establishment properties scoped to Restaurant', () => {
+      expect(() =>
+        LocalBusiness({
+          name: 'Generic business',
+          address: '1 Main Street',
+          // @ts-expect-error servesCuisine belongs to FoodEstablishment types
+          servesCuisine: 'French',
+        })
+      ).toThrowError(SchemaValidationError);
+
+      expect(() =>
+        Store({
+          name: 'Generic store',
+          address: '2 Main Street',
+          // @ts-expect-error hasMenu belongs to FoodEstablishment types
+          hasMenu: '/menu',
+        })
+      ).toThrowError(SchemaValidationError);
+    });
+
+    it('rejects the superseded Restaurant.menu property', () => {
+      expect(() =>
+        Restaurant({
+          name: 'Legacy restaurant',
+          address: '3 Main Street',
+          // @ts-expect-error menu was replaced by Schema.org hasMenu
+          menu: '/legacy-menu',
+        })
+      ).toThrowError(SchemaValidationError);
     });
   });
 

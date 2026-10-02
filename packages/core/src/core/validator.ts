@@ -43,6 +43,7 @@ function getValueAtPath(data: unknown, path: readonly PropertyKey[]): unknown {
 
 function formatValue(value: unknown): string {
   if (value === undefined) return 'undefined';
+  if (typeof value === 'string') return value;
   try {
     const serialized = JSON.stringify(value);
     if (serialized === undefined) return String(value);
@@ -50,6 +51,27 @@ function formatValue(value: unknown): string {
   } catch {
     return String(value);
   }
+}
+
+interface EntityRelationDiagnostic {
+  kind: 'entity_relation';
+  expected: string;
+  received: string;
+  suggestion: string;
+}
+
+function getEntityRelationDiagnostic(issue: ZodIssue): EntityRelationDiagnostic | undefined {
+  if (issue.code !== 'custom') return undefined;
+  const params = (issue as ZodIssue & { params?: Record<string, unknown> }).params;
+  if (
+    params?.kind !== 'entity_relation' ||
+    typeof params.expected !== 'string' ||
+    typeof params.received !== 'string' ||
+    typeof params.suggestion !== 'string'
+  ) {
+    return undefined;
+  }
+  return params as unknown as EntityRelationDiagnostic;
 }
 
 function suggestionForIssue(issue: ZodIssue, path: string): string {
@@ -101,15 +123,20 @@ export function normalizeZodIssues(
         : `${entityType}.${propertyPath}`
       : propertyPath;
     const expected = (issue as ZodIssue & { expected?: unknown }).expected;
+    const relationDiagnostic = getEntityRelationDiagnostic(issue);
 
     return [
       {
         code: issue.code,
         path,
         message: issue.message,
-        ...(expected === undefined ? {} : { expected }),
-        received: getValueAtPath(data, issue.path),
-        suggestion: suggestionForIssue(issue, path),
+        ...(relationDiagnostic
+          ? { expected: relationDiagnostic.expected }
+          : expected === undefined
+            ? {}
+            : { expected }),
+        received: relationDiagnostic?.received ?? getValueAtPath(data, issue.path),
+        suggestion: relationDiagnostic?.suggestion ?? suggestionForIssue(issue, path),
       },
     ];
   });

@@ -47,35 +47,20 @@ also covers values loaded from a CMS or API.
 
 ## Entity and identity
 
-The value returned by a builder is an entity. Add `@id` when that entity must be
-referenced from another node or reused across pages.
+The value returned by a builder is an entity. An entity can be used in three ways:
 
-```ts
-const organization = Organization({
-  '@id': '#organization',
-  name: 'Acme Publishing',
-  url: 'https://example.com',
-});
+1. **Top-level graph node:** Add an `@id` when that entity represents an independent identity (like an `Organization`, `WebSite`, `WebPage`, `Article`, or `Person`).
+2. **Entity-object reference:** Pass a builder entity directly to a relation property (such as `publisher: organization` or `isPartOf: website`). TypeScript guarantees property types, and the graph collector automatically hoists the entity into `@graph` while replacing the nested reference with an `{ "@id": "..." }` pointer.
+3. **Inline value object:** Entities without `@id` (such as `PostalAddress`, `GeoCoordinates`, `ContactPoint`, or `AggregateRating`) remain nested inline inside their parent entity because they have no independent identity.
 
-const article = Article({
-  headline: 'Connected structured data',
-  image: 'https://example.com/cover.jpg',
-  datePublished: '2026-09-29',
-  author: 'Ada Lovelace',
-  publisher: '#organization',
-});
-```
+You can also use string shorthands like `publisher: '#organization'` or `{ "@id": "#organization" }`, but passing typed entity objects provides compile-time safety and automatic graph discovery.
 
-`publisher: '#organization'` becomes an `@id` reference instead of a second embedded
-copy of the organization.
+## The recommended pattern: Automatic graph discovery
 
-## A realistic page graph
-
-One page can describe the site, publisher, page, and article together:
+Instead of manually maintaining an array of every entity on the page, connect your entities with entity-object references and pass only the root entity to `buildJsonLdGraph`:
 
 ```ts
 import {
-  Article,
   Organization,
   WebPage,
   WebSite,
@@ -84,41 +69,74 @@ import {
 
 const organization = Organization({
   '@id': '#organization',
-  name: 'Acme Publishing',
+  name: 'Acme',
   url: 'https://example.com',
 });
 
 const website = WebSite({
   '@id': '#website',
-  name: 'Acme Journal',
+  name: 'Acme',
   url: 'https://example.com',
-  publisher: '#organization',
+  publisher: organization,
 });
 
-const page = WebPage({
-  '@id': '/articles/graph#webpage',
-  name: 'Connected structured data',
-  url: '/articles/graph',
-  isPartOf: '#website',
+const webpage = WebPage({
+  '@id': '#webpage',
+  name: 'Home',
+  isPartOf: website,
 });
 
-const article = Article({
-  '@id': '/articles/graph#article',
-  headline: 'Connected structured data',
-  image: 'https://example.com/cover.jpg',
-  datePublished: '2026-09-29',
-  author: 'Ada Lovelace',
-  publisher: '#organization',
-  mainEntityOfPage: '/articles/graph#webpage',
-});
-
-const graph = buildJsonLdGraph([organization, website, page, article], {
+const graph = buildJsonLdGraph(webpage, {
   baseUrl: 'https://example.com',
 });
 ```
 
-The graph contains four nodes. Their relative identities become absolute, and
-references point to the corresponding nodes without duplicating their properties.
+Passing just `webpage` automatically traverses `isPartOf` and `publisher`, discovering `website` and `organization`. The resulting output is a flat, unified `@graph` with canonical IDs:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://example.com/#organization",
+      "name": "Acme",
+      "url": "https://example.com"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://example.com/#website",
+      "name": "Acme",
+      "url": "https://example.com",
+      "publisher": {
+        "@id": "https://example.com/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://example.com/#webpage",
+      "name": "Home",
+      "isPartOf": {
+        "@id": "https://example.com/#website"
+      }
+    }
+  ]
+}
+```
+
+## Framework integrations
+
+During static build (SSG) or server-side rendering (SSR), the `<Schema />` component executes this pipeline, outputting the sanitized `<script type="application/ld+json">` tag directly into the document `<head>` (adding **0 kB** of client-side JavaScript in Astro):
+
+```astro title="src/pages/index.astro"
+---
+import { Schema } from '@unschema-graph/astro';
+import { webpage } from '../lib/schema';
+---
+<head>
+  <Schema items={webpage} />
+</head>
+```
 
 ## What the library guarantees
 
@@ -126,4 +144,5 @@ unschema-graph validates the properties modeled by each builder, composes the gr
 and safely serializes JSON-LD for HTML. It does not guarantee that a search engine will
 display a rich result or that a platform will consume a particular property.
 
-Next: learn [how types and properties are validated](/guides/entities-types-and-properties/).
+Next: learn [how types and properties are validated](/guides/entities-types-and-properties/) and how [graphs and references](/guides/graphs-and-references/) work.
+

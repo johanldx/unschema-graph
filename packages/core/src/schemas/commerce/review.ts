@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { EntityIdSchema } from '../common/reference.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 
@@ -9,7 +10,7 @@ import { PersonSchema } from '../identity/person.js';
 export const RatingSchema = z
   .object({
     '@type': z.literal('Rating').default('Rating').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     ratingValue: z.union([z.number(), z.string()], {
       message: 'Property "ratingValue" is required for Rating',
     }),
@@ -24,7 +25,7 @@ export const RatingSchema = z
 export const AggregateRatingSchema = z
   .object({
     '@type': z.literal('AggregateRating').default('AggregateRating').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     ratingValue: z.union([z.number(), z.string()], {
       message: 'Property "ratingValue" is required for AggregateRating',
     }),
@@ -36,11 +37,15 @@ export const AggregateRatingSchema = z
   .strict();
 
 import { IsoDateSchema } from '../../core/temporal.js';
-import { createEntityRef, TypedEntitySchema } from '../common/reference.js';
+import { entityRef, TypedEntitySchema } from '../common/reference.js';
 
-const ReviewAuthorSchema = createEntityRef(z.union([PersonSchema, OrganizationSchema]), 'Person');
+const ReviewAuthorSchema = entityRef({
+  schemas: [PersonSchema, OrganizationSchema],
+  types: ['Person', 'Organization'],
+  fallbackType: 'Person',
+});
 
-const ItemReviewedSchema = createEntityRef(TypedEntitySchema);
+const ItemReviewedSchema = entityRef({ schemas: [TypedEntitySchema] });
 
 /**
  * Zod schema for Schema.org `Review`.
@@ -48,7 +53,7 @@ const ItemReviewedSchema = createEntityRef(TypedEntitySchema);
 export const ReviewSchema = z
   .object({
     '@type': z.literal('Review').default('Review').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     author: ReviewAuthorSchema,
     reviewRating: z.union([
       RatingSchema,

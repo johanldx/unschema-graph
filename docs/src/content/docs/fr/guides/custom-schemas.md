@@ -47,6 +47,12 @@ Chaque builder personnalisé :
 - Respecte le mode de sévérité `onError` (`throw`, `warn`, `silent`).
 - Expose `.schema`, `.entityType` et `.safeParse()`.
 
+`defineSchema()` impose `.strict()` sur l’objet Zod racine même si le schéma fourni
+l’omet. Les objets imbriqués doivent toujours déclarer `.strict()` explicitement. Les
+schémas intégrés suivent la même politique ; seul `TypedEntitySchema` emploie
+intentionnellement `.passthrough()` comme point d’extension des entités typées dans les
+relations.
+
 ---
 
 ## 2. Composer avec les schémas existants
@@ -73,5 +79,7 @@ export const PodcastSeries = defineSchema(
 ```
 
 :::tip
-Conservez des schémas stricts. Pour des ajouts ponctuels, préférez `withAdditionalProperties()` plutôt que d'assouplir vos schémas avec `z.any()` ou `.passthrough()`.
+Conservez les schémas imbriqués stricts. Pour des ajouts ponctuels, préférez
+`withAdditionalProperties()` plutôt que d’assouplir la définition avec `z.any()` ou
+`.passthrough()`. Cet escape hatch ne peut remplacer ni `@type` ni `@id`.
 :::

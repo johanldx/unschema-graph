@@ -1,0 +1,12 @@
+{
+  "name": "published-sveltekit-consumer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && vite build"
+  },
+  "devDependencies": {
+    "svelte-check": "^4.0.0",
+    "typescript": "^6.0.0"
+  }
+}

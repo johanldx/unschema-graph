@@ -3,6 +3,7 @@ import {
   BlogPosting,
   BreadcrumbList,
   buildJsonLdGraph,
+  GoogleArticle,
   ImageObject,
   ListItem,
   NewsArticle,
@@ -82,15 +83,20 @@ describe('schemas/content', () => {
       });
     });
 
-    it('throws when required fields are missing', () => {
+    it('separates the generic Schema.org model from the Google profile', () => {
+      expect(Article({ headline: 'Schema.org article' })).toEqual({
+        '@type': 'Article',
+        headline: 'Schema.org article',
+      });
+
       expect(() =>
-        // @ts-expect-error Testing missing image, datePublished, author
-        Article({ headline: 'Incomplete' })
+        // @ts-expect-error Google profile requires image, datePublished, and author.
+        GoogleArticle({ headline: 'Incomplete for Google' })
       ).toThrowError(SchemaValidationError);
 
       expect(() =>
-        // @ts-expect-error Testing missing headline
-        Article({
+        // @ts-expect-error Google profile requires headline.
+        GoogleArticle({
           image: 'https://example.com/img.jpg',
           datePublished: '2026-01-01',
           author: 'Alice',
@@ -273,6 +279,7 @@ describe('schemas/content', () => {
 
       expect(jsonLd).toContain('"@context": "https://schema.org"');
       expect(jsonLd).toContain('"@type": "Organization"');
+      expect(jsonLd).toContain('"@type": "Person"');
       expect(jsonLd).toContain('"@type": "Article"');
       expect(jsonLd).toContain('"@type": "BreadcrumbList"');
       expect(jsonLd).toContain('"position": 1');
@@ -280,7 +287,12 @@ describe('schemas/content', () => {
       expect(jsonLd).toContain('"position": 3');
 
       const parsed = JSON.parse(jsonLd);
-      expect(parsed['@graph']).toHaveLength(3);
+      expect(parsed['@graph']).toHaveLength(4);
+      expect(
+        parsed['@graph'].find((node: Record<string, unknown>) => node['@type'] === 'Article')
+      ).toMatchObject({
+        author: { '@id': 'https://mon-site.fr/auteurs/johan#person' },
+      });
     });
   });
 });

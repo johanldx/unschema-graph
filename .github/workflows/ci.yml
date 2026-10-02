@@ -28,20 +28,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm run typecheck
+      - name: Verify source, packages, examples, and documentation
+        run: pnpm run verify
 
-      - name: Lint and formatting
-        run: pnpm run lint
+  published-package-compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Test
-        run: pnpm test
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Build packages
-        run: pnpm run build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
 
-      - name: Audit JSON-LD
-        run: pnpm run audit
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Build documentation
-        run: pnpm run build:docs
+      - name: Test packed packages, peer bounds, and npm consumers
+        run: pnpm run test:published

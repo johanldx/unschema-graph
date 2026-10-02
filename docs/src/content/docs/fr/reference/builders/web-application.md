@@ -48,7 +48,7 @@ type WebApplicationOutput = SchemaOutput<typeof SoftwareApplicationSchema, 'WebA
 | `review` | [Review](/fr/reference/builders/review/) \| Array<[Review](/fr/reference/builders/review/)> | Non | — |
 | `screenshot` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
 | `softwareVersion` | string | Non | — |
-| `downloadUrl` | string | Non | — |
+| `downloadUrl` | string | Non | non-empty |
 | `fileSize` | string | Non | — |
 | `description` | string | Non | — |
 

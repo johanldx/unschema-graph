@@ -39,13 +39,13 @@ type ContactPointOutput = SchemaOutput<typeof ContactPointSchema, 'ContactPoint'
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `telephone` | string | No | — |
 | `contactType` | string | No | — |
 | `email` | string | No | format: email |
 | `areaServed` | string \| Array<string> | No | — |
 | `availableLanguage` | string \| Array<string> | No | — |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'ContactPoint'`.

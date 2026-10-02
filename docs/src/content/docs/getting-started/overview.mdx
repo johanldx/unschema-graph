@@ -5,8 +5,8 @@ description: Architecture and ecosystem of unschema-graph for modern web applica
 
 **unschema-graph** is a Schema.org JSON-LD engine powered by [Zod](https://zod.dev). It helps TypeScript, Astro, and Svelte projects build typed entities, validate supported inputs, connect them in a graph, and safely serialize the result into HTML.
 
-:::note[Pre-1.0 status]
-The project is currently on the `0.1.x` release line. Its public API is documented and tested, but it may still evolve before `1.0`; changes are recorded with Changesets.
+:::note[Version 0.9.0 — v1 stabilization candidate]
+The current release **0.9.0** hardens the architecture before the actual `1.0.0-rc.1` Release Candidate and stable `1.0.0`. It includes a curated Schema.org 30.1 builder surface, automated relational `@graph` resolution, anti-XSS serialization, and native Astro and Svelte 5 components.
 :::
 
 ---
@@ -25,9 +25,9 @@ directly to the [Astro quick start](/getting-started/quick-start/astro/).
 
 ## Core Pillars
 
-### Zero Client JavaScript (0 kB)
+### Server-First with Zero Client JS in Astro
 
-Structured data belongs exclusively in the HTML `<head>`. Our components render during static build (SSG) or server-side rendering (SSR), adding **0 kB** to your client bundle.
+Structured data is rendered server-side or during static build. In Astro, the `<Schema />` component emits static JSON-LD without hydration directives, adding **0 kB** to your client bundle. In Svelte 5, the component integrates with framework reactivity for dynamic updates without browser-only dependencies.
 
 ### Strict Zod Builders
 
@@ -46,7 +46,7 @@ HTML-sensitive characters are Unicode-escaped during serialization to prevent `<
 
 ## Why unschema-graph?
 
-Generating structured data manually or with loose TypeScript definitions often leads to subtle errors that silently break Google Rich Results. Here is how unschema-graph compares:
+Generating structured data manually or with loose TypeScript definitions often leads to subtle errors that can silently produce invalid structured data. Here is how unschema-graph compares:
 
 | Feature | Manual `<script>` | `schema-dts` | `unschema-graph` |
 | :--- | :---: | :---: | :---: |
@@ -56,7 +56,7 @@ Generating structured data manually or with loose TypeScript definitions often l
 | **XSS sanitization (`</script>`)** | Manual | ❌ | ✅ (Automatic Unicode escaping) |
 | **Astro Dev Toolbar inspector** | ❌ | ❌ | ✅ (Live interactive debugger) |
 | **Svelte 5 runes support** | ❌ | ❌ | ✅ (Native `$props` & `$derived`) |
-| **Client bundle cost** | 0 kB | 0 kB | **0 kB** |
+| **Client bundle cost** | 0 kB | 0 kB | **0 kB in Astro / native Svelte** |
 
 ---
 
@@ -101,7 +101,7 @@ The journey of your data from page source to the final HTML `<script>`:
                             │
                             ▼
 ┌────────────────────────────────────────────────────────┐
-│  HTML <script type="application/ld+json">              │  ◄── Injected in SSR / Static <head> (0 kB JS)
+│  HTML <script type="application/ld+json">              │  ◄── Injected in SSR / Static <head> (0 kB JS in Astro)
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -132,4 +132,3 @@ Explore the Astro Dev Toolbar and Svelte 5 reactive runes.
 Validate your compiled HTML files automatically in CI/CD pipelines.
 
 [View Audit CLI →](/audit-and-quality/audit-cli/)
-

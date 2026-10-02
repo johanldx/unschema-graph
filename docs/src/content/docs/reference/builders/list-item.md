@@ -39,7 +39,7 @@ type ListItemOutput = SchemaOutput<typeof ListItemSchema, 'ListItem'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `position` | number | No | integer; greater than 0; maximum: 9007199254740991 |
 | `name` | string | Yes | non-empty |
 | `item` | string | No | non-empty |

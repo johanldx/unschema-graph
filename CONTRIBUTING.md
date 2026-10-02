@@ -54,7 +54,12 @@ We strictly follow the [Conventional Commits](https://www.conventionalcommits.or
 
 ## Pull Request Process
 
-1. Ensure lint, typecheck, tests, build, and audit all pass locally.
+1. Ensure lint, typecheck, tests, build, and audit all pass locally (`pnpm run release:check`).
 2. Open a Pull Request against the `main` branch.
 3. Fill out the provided Pull Request template completely.
 4. Once approved, the PR will be merged using the **Squash and merge** strategy to keep the `main` history clean.
+
+## Release Process
+
+For the progressive release trajectory toward v1, pre-release tagging (`rc`), and quality gates, please refer to [RELEASE.md](./RELEASE.md).
+

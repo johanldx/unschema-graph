@@ -39,13 +39,13 @@ type ContactPointOutput = SchemaOutput<typeof ContactPointSchema, 'ContactPoint'
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `telephone` | string | Non | — |
 | `contactType` | string | Non | — |
 | `email` | string | Non | format: email |
 | `areaServed` | string \| Array<string> | Non | — |
 | `availableLanguage` | string \| Array<string> | Non | — |
-| `url` | string | Non | — |
+| `url` | string | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

@@ -39,11 +39,11 @@ type ClipOutput = SchemaOutput<typeof ClipSchema, 'Clip'>;
 
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
-| `@id` | string | Non | — |
+| `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
 | `startOffset` | number | Oui | minimum: 0 |
 | `endOffset` | number | Oui | greater than 0 |
-| `url` | string | Non | — |
+| `url` | string | Non | non-empty |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder
 accepte aussi une configuration de validation en second argument et possède une sortie dont le

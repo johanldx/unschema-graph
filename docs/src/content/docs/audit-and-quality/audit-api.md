@@ -12,8 +12,11 @@ import {
   auditHtmlContent,
   auditHtmlDirectory,
   getHtmlFiles,
-  type AuditResult,
+  type AuditContentResult,
+  type AuditDiagnostic,
+  type AuditDiagnosticCode,
   type AuditError,
+  type AuditResult,
 } from '@unschema-graph/core/audit';
 ```
 
@@ -30,20 +33,38 @@ Use `auditHtmlDirectory` to scan an entire build directory:
 ```ts
 import { auditHtmlDirectory } from '@unschema-graph/core/audit';
 
-const result = auditHtmlDirectory('./dist');
+const report = auditHtmlDirectory('./dist');
 
-console.log(`Scanned ${result.scannedFiles} HTML files.`);
-console.log(`Found ${result.totalBlocks} JSON-LD blocks.`);
-console.log(`Validated ${result.totalEntities} entities.`);
+console.log(`Scanned ${report.scannedFiles} HTML files.`);
+console.log(`Found ${report.totalBlocks} JSON-LD blocks.`);
+console.log(`Resolved ${report.resolvedLocalReferences} local graph references.`);
+console.log(`Found ${report.totalEntities} entities.`);
 
-if (!result.passed) {
-  console.error('Audit failed with errors:');
-  for (const error of result.errors) {
-    console.error(`- [${error.file}] ${error.message}`);
-  }
+for (const warning of report.warnings) {
+  console.warn(warning.code, warning.message);
+}
+
+for (const error of report.errors) {
+  console.error(error.code, error.message);
+}
+
+if (!report.passed) {
   process.exit(1);
 }
 ```
+
+### Result Semantics (`passed` vs `--strict`)
+
+- In the programmatic API, `report.passed` is `true` when there are zero errors (`errors.length === 0`). Warnings do not cause `report.passed` to be `false`.
+- In the CLI, the `--strict` flag additionally treats warnings as failures (exiting with code `1`).
+
+When a page contains a canonical link element, the audit uses its `href` URL to validate
+fragment and absolute same-document `@id` references. An absolute reference to another path on
+the same origin is treated as external to the current graph.
+
+Without a canonical URL, only a fragment-only reference such as `#organization` can be proven to
+target the current document. Path references such as `/about#organization`, `./page#thing`, and
+`../page#thing` are therefore not reported as locally broken.
 
 ---
 
@@ -74,9 +95,11 @@ describe('Server-rendered HTML', () => {
     `;
 
     const result = auditHtmlContent(html, 'virtual-test.html');
-    expect(result.passed).toBe(true);
-    expect(result.totalEntities).toBe(1);
+    expect(result.entities).toBe(1);
+    expect(result.blocks).toBe(1);
+    expect(result.resolvedLocalReferences).toBe(0);
     expect(result.errors).toHaveLength(0);
+    expect(result.warnings).toHaveLength(0);
   });
 });
 ```
@@ -85,17 +108,48 @@ describe('Server-rendered HTML', () => {
 
 ## TypeScript Interfaces
 
+The following types and interfaces are exported by `@unschema-graph/core/audit`:
+
 ```ts
-export interface AuditError {
+export type AuditDiagnosticCode =
+  | 'empty-script'
+  | 'invalid-json'
+  | 'invalid-root'
+  | 'missing-context'
+  | 'invalid-graph'
+  | 'missing-type'
+  | 'broken-reference'
+  | 'duplicate-id'
+  | 'duplicate-conflict'
+  | 'no-html'
+  | 'no-jsonld';
+
+export interface AuditDiagnostic {
+  code: AuditDiagnosticCode;
+  severity: 'warning' | 'error';
   file: string;
   message: string;
+  path?: string;
+  id?: string;
 }
+
+export type AuditError = AuditDiagnostic;
 
 export interface AuditResult {
   scannedFiles: number;
   totalBlocks: number;
   totalEntities: number;
+  resolvedLocalReferences: number;
   errors: AuditError[];
+  warnings: AuditDiagnostic[];
   passed: boolean;
+}
+
+export interface AuditContentResult {
+  blocks: number;
+  entities: number;
+  resolvedLocalReferences: number;
+  errors: AuditError[];
+  warnings: AuditDiagnostic[];
 }
 ```

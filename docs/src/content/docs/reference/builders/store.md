@@ -41,18 +41,16 @@ type StoreOutput = SchemaOutput<typeof LocalBusinessSchema, 'Store'>;
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
-| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | Yes | — |
+| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | Yes | non-empty |
 | `image` | string \| [ImageObject](/reference/builders/image-object/) | No | non-empty |
 | `telephone` | string | No | — |
 | `priceRange` | string | No | — |
-| `url` | string | No | — |
-| `geo` | [GeoCoordinates](/reference/builders/geo-coordinates/) | No | — |
+| `url` | string | No | non-empty |
+| `geo` | [GeoCoordinates](/reference/builders/geo-coordinates/) \| string \| [GeoCoordinates](/reference/builders/geo-coordinates/) | No | non-empty |
 | `openingHoursSpecification` | object \| Array<object> | No | — |
 | `currenciesAccepted` | string | No | — |
 | `paymentAccepted` | string | No | — |
-| `sameAs` | string \| Array<string> | No | — |
-| `servesCuisine` | string \| Array<string> | No | — |
-| `menu` | string | No | — |
+| `sameAs` | string \| Array<string> | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'Store'`.

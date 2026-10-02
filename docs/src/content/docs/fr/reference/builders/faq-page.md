@@ -40,7 +40,7 @@ type FAQPageOutput = SchemaOutput<typeof FAQPageSchema, 'FAQPage'>;
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
-| `mainEntity` | Array<object> | Conditionnel | — |
+| `mainEntity` | Array<[Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Conditionnel | — |
 | `questions` | Array<object> | Conditionnel | — |
 
 Les alias ci-dessus restent la référence exacte, notamment pour les objets imbriqués. Le builder

@@ -41,11 +41,11 @@ type BookOutput = SchemaOutput<typeof BookSchema, 'Book'>;
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
-| `author` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Oui | — |
+| `author` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference \| Array<[Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference> | Oui | — |
 | `isbn` | string | Non | — |
 | `bookFormat` | string | Non | — |
 | `datePublished` | string \| number \| Date | Non | non-empty |
-| `publisher` | string \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
+| `publisher` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
 | `inLanguage` | string | Non | — |
 | `numberOfPages` | number | Non | integer; greater than 0; maximum: 9007199254740991 |
 | `description` | string | Non | — |
@@ -73,7 +73,10 @@ const entity = Book({
 {
   "@type": "Book",
   "name": "The Astro Handbook",
-  "author": "Ada Lovelace"
+  "author": {
+    "@type": "Person",
+    "name": "Ada Lovelace"
+  }
 }
 ```
 

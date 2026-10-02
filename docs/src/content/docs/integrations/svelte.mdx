@@ -35,6 +35,7 @@ bun add @unschema-graph/svelte zod
 
 
 No build plugin or Vite integration is required: import the component and builders directly into your `.svelte` files.
+Svelte 5 is an explicit peer dependency; Svelte 4 is not supported by this package line.
 
 ---
 
@@ -85,6 +86,9 @@ const article = $derived(
 ## 3. SvelteKit SSR Integration
 
 In SvelteKit, structured data rendered by `<Schema />` is serialized during Server-Side Rendering (SSR) and included in the initial HTML payload sent to crawlers and search engine bots.
+Each component instance emits exactly one JSON-LD script in `<svelte:head>`. The component
+has no browser-only dependency or effect of its own, but participates in normal Svelte runtime/hydration
+when the application uses client-side navigation or reactive updates.
 
 ### Global Layout Pattern (`+layout.svelte`)
 
@@ -155,3 +159,7 @@ import {
   type SchemaInput,
 } from '@unschema-graph/svelte';
 ```
+
+The Svelte adapter delegates graph construction, ID resolution, validation, and anti-XSS
+serialization directly to Core. `baseUrl` and `inLanguage` props override optional
+defaults configured with `setGlobalConfig()`; inputs are copied and never mutated.

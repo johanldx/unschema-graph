@@ -33,6 +33,9 @@ const job = JobPosting({
 
 :::tip
 Les expressions relatives (`'today'`, `'+30d'`) sont évaluées au moment du build ou du rendu SSR.
+Seul un appel direct à `parseDate(input, referenceDate)` peut employer une horloge fixe.
+Les builders, `IsoDateSchema` et `formatIsoDate()` utilisent l’horloge réelle : fournissez
+des valeurs ISO explicites lorsque la sortie doit être reproductible.
 :::
 
 ---

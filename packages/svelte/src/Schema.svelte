@@ -1,5 +1,10 @@
 <script lang="ts">
-import { buildJsonLdGraph, type SchemaProps, serializeJsonLd } from '@unschema-graph/core';
+import {
+  buildJsonLdGraph,
+  getGlobalConfig,
+  type SchemaProps,
+  serializeJsonLd,
+} from '@unschema-graph/core';
 
 type Props = SchemaProps;
 
@@ -14,6 +19,10 @@ let {
   baseUrl,
   inLanguage,
 }: Props = $props();
+
+const globalConfig = getGlobalConfig();
+const effectiveBaseUrl = $derived(baseUrl ?? globalConfig.baseUrl);
+const effectiveLocale = $derived(inLanguage ?? globalConfig.inLanguage);
 
 const languageAwareTypes = new Set([
   'Article',
@@ -38,7 +47,7 @@ const jsonLdOutput = $derived.by(() => {
   }
 
   const preparedItems = rawItems.map((rawItem) => {
-    if (!inLanguage || !rawItem || typeof rawItem !== 'object') {
+    if (!effectiveLocale || !rawItem || typeof rawItem !== 'object') {
       return rawItem;
     }
     const entity = rawItem as Record<string, unknown>;
@@ -50,13 +59,13 @@ const jsonLdOutput = $derived.by(() => {
     if (!isLanguageAware || 'inLanguage' in entity) {
       return rawItem;
     }
-    return { ...entity, inLanguage };
+    return { ...entity, inLanguage: effectiveLocale };
   });
 
   const graphPayload = buildJsonLdGraph(preparedItems, {
     graph,
     context,
-    baseUrl,
+    baseUrl: effectiveBaseUrl,
   });
 
   return graphPayload ? serializeJsonLd(graphPayload, { pretty, indent }) : null;
@@ -65,7 +74,6 @@ const jsonLdOutput = $derived.by(() => {
 
 <svelte:head>
   {#if jsonLdOutput}
-    <!-- serializeJsonLd escapes script-breaking characters before this deliberate raw insertion. -->
-    {@html `<script type="application/ld+json">${jsonLdOutput}<${'/'}script>`}
+    <svelte:element this={'script'} type="application/ld+json">{jsonLdOutput}</svelte:element>
   {/if}
 </svelte:head>

@@ -13,7 +13,7 @@ const content = `# unschema-graph
 - Documentation: ${documentationOrigin}/
 - GitHub: https://github.com/johanldx/unschema-graph
 - License: MIT
-- Status: pre-1.0; review release notes before upgrading
+- Status: 0.9.0 (v1 stabilization candidate)
 
 ## Choose the package
 

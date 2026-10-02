@@ -42,7 +42,7 @@ type CourseOutput = SchemaOutput<typeof CourseSchema, 'Course'>;
 | `@id` | string | Non | non-empty |
 | `name` | string | Oui | non-empty |
 | `description` | string | Oui | non-empty |
-| `provider` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| [LocalBusiness](/fr/reference/builders/local-business/) \| EntityReference | Oui | non-empty |
+| `provider` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| [LocalBusiness](/fr/reference/builders/local-business/) \| EntityReference | Oui | — |
 | `courseCode` | string | Non | — |
 | `educationalCredentialAwarded` | string | Non | — |
 | `inLanguage` | string | Non | — |

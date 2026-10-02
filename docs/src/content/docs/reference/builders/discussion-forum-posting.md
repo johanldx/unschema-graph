@@ -41,11 +41,11 @@ type DiscussionForumPostingOutput = SchemaOutput<typeof DiscussionForumPostingSc
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
 | `headline` | string | Yes | non-empty |
-| `author` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | Yes | non-empty |
+| `author` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | Yes | — |
 | `datePublished` | string \| number \| Date | Yes | non-empty |
 | `text` | string | No | — |
 | `comment` | object \| Array<object> | No | — |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'DiscussionForumPosting'`.

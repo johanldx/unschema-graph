@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema, IsoDurationSchema } from '../../core/temporal.js';
 import { ImageUrlOrObject } from '../common/image.js';
+import { EntityIdSchema } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../common/url.js';
 
 /**
  * Zod schema for Schema.org `Clip` (video key moment/chapter).
@@ -9,17 +11,16 @@ import { ImageUrlOrObject } from '../common/image.js';
 export const ClipSchema = z
   .object({
     '@type': z.literal('Clip').default('Clip').optional(),
-    '@id': z.string().optional(),
+    '@id': EntityIdSchema.optional(),
     name: z.string().min(1, 'Clip name is required'),
     startOffset: z.number().nonnegative(),
     endOffset: z.number().positive(),
-    url: z.string().optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
   })
   .strict();
 
 /**
- * Zod schema for Schema.org `VideoObject`.
- * Follows Google Search Central Video structured data specifications.
+ * Curated Zod schema for Schema.org `VideoObject`.
  */
 export const VideoObjectSchema = z
   .object({
@@ -33,8 +34,8 @@ export const VideoObjectSchema = z
     ),
     uploadDate: IsoDateSchema,
     duration: IsoDurationSchema.optional(),
-    contentUrl: z.string().optional(),
-    embedUrl: z.string().optional(),
+    contentUrl: WebUrlSchema.optional(),
+    embedUrl: WebUrlSchema.optional(),
     hasPart: z.union([ClipSchema, z.array(ClipSchema)]).optional(),
     inLanguage: z.string().optional(),
   })

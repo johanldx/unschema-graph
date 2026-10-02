@@ -3,7 +3,7 @@ title: Restaurant builder
 description: Reference for the Restaurant builder and its validated Schema.org Restaurant output.
 ---
 
-Creates a Restaurant using the LocalBusiness schema. The `Restaurant` builder injects `@type`, validates synchronously, and
+Creates a Restaurant with food-establishment properties. The `Restaurant` builder injects `@type`, validates synchronously, and
 rejects unknown properties.
 
 ## Import
@@ -17,22 +17,22 @@ import { Restaurant } from '@unschema-graph/svelte';
 
 // Core / Node.js
 import { Restaurant } from '@unschema-graph/core';
-import { LocalBusinessSchema } from '@unschema-graph/core';
+import { RestaurantSchema } from '@unschema-graph/core';
 ```
 
-The `LocalBusinessSchema` Zod schema is also exported for composition and advanced validation.
+The `RestaurantSchema` Zod schema is also exported for composition and advanced validation.
 
 ## TypeScript types
 
 ```ts
 import {
-  LocalBusinessSchema,
+  RestaurantSchema,
   type SchemaInput,
   type SchemaOutput,
 } from '@unschema-graph/core';
 
-type RestaurantInput = SchemaInput<typeof LocalBusinessSchema>;
-type RestaurantOutput = SchemaOutput<typeof LocalBusinessSchema, 'Restaurant'>;
+type RestaurantInput = SchemaInput<typeof RestaurantSchema>;
+type RestaurantOutput = SchemaOutput<typeof RestaurantSchema, 'Restaurant'>;
 ```
 
 ## Input properties
@@ -41,18 +41,18 @@ type RestaurantOutput = SchemaOutput<typeof LocalBusinessSchema, 'Restaurant'>;
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
-| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | Yes | — |
+| `address` | string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference \| string \| [PostalAddress](/reference/builders/postal-address/) \| EntityReference | Yes | non-empty |
 | `image` | string \| [ImageObject](/reference/builders/image-object/) | No | non-empty |
 | `telephone` | string | No | — |
 | `priceRange` | string | No | — |
-| `url` | string | No | — |
-| `geo` | [GeoCoordinates](/reference/builders/geo-coordinates/) | No | — |
+| `url` | string | No | non-empty |
+| `geo` | [GeoCoordinates](/reference/builders/geo-coordinates/) \| string \| [GeoCoordinates](/reference/builders/geo-coordinates/) | No | non-empty |
 | `openingHoursSpecification` | object \| Array<object> | No | — |
 | `currenciesAccepted` | string | No | — |
 | `paymentAccepted` | string | No | — |
-| `sameAs` | string \| Array<string> | No | — |
+| `sameAs` | string \| Array<string> | No | non-empty |
 | `servesCuisine` | string \| Array<string> | No | — |
-| `menu` | string | No | — |
+| `hasMenu` | string | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'Restaurant'`.
@@ -70,7 +70,8 @@ const entity = Restaurant({
     "postalCode": "75001",
     "addressCountry": "FR"
   },
-  "servesCuisine": "French"
+  "servesCuisine": "French",
+  "hasMenu": "/menu"
 });
 ```
 
@@ -86,7 +87,8 @@ const entity = Restaurant({
     "postalCode": "75001",
     "addressCountry": "FR"
   },
-  "servesCuisine": "French"
+  "servesCuisine": "French",
+  "hasMenu": "/menu"
 }
 ```
 

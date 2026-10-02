@@ -52,9 +52,38 @@ const article = Article({
 });
 ```
 
+### Entity-Object References
+
+The recommended v1 pattern is passing the entity object directly rather than a string identifier.
+Because every builder returns a fully-typed Schema.org object, TypeScript validates relation types at compile time:
+
+```ts
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme Publishing',
+  url: 'https://example.com',
+});
+
+const article = Article({
+  headline: 'Connected structured data',
+  image: 'https://example.com/cover.jpg',
+  datePublished: '2026-09-29',
+  author: 'Ada Lovelace',
+  publisher: organization, // Typed entity-object reference!
+});
+```
+
+When `buildJsonLdGraph` runs, it:
+1. Detects that `organization` has an `@id`.
+2. Hoists `organization` into the top-level `@graph` array.
+3. Automatically replaces `article.publisher` with `{ "@id": "https://example.com/#organization" }`.
+
 ### Identifier String Shorthands
 
-Any string starting with `#`, `/`, `http://`, `https://`, or `urn:` is automatically recognized as an entity reference and transformed into an `{ "@id": "..." }` pointer:
+A string is treated as a reference when it starts with a fragment (`#org`), an explicit
+path prefix (`/about#org`, `./docs/page`, `../docs/page`), or an absolute URI with any
+valid scheme (`https:`, `urn:`, `mailto:`, `tel:`, and so on). It is then transformed into an
+`{ "@id": "..." }` pointer:
 
 ```ts
 // Both of these produce identical JSON-LD:
@@ -62,24 +91,78 @@ publisher: '#organization'
 publisher: { '@id': '#organization' }
 ```
 
-If a string does not begin with an identifier prefix, `unschema-graph` uses the property's known fallback type to create a nested named entity:
+Otherwise, when the relation declares a `fallbackType`, the string becomes an inline
+named entity. Without a fallback type, a plain string is rejected: pass a direct entity,
+an explicit ID-looking string, or an `{ '@id': '...' }` object instead.
+
 - `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
 - `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
+- `brand: 'AC/DC'` → `{ "@type": "Brand", "name": "AC/DC" }`
+
 
 ---
 
-## 3. Canonical URL Resolution
+## 3. Node or inline entity
+
+The distinction is determined by identity, not by nesting depth:
+
+- a nested entity with an `@id` becomes its own node in `@graph`, and its parent keeps
+  only `{ '@id': '...' }`;
+- a nested entity without an `@id` remains inline in its parent;
+- an object containing only `@id` is already a reference and does not create an empty node.
+
+```ts
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme',
+});
+
+const website = WebSite({
+  '@id': '#website',
+  name: 'Acme',
+  url: 'https://example.com',
+  publisher: organization,
+});
+
+const graph = buildJsonLdGraph(website);
+// Organization is a node; website.publisher is { '@id': '#organization' }.
+```
+
+Reusable identities such as `Organization`, `Person`, `WebSite`, `WebPage`, `Product`,
+`Service`, and `Event` are common node candidates. Value objects such as
+`PostalAddress`, `GeoCoordinates`, `ContactPoint`, `Rating`, `AggregateRating`, and
+`NutritionInformation` normally remain inline because they usually have no independent
+identity. This is a library convention for predictable graphs, not a Schema.org rule.
+
+---
+
+## 4. Identifier and URL semantics
 
 In development or across multiple environments (staging, production), you often want to write relative identifiers like `#organization` or `/about#organization`.
 
-When you provide a `baseUrl` (or set `site` in Astro's `astro.config.mjs`), `unschema-graph` resolves all relative identifiers recursively:
+When you provide a `baseUrl` (or set `site` in Astro's `astro.config.mjs`), `unschema-graph` resolves explicit relative `@id` values recursively. URL properties remain URL strings; the collector never guesses semantics from property names such as `url` or `item`.
 
-| Input `@id` or URL | Configured `baseUrl` | Output in `@graph` |
+| Input `@id` | Configured `baseUrl` | Output in `@graph` |
 | --- | --- | --- |
 | `#organization` | `https://example.com` | `https://example.com/#organization` |
+| `#organization` | `https://example.com/about` | `https://example.com/about#organization` |
+| `#organization` | `https://example.com/about/` | `https://example.com/about/#organization` |
+| `/about` | `https://example.com` | `https://example.com/about` |
 | `/about#organization` | `https://example.com` | `https://example.com/about#organization` |
-| `/blog/first-post` | `https://example.com` | `https://example.com/blog/first-post` |
-| `https://external.com/id` | `https://example.com` | `https://external.com/id` *(unchanged)* |
+| `https://example.com/#organization` | `https://example.com` | unchanged |
+| `urn:example:foo` | `https://example.com` | unchanged |
+| `mailto:hello@example.com` | `https://example.com` | unchanged |
+| `tel:+33123456789` | `https://example.com` | unchanged |
+
+Fragment resolution preserves the path form supplied by `baseUrl`: `/about` and `/about/` remain
+distinct document URLs.
+
+Built-in schemas distinguish these values explicitly: `WebUrlSchema` validates absolute
+HTTP(S) URLs, `RelativeOrAbsoluteUrlSchema` validates URL properties, and entity
+relations normalize reference strings to `{ '@id': value }` before graph collection.
+Only explicit `@id` properties are resolved. Ordinary values such as `name`,
+`serviceType`, and `description` are always preserved, even when they look like a path,
+fragment, or URI.
 
 :::tip
 Input entity objects are **never mutated**. Resolution creates a fresh graph payload;
@@ -88,7 +171,20 @@ HTML-safe escaping happens later during serialization.
 
 ---
 
-## 4. Automatic Deduplication & Node Merging
+## 5. Automatic discovery, deduplication, and node merging
+
+You can pass only the root entity. The collector recursively follows object and array
+relations, discovers every linked entity with an `@id`, and emits dependencies before
+the parent that references them.
+
+```ts
+const graph = buildJsonLdGraph(webpage);
+// Discovers WebPage → WebSite → Organization.
+```
+
+The same entity object may be reused by several parents; it is registered once. Cyclic
+relations between identified entities terminate safely and become references in both
+directions. Entities without `@id` stay inline and are not globally deduplicated.
 
 If multiple parts of your application declare entities sharing the same resolved `@id`, `unschema-graph` merges them into a single graph node instead of generating duplicates.
 
@@ -113,6 +209,35 @@ const richOrg = Organization({
 
 The resulting `@graph` contains only **one** `Organization` node with all properties merged: `name`, `url`, `logo`, and `sameAs`.
 
+Duplicate handling is explicit and deterministic:
+
+| Strategy | Behavior |
+| --- | --- |
+| `merge` *(default)* | Combines properties; the latest conflicting value wins. |
+| `first` | Keeps the first node encountered. |
+| `last` | Replaces it with the last node encountered. |
+| `error` | Throws `DuplicateEntityError` on any duplicate `@id`. |
+
+Use `onDiagnostic` to collect machine-readable merge conflicts and broken local
+references. Fragment, relative, and same-origin references are checked against graph
+nodes; absolute external and non-HTTP identifiers are preserved without being reported.
+
+```ts
+const diagnostics: GraphDiagnostic[] = [];
+const graph = buildJsonLdGraph(items, {
+  duplicateStrategy: 'merge',
+  onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+});
+```
+
+### Stability guarantees
+
+Core normalization never mutates user-owned entities, including nested arrays and
+objects. Graph collection follows a stable depth-first encounter order, so identical
+input and options produce identical node order and serialization. Passing an already
+normalized graph document through `buildJsonLdGraph()` again preserves its structure;
+reference and ID normalizers are likewise idempotent.
+
 ```json title="Merged node"
 {
   "@type": "Organization",
@@ -126,7 +251,7 @@ The resulting `@graph` contains only **one** `Organization` node with all proper
 
 ---
 
-## 5. Multiple Schema.org Types
+## 6. Multiple Schema.org Types
 
 Some entities represent multiple Schema.org types simultaneously (e.g. an `Article` that is also a `TechArticle` or `CreativeWork`).
 
@@ -147,10 +272,12 @@ const techGuide = withAdditionalTypes(
 ```
 
 The output `@type` becomes an array: `["Article", "TechArticle", "CreativeWork"]`.
+The helper keeps the builder’s primary type first, removes duplicates in first-seen
+order, and rejects empty type names. Applying it again preserves these invariants.
 
 ---
 
-## 6. Standalone Flat Output (`graph={false}`)
+## 7. Standalone Flat Output (`graph={false}`)
 
 By default, `<Schema />` always wraps entities inside a root `@graph` array. If you are rendering an isolated single entity and need flat output without `@graph`, set `graph={false}`:
 

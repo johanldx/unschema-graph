@@ -1,21 +1,18 @@
 import { z } from 'zod';
 import { defineSchema } from '../../core/defineSchema.js';
+import { SchemaTypeSchema } from '../../core/schemaType.js';
+import { EntityIdSchema } from './reference.js';
+import { RelativeOrAbsoluteUrlSchema } from './url.js';
 
-const ImageUrlSchema = z
-  .string()
-  .min(1, 'Image URL cannot be empty')
-  .refine(
-    (value) => value.startsWith('/') || URL.canParse(value),
-    'Image URL must be absolute or root-relative'
-  );
+const ImageUrlSchema = RelativeOrAbsoluteUrlSchema;
 
 /**
  * Zod schema for Schema.org `ImageObject`.
  */
 export const ImageObjectSchema = z
   .object({
-    '@type': z.union([z.string(), z.array(z.string())]).optional(),
-    '@id': z.string().optional(),
+    '@type': SchemaTypeSchema.optional(),
+    '@id': EntityIdSchema.optional(),
     url: ImageUrlSchema,
     contentUrl: ImageUrlSchema.optional(),
     caption: z.string().optional(),

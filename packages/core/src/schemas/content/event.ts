@@ -4,37 +4,44 @@ import { addDuration, IsoDateSchema, IsoDurationSchema } from '../../core/tempor
 import { AggregateOfferSchema, OfferSchema } from '../commerce/offer.js';
 import { PostalAddressSchema } from '../common/address.js';
 import { ImageUrlOrObject } from '../common/image.js';
-import { createEntityRef } from '../common/reference.js';
+import { EntityIdSchema, entityRef } from '../common/reference.js';
+import { RelativeOrAbsoluteUrlSchema } from '../common/url.js';
 import { OrganizationSchema } from '../identity/organization.js';
 import { PersonSchema } from '../identity/person.js';
 
-/**
- * Location schema supporting Place, PostalAddress, VirtualLocation, or plain string.
- */
+const EventPlaceSchema = z
+  .object({
+    '@type': z.enum(['Place', 'VirtualLocation']).optional(),
+    '@id': EntityIdSchema.optional(),
+    name: z.string().optional(),
+    address: z.union([z.string(), PostalAddressSchema]).optional(),
+    url: RelativeOrAbsoluteUrlSchema.optional(),
+  })
+  .strict();
+
+const EventPlaceReferenceSchema = entityRef({
+  schemas: [EventPlaceSchema],
+  types: ['Place', 'VirtualLocation'],
+});
+
+/** Location value supporting inline addresses/places and identifiable place references. */
 const EventLocationSchema = z.union([
   z.string().min(1, 'Location cannot be empty'),
   PostalAddressSchema,
-  z
-    .object({
-      '@type': z.union([z.string(), z.array(z.string())]).optional(),
-      name: z.string().optional(),
-      address: z.union([z.string(), PostalAddressSchema]).optional(),
-      url: z.string().optional(),
-    })
-    .strict(),
+  EventPlaceReferenceSchema,
 ]);
 
 /**
  * Organizer or performer reference/entity schema.
  */
-const PerformerOrOrganizerSchema = createEntityRef(
-  z.union([PersonSchema, OrganizationSchema]),
-  'Organization'
-);
+const PerformerOrOrganizerSchema = entityRef({
+  schemas: [PersonSchema, OrganizationSchema],
+  types: ['Person', 'Organization'],
+  fallbackType: 'Organization',
+});
 
 /**
- * Zod schema for Schema.org `Event`.
- * Follows Google Search Central Event structured data requirements.
+ * Curated Zod schema for Schema.org `Event`.
  */
 export const EventSchema = z
   .object({

@@ -41,6 +41,7 @@ export default function schemaGraph(options: SchemaGraphOptions = {}): AstroInte
         setGlobalConfig({
           baseUrl: resolvedBaseUrl,
           onError: resolvedOnError,
+          inLanguage: options.inLanguage,
         });
 
         if (command === 'dev' && addDevToolbarApp) {
@@ -53,7 +54,7 @@ export default function schemaGraph(options: SchemaGraphOptions = {}): AstroInte
         }
 
         logger.info(
-          `Initialized (onError: ${resolvedOnError}${resolvedBaseUrl ? `, baseUrl: ${resolvedBaseUrl}` : ''})`
+          `Initialized (onError: ${resolvedOnError}${resolvedBaseUrl ? `, baseUrl: ${resolvedBaseUrl}` : ''}${options.inLanguage ? `, locale: ${options.inLanguage}` : ''})`
         );
       },
     },

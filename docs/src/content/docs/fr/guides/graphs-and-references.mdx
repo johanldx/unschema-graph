@@ -52,9 +52,38 @@ const article = Article({
 });
 ```
 
+### Références d'entités objets
+
+Le pattern recommandé en v1 consiste à passer directement l'entité objet plutôt qu'un identifiant textuel.
+Chaque builder renvoyant un objet Schema.org strictement typé, TypeScript valide les types attendus dès la compilation :
+
+```ts
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme Publishing',
+  url: 'https://mon-site.fr',
+});
+
+const article = Article({
+  headline: 'Guide des données structurées',
+  image: 'https://mon-site.fr/couverture.jpg',
+  datePublished: '2026-09-29',
+  author: 'Ada Lovelace',
+  publisher: organization, // Référence d'entité objet typée !
+});
+```
+
+Lorsque `buildJsonLdGraph` s'exécute :
+1. Il détecte que `organization` possède un `@id`.
+2. Il hisse `organization` comme nœud racine du tableau `@graph`.
+3. Il remplace automatiquement `article.publisher` par `{ "@id": "https://mon-site.fr/#organization" }`.
+
 ### Raccourcis de chaînes d'identification
 
-Toute chaîne commençant par `#`, `/`, `http://`, `https://` ou `urn:` est automatiquement reconnue comme une référence d'entité et transformée en pointeur `{ "@id": "..." }` :
+Une chaîne est traitée comme référence lorsqu’elle commence par un fragment (`#org`),
+un préfixe de chemin explicite (`/a-propos#org`, `./docs/page`, `../docs/page`) ou une URI
+absolue avec n’importe quel schéma valide (`https:`, `urn:`, `mailto:`, `tel:`, etc.). Elle est alors transformée
+en pointeur `{ "@id": "..." }` :
 
 ```ts
 // Ces deux syntaxes produisent exactement le même JSON-LD :
@@ -62,24 +91,80 @@ publisher: '#organization'
 publisher: { '@id': '#organization' }
 ```
 
-Si la chaîne n'utilise aucun préfixe d'identifiant, `unschema-graph` utilise le type par défaut de la propriété pour instancier un objet nommé :
+Sinon, lorsque la relation déclare un `fallbackType`, la chaîne devient une entité
+nommée inline. Sans type de fallback, une chaîne simple est rejetée : fournissez plutôt
+une entité directe, une chaîne ressemblant explicitement à un identifiant ou un objet
+`{ '@id': '...' }`.
+
 - `author: 'Ada Lovelace'` → `{ "@type": "Person", "name": "Ada Lovelace" }`
 - `brand: 'Acme Corp'` → `{ "@type": "Brand", "name": "Acme Corp" }`
+- `brand: 'AC/DC'` → `{ "@type": "Brand", "name": "AC/DC" }`
+
 
 ---
 
-## 3. Résolution des URLs canoniques
+## 3. Node ou entité inline
+
+La distinction dépend de l’identité, pas de la profondeur d’imbrication :
+
+- une entité imbriquée avec un `@id` devient son propre node dans `@graph`, tandis que
+  son parent ne conserve que `{ '@id': '...' }` ;
+- une entité imbriquée sans `@id` reste inline dans son parent ;
+- un objet contenant uniquement `@id` est déjà une référence et ne crée pas de node vide.
+
+```ts
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme',
+});
+
+const website = WebSite({
+  '@id': '#website',
+  name: 'Acme',
+  url: 'https://example.com',
+  publisher: organization,
+});
+
+const graph = buildJsonLdGraph(website);
+// Organization est un node ; website.publisher vaut { '@id': '#organization' }.
+```
+
+Les identités réutilisables comme `Organization`, `Person`, `WebSite`, `WebPage`,
+`Product`, `Service` et `Event` sont des nodes potentiels courants. Les value objects
+comme `PostalAddress`, `GeoCoordinates`, `ContactPoint`, `Rating`, `AggregateRating` et
+`NutritionInformation` restent normalement inline, car ils ne possèdent généralement
+pas d’identité propre. Il s’agit d’une convention de la bibliothèque pour produire des
+graphes prévisibles, pas d’une règle Schema.org.
+
+---
+
+## 4. Sémantique des identifiants et des URL
 
 En cours de développement ou entre différents environnements (préproduction, production), il est courant d'écrire des identifiants relatifs comme `#organization` ou `/a-propos#person`.
 
-Lorsque vous configurez `baseUrl` (ou la propriété `site` dans l'`astro.config.mjs` d'Astro), `unschema-graph` résout récursivement tous les identifiants relatifs :
+Lorsque vous configurez `baseUrl` (ou la propriété `site` dans l'`astro.config.mjs` d'Astro), `unschema-graph` résout récursivement les valeurs `@id` relatives explicites. Les propriétés URL restent des chaînes URL : le collecteur ne déduit jamais leur sémantique depuis un nom comme `url` ou `item`.
 
-| Entrée `@id` ou URL | `baseUrl` configurée | Sortie dans `@graph` |
+| Entrée `@id` | `baseUrl` configurée | Sortie dans `@graph` |
 | --- | --- | --- |
 | `#organization` | `https://mon-site.fr` | `https://mon-site.fr/#organization` |
+| `#organization` | `https://mon-site.fr/a-propos` | `https://mon-site.fr/a-propos#organization` |
+| `#organization` | `https://mon-site.fr/a-propos/` | `https://mon-site.fr/a-propos/#organization` |
+| `/a-propos` | `https://mon-site.fr` | `https://mon-site.fr/a-propos` |
 | `/a-propos#person` | `https://mon-site.fr` | `https://mon-site.fr/a-propos#person` |
-| `/blog/premier-post` | `https://mon-site.fr` | `https://mon-site.fr/blog/premier-post` |
-| `https://externe.com/id` | `https://mon-site.fr` | `https://externe.com/id` *(inchangé)* |
+| `https://mon-site.fr/#organization` | `https://mon-site.fr` | inchangé |
+| `urn:example:foo` | `https://mon-site.fr` | inchangé |
+| `mailto:hello@example.com` | `https://mon-site.fr` | inchangé |
+| `tel:+33123456789` | `https://mon-site.fr` | inchangé |
+
+La résolution d’un fragment préserve la forme du chemin fournie par `baseUrl` : `/a-propos` et
+`/a-propos/` restent deux URL de document distinctes.
+
+Les schémas intégrés distinguent ces valeurs explicitement : `WebUrlSchema` valide les
+URL HTTP(S) absolues, `RelativeOrAbsoluteUrlSchema` valide les propriétés URL et les
+relations d’entités normalisent les références en `{ '@id': valeur }` avant la collecte.
+Seules les propriétés `@id` explicites sont résolues. Les valeurs ordinaires comme
+`name`, `serviceType` et `description` restent toujours intactes, même lorsqu'elles
+ressemblent à un chemin, un fragment ou une URI.
 
 :::tip
 Les objets d'entités passés en entrée ne sont **jamais modifiés**. La résolution crée
@@ -89,7 +174,21 @@ sérialisation.
 
 ---
 
-## 4. Déduplication et fusion automatique
+## 5. Découverte, déduplication et fusion automatiques
+
+Vous pouvez transmettre uniquement l’entité racine. Le collecteur parcourt récursivement
+les relations objet et tableau, découvre chaque entité liée possédant un `@id` et émet
+les dépendances avant le parent qui les référence.
+
+```ts
+const graph = buildJsonLdGraph(webpage);
+// Découvre WebPage → WebSite → Organization.
+```
+
+Un même objet d’entité peut être réutilisé par plusieurs parents : il n’est enregistré
+qu’une fois. Les relations cycliques entre entités identifiées se terminent sans boucle
+et deviennent des références dans les deux directions. Les entités sans `@id` restent
+inline et ne sont pas dédupliquées globalement.
 
 Si plusieurs composants ou layouts déclarent des entités partageant le même `@id` résolu, `unschema-graph` les fusionne automatiquement en un nœud unique au lieu de créer des doublons.
 
@@ -114,6 +213,37 @@ const richOrg = Organization({
 
 Le graphe final ne contiendra qu'un **seul** nœud `Organization` combinant l'ensemble des propriétés : `name`, `url`, `logo` et `sameAs`.
 
+La gestion des doublons est explicite et déterministe :
+
+| Stratégie | Comportement |
+| --- | --- |
+| `merge` *(défaut)* | Combine les propriétés ; la dernière valeur conflictuelle gagne. |
+| `first` | Conserve le premier node rencontré. |
+| `last` | Le remplace par le dernier node rencontré. |
+| `error` | Lève `DuplicateEntityError` pour tout doublon de `@id`. |
+
+Utilisez `onDiagnostic` pour collecter les conflits de fusion et les références locales
+cassées sous une forme exploitable par programme. Les fragments, chemins relatifs et
+références de même origine sont vérifiés ; les références absolues externes et les
+identifiants non HTTP sont conservés sans diagnostic.
+
+```ts
+const diagnostics: GraphDiagnostic[] = [];
+const graph = buildJsonLdGraph(items, {
+  duplicateStrategy: 'merge',
+  onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+});
+```
+
+### Garanties de stabilité
+
+Les normalisations du Core ne modifient jamais les entités fournies, y compris leurs
+tableaux et objets imbriqués. La collecte suit un ordre de découverte stable en
+profondeur : une entrée et des options identiques produisent le même ordre de nodes et
+la même sérialisation. Un document déjà normalisé peut être repassé dans
+`buildJsonLdGraph()` sans dégrader sa structure ; les normalizers de références et d’ID
+sont également idempotents.
+
 ```json title="Nœud fusionné"
 {
   "@type": "Organization",
@@ -127,7 +257,7 @@ Le graphe final ne contiendra qu'un **seul** nœud `Organization` combinant l'en
 
 ---
 
-## 5. Types Schema.org multiples
+## 6. Types Schema.org multiples
 
 Certaines entités relèvent de plusieurs types Schema.org à la fois (par exemple un `Article` qui est également un `TechArticle` ou une `CreativeWork`).
 
@@ -148,10 +278,13 @@ const techGuide = withAdditionalTypes(
 ```
 
 Le champ `@type` résultant sera un tableau : `["Article", "TechArticle", "CreativeWork"]`.
+Le helper conserve le type principal du builder en première position, supprime les
+doublons dans l’ordre de première apparition et refuse les noms de type vides. Une
+nouvelle application préserve ces invariants.
 
 ---
 
-## 6. Sortie plate sans graphe (`graph={false}`)
+## 7. Sortie plate sans graphe (`graph={false}`)
 
 Par défaut, `<Schema />` enveloppe systématiquement vos entités dans un tableau `@graph`. Si vous ne rendez qu'une seule entité et exigez une structure plate sans `@graph`, désactivez l'option avec `graph={false}` :
 

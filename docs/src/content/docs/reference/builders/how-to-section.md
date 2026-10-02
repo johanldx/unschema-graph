@@ -39,7 +39,7 @@ type HowToSectionOutput = SchemaOutput<typeof HowToSectionSchema, 'HowToSection'
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `itemListElement` | Array<object> | Yes | — |
 

@@ -47,35 +47,20 @@ y compris celles chargées depuis un CMS ou une API.
 
 ## Entité et identité
 
-La valeur renvoyée par un builder est une entité. Ajoutez `@id` lorsqu'une autre entité
-doit la référencer ou qu'elle doit être réutilisée sur plusieurs pages.
+La valeur renvoyée par un builder est une entité. Une entité s'utilise de trois façons :
 
-```ts
-const organization = Organization({
-  '@id': '#organization',
-  name: 'Acme Publishing',
-  url: 'https://example.com',
-});
+1. **Nœud racine du graphe :** Ajoutez un `@id` lorsque l'entité représente une identité autonome (comme une `Organization`, `WebSite`, `WebPage`, `Article` ou `Person`).
+2. **Référence d'entité objet :** Passez directement une entité issue d'un builder à une propriété relationnelle (comme `publisher: organization` ou `isPartOf: website`). TypeScript garantit la validité des propriétés et le collecteur extrait automatiquement l'entité dans le `@graph` tout en remplaçant la référence imbriquée par un pointeur `{ "@id": "..." }`.
+3. **Value object inline :** Les entités sans `@id` (telles que `PostalAddress`, `GeoCoordinates`, `ContactPoint` ou `AggregateRating`) restent imbriquées en ligne dans leur entité parente, car elles ne possèdent pas d'identité indépendante.
 
-const article = Article({
-  headline: 'Des données structurées reliées',
-  image: 'https://example.com/cover.jpg',
-  datePublished: '2026-09-29',
-  author: 'Ada Lovelace',
-  publisher: '#organization',
-});
-```
+Vous pouvez également employer des raccourcis textuels comme `publisher: '#organization'` ou `{ "@id": "#organization" }`, mais passer des objets typés offre la sûreté du typage TypeScript et la découverte automatique du graphe.
 
-`publisher: '#organization'` devient une référence `@id` plutôt qu'une deuxième copie
-imbriquée de l'organisation.
+## Le pattern recommandé : Découverte automatique du graphe
 
-## Un graphe de page réaliste
-
-Une page peut décrire ensemble le site, l'éditeur, la page et l'article :
+Plutôt que d'assembler manuellement un tableau de toutes les entités de la page, reliez vos entités avec des références d'objets et passez uniquement l'entité racine à `buildJsonLdGraph` :
 
 ```ts
 import {
-  Article,
   Organization,
   WebPage,
   WebSite,
@@ -84,41 +69,74 @@ import {
 
 const organization = Organization({
   '@id': '#organization',
-  name: 'Acme Publishing',
+  name: 'Acme',
   url: 'https://example.com',
 });
 
 const website = WebSite({
   '@id': '#website',
-  name: 'Acme Journal',
+  name: 'Acme',
   url: 'https://example.com',
-  publisher: '#organization',
+  publisher: organization,
 });
 
-const page = WebPage({
-  '@id': '/articles/graphe#webpage',
-  name: 'Des données structurées reliées',
-  url: '/articles/graphe',
-  isPartOf: '#website',
+const webpage = WebPage({
+  '@id': '#webpage',
+  name: 'Home',
+  isPartOf: website,
 });
 
-const article = Article({
-  '@id': '/articles/graphe#article',
-  headline: 'Des données structurées reliées',
-  image: 'https://example.com/cover.jpg',
-  datePublished: '2026-09-29',
-  author: 'Ada Lovelace',
-  publisher: '#organization',
-  mainEntityOfPage: '/articles/graphe#webpage',
-});
-
-const graph = buildJsonLdGraph([organization, website, page, article], {
+const graph = buildJsonLdGraph(webpage, {
   baseUrl: 'https://example.com',
 });
 ```
 
-Le graphe contient quatre nœuds. Leurs identités relatives deviennent absolues et les
-références pointent vers les nœuds correspondants sans dupliquer leurs propriétés.
+En recevant seulement `webpage`, le moteur parcourt récursivement `isPartOf` et `publisher`, découvrant ainsi `website` et `organization`. La sortie produite est un tableau `@graph` plat, unifié, avec des identifiants canoniques :
+
+```json
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://example.com/#organization",
+      "name": "Acme",
+      "url": "https://example.com"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://example.com/#website",
+      "name": "Acme",
+      "url": "https://example.com",
+      "publisher": {
+        "@id": "https://example.com/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://example.com/#webpage",
+      "name": "Home",
+      "isPartOf": {
+        "@id": "https://example.com/#website"
+      }
+    }
+  ]
+}
+```
+
+## Intégrations aux frameworks
+
+Lors de la compilation statique (SSG) ou du rendu serveur (SSR), le composant `<Schema />` exécute ce pipeline, injectant la balise sécurisée `<script type="application/ld+json">` directement dans le `<head>` (avec **0 kB** de JavaScript côté client sous Astro) :
+
+```astro title="src/pages/index.astro"
+---
+import { Schema } from '@unschema-graph/astro';
+import { webpage } from '../lib/schema';
+---
+<head>
+  <Schema items={webpage} />
+</head>
+```
 
 ## Ce que garantit la bibliothèque
 
@@ -126,4 +144,4 @@ unschema-graph valide les propriétés modélisées par chaque builder, compose 
 et sérialise le JSON-LD de façon sûre pour le HTML. Il ne garantit pas qu'un moteur de
 recherche affiche un résultat enrichi ni qu'une plateforme utilise une propriété.
 
-Étape suivante : comprendre [la validation des types et propriétés](/fr/guides/entities-types-and-properties/).
+Étape suivante : comprendre [la validation des types et propriétés](/fr/guides/entities-types-and-properties/) et le fonctionnement des [graphes et références](/fr/guides/graphs-and-references/).

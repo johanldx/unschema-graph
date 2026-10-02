@@ -1,16 +1,16 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as sveltePackage from '@unschema-graph/svelte';
 import { compile } from 'svelte/compiler';
 import { render } from 'svelte/server';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('@unschema-graph/svelte', () => {
   const sveltePath = fileURLToPath(new URL('../src/Schema.svelte', import.meta.url));
-  const cacheDir = fileURLToPath(
-    new URL('../../../node_modules/.cache/unschema-test', import.meta.url)
-  );
+
+  beforeEach(() => {
+    sveltePackage.resetGlobalConfig();
+  });
 
   it('re-exports core builders and utilities', () => {
     expect(typeof sveltePackage.Article).toBe('function');
@@ -20,28 +20,33 @@ describe('@unschema-graph/svelte', () => {
     expect(typeof sveltePackage.setGlobalConfig).toBe('function');
   });
 
-  it('compiles Schema.svelte and renders to SSR head', async () => {
+  it('compiles for Svelte 5 server and client without browser-side effects', () => {
     const source = fs.readFileSync(sveltePath, 'utf-8');
-
-    const compiled = compile(source, {
+    const server = compile(source, {
       generate: 'server',
       filename: 'Schema.svelte',
     });
+    const client = compile(source, {
+      generate: 'client',
+      filename: 'Schema.svelte',
+    });
 
-    // Write compiled SSR component to cache
-    fs.mkdirSync(cacheDir, { recursive: true });
-    const compiledPath = path.join(cacheDir, 'Schema.js');
-    fs.writeFileSync(compiledPath, compiled.js.code);
+    expect(server.warnings).toHaveLength(0);
+    expect(client.warnings).toHaveLength(0);
+    expect(source).toContain('$props()');
+    expect(source).toContain('$derived.by');
+    expect(source).not.toMatch(/\$effect|onMount|window\.|document\.|addEventListener/);
+    expect(client.js.code).not.toMatch(/addEventListener|onMount/);
+  });
 
-    const { default: SchemaComponent } = await import(compiledPath);
-
+  it('renders exactly one anti-XSS JSON-LD script in the SvelteKit SSR head', () => {
     const org = sveltePackage.Organization({
       '@id': 'https://example.com/#org',
-      name: 'Rootage',
+      name: '</script><script>alert("xss")</script>',
       url: 'https://example.com',
     });
 
-    const rendered = render(SchemaComponent, {
+    const rendered = render(sveltePackage.Schema, {
       props: {
         item: org,
         inLanguage: 'fr',
@@ -50,29 +55,67 @@ describe('@unschema-graph/svelte', () => {
 
     expect(rendered.head).toContain('<script type="application/ld+json">');
     expect(rendered.head).toContain('"@type":"Organization"');
-    expect(rendered.head).toContain('"name":"Rootage"');
+    expect(rendered.head).toContain('\\u003c/script\\u003e');
     expect(rendered.head).toContain('</script>');
+    expect((rendered.head.match(/<script/g) ?? []).length).toBe(1);
+    expect(rendered.body.replaceAll(/<!--.*?-->/g, '')).toBe('');
   });
 
-  it('supports multiple items and language injection', async () => {
-    const compiledPath = path.join(cacheDir, 'Schema.js');
-    const { default: SchemaComponent } = await import(compiledPath);
-
+  it('reacts to changed inputs across renders without duplicating the head script', () => {
     const article = sveltePackage.Article({
+      '@id': '#article',
       headline: 'Svelte 5 & JSON-LD',
-      image: 'https://example.com/cover.jpg',
-      datePublished: '2026-09-29T12:00:00Z',
       author: 'Johan',
     });
+    const updatedArticle = { ...article, headline: 'Updated Svelte title' };
 
-    const rendered = render(SchemaComponent, {
+    const first = render(sveltePackage.Schema, {
       props: {
         items: [article],
         inLanguage: 'en-US',
+        baseUrl: 'https://example.com',
+      },
+    });
+    const updated = render(sveltePackage.Schema, {
+      props: {
+        items: [updatedArticle],
+        inLanguage: 'en-US',
+        baseUrl: 'https://example.com',
       },
     });
 
-    expect(rendered.head).toContain('"inLanguage":"en-US"');
-    expect(rendered.head).toContain('"headline":"Svelte 5 \\u0026 JSON-LD"');
+    expect(first.head).toContain('"headline":"Svelte 5 \\u0026 JSON-LD"');
+    expect(updated.head).toContain('"headline":"Updated Svelte title"');
+    expect(updated.head).toContain('"@id":"https://example.com/#article"');
+    expect(updated.head).toContain('"inLanguage":"en-US"');
+    expect((first.head.match(/<script/g) ?? []).length).toBe(1);
+    expect((updated.head.match(/<script/g) ?? []).length).toBe(1);
+    expect(article.headline).toBe('Svelte 5 & JSON-LD');
+    expect(article.inLanguage).toBeUndefined();
+  });
+
+  it('uses Core global defaults and produces the exact Core graph payload', () => {
+    sveltePackage.setGlobalConfig({
+      baseUrl: 'https://configured.example',
+      inLanguage: 'fr-FR',
+    });
+    const article = Object.freeze(
+      sveltePackage.Article({
+        '@id': '#article',
+        headline: 'Core parity',
+      })
+    );
+
+    const rendered = render(sveltePackage.Schema, { props: { item: article } });
+    const expectedEntity = { ...article, inLanguage: 'fr-FR' };
+    const expected = sveltePackage.serializeJsonLd(
+      sveltePackage.buildJsonLdGraph([expectedEntity], {
+        baseUrl: 'https://configured.example',
+      })
+    );
+
+    expect(rendered.head).toContain(expected);
+    expect(article['@id']).toBe('#article');
+    expect(article.inLanguage).toBeUndefined();
   });
 });

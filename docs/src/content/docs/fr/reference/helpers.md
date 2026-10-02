@@ -10,6 +10,7 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | `defineSchema(type, schema, defaults?)` | Crée un builder strict et appelable depuis un schéma Zod. |
 | `withAdditionalProperties(entity, properties)` | Ajoute des propriétés choisies après validation, sans remplacer `@type` ou `@id`. |
 | `withAdditionalTypes(entity, types)` | Ajoute des types Schema.org secondaires en conservant le type principal. |
+| `SchemaTypeSchema`, `normalizeSchemaTypes()` | Garantissent un `@type` non vide, dédupliqué et stable. |
 | `SchemaBuilder` | Interface appelable avec `.schema`, `.entityType` et `.safeParse()`. |
 | `SchemaInput`, `SchemaOutput` | Infère les entrées et sorties depuis un schéma Zod. |
 
@@ -19,8 +20,11 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | --- | --- |
 | `buildJsonLdGraph(items, options?)` | Aplatit, résout, déduplique et encapsule les entités. |
 | `resolveId(id, baseUrl?)` | Résout un identifiant relatif depuis une URL canonique. |
-| `resolveEntityIds(value, baseUrl?)` | Résout récursivement `@id`, `item` et `url` dans une copie. |
-| `GraphOptions` | Options `graph`, `context` et `baseUrl`. |
+| `resolveEntityIds(value, baseUrl?)` | Résout récursivement les valeurs `@id` explicites dans une copie. |
+| `GraphOptions` | Options d’encapsulation, résolution d’ID, doublons et diagnostics. |
+| `GraphDiagnostic` | Diagnostic structuré de conflit ou référence cassée. |
+| `DuplicateStrategy` | Politique de doublon : `merge`, `error`, `first` ou `last`. |
+| `DuplicateEntityError` | Erreur levée par la stratégie de doublons `error`. |
 
 ## Validation
 
@@ -31,6 +35,8 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | `formatZodError(error, entityType?, data?)` | Produit le diagnostic lisible dans le terminal. |
 | `normalizeZodIssues(error, entityType?, data?)` | Produit des détails d’erreur structurés et stables. |
 | `SchemaValidationError` | Erreur avec `code`, `entityType`, `issues`, `details` et message formaté. |
+| `GoogleArticle`, `GoogleRecipe` | Builders opt-in des profils consommateurs Google implémentés. |
+| `GoogleArticleSchema`, `GoogleRecipeSchema` | Schémas de profils composables, sans garantie d’éligibilité aux résultats enrichis. |
 
 ## Dates et durées
 
@@ -45,22 +51,50 @@ description: Référence des helpers de graphe, validation, temps, sérialisatio
 | `IsoDateSchema`, `IsoDurationSchema` | Schémas Zod de transformation réutilisables. |
 | `DurationInput`, `DurationObject` | Types publics d’entrée des durées. |
 
+`referenceDate` ne contrôle qu’un appel direct à `parseDate()`. Les valeurs relatives
+transmises aux builders, à `IsoDateSchema` ou à `formatIsoDate()` utilisent l’horloge réelle
+au moment de l’exécution ; préférez une entrée ISO explicite pour une sortie reproductible.
+
 ## Sérialisation
 
 | Export | Rôle |
 | --- | --- |
-| `serializeJsonLd(data, options?)` | Sérialise le JSON et échappe les caractères HTML dangereux. |
-| `escapeJsonLd(json)` | Échappe `<`, `>` et `&` dans une chaîne JSON existante. |
+| `serializeJsonLd(data, options?)` | Voie recommandée pour injecter du JSON-LD dans `<script>` ; neutralise `<`, `>`, `&`, `\u2028` et `\u2029`. |
+| `escapeJsonLd(json)` | Échappe les caractères HTML sensibles et séparateurs Unicode dans une chaîne JSON existante. |
 | `SerializeOptions` | Paramètres `pretty` et `indent`. |
 
 ## Références et raccourcis
 
 | Export | Rôle |
 | --- | --- |
+| `EntityReference<T>` | Entrée relationnelle typée : entité compatible, chaîne d’identifiant ou objet `{ '@id' }` explicite. |
+| `EntityIdReference` | Forme d’un pointeur relationnel explicite `{ '@id': string }`. |
+| `entityRef({ schemas, types?, fallbackType? })` | Crée le schéma Zod relationnel partagé par les builders intégrés. |
 | `isIdReference(value)` | Détecte les fragments, chemins, URL HTTP(S) et URN. |
-| `createEntityRef(schema, fallbackType?)` | Crée une union Zod pour entités imbriquées et références. |
+| `EntityIdSchema` | Nettoie et valide un identifiant d’entité JSON-LD non vide ; les identifiants composés uniquement d’espaces sont rejetés. |
+| `WebUrlSchema` | Valide une URL HTTP(S) absolue. |
+| `RelativeOrAbsoluteUrlSchema` | Valide une URI absolue ou une URL/chemin relatif. |
+| `createEntityRef(schema, fallbackType?)` | Alias de compatibilité déprécié de `entityRef()`. |
 | `createSearchAction(options)` | Crée une SearchAction et son EntryPoint. |
 | `SpeakableSchema` | Valide et convertit des sélecteurs CSS ou XPath en SpeakableSpecification. |
+
+Utilisez un schéma spécialisé pour chaque propriété plutôt que d’accepter toute entité
+Schema.org :
+
+```ts
+const PublisherSchema = entityRef({
+  schemas: [OrganizationSchema, PersonSchema],
+  types: ['Organization', 'Person'],
+  fallbackType: 'Organization',
+});
+```
+
+La même primitive conserve les entités issues des builders, normalise les chaînes
+d’identifiant en `{ '@id' }` et développe les chaînes simples avec `fallbackType`. Sans
+type de fallback, les chaînes simples sont rejetées : fournissez une entité directe, une
+chaîne ressemblant explicitement à un identifiant ou un objet `{ '@id' }`. Les value
+objects comme les adresses gardent des schémas distincts afin qu’une chaîne libre ne soit
+pas confondue avec une référence d’entité.
 
 ## Helpers de contenu
 

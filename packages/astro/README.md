@@ -5,11 +5,19 @@
 
 Astro integration, `<Schema />` component (0 KB client JS), Content Collections helpers, and Dev Toolbar inspector for `unschema-graph`.
 
-All 51 typed Schema.org builders from `@unschema-graph/core` are re-exported directly from `@unschema-graph/astro`.
+The complete curated Schema.org 30.1 builder surface from `@unschema-graph/core` is re-exported directly from `@unschema-graph/astro`.
 
 ---
 
 ## Installation
+
+Automatic setup:
+
+```bash
+npx astro add @unschema-graph/astro
+```
+
+Manual installation:
 
 ```bash
 # pnpm
@@ -33,7 +41,7 @@ Add the integration in `astro.config.mjs` to enable automatic `baseUrl` inferenc
 
 ```javascript
 // astro.config.mjs
-import schemaGraph from '@unschema-graph/astro/integration';
+import schemaGraph from '@unschema-graph/astro';
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
@@ -46,6 +54,13 @@ export default defineConfig({
   ],
 });
 ```
+
+The named `schemaGraph` export and the `@unschema-graph/astro/integration` subpath remain supported.
+
+The integration stores these defaults in Core's module-level global configuration. During Astro
+rendering, `baseUrl` resolves in this order: component prop, integration/global default, then
+`Astro.site`. Language resolution preserves an entity's existing `inLanguage`, then uses the
+component prop, `Astro.currentLocale`, and finally the integration/global default.
 
 ---
 
@@ -92,7 +107,7 @@ const breadcrumbs = BreadcrumbList({
 <head>
   <title>{post.data.title}</title>
   <!-- Injects a single unified, deduplicated, anti-XSS escaped @graph script -->
-  <Schema data={[publisher, article, breadcrumbs]} />
+  <Schema items={[publisher, article, breadcrumbs]} />
 </head>
 ```
 
@@ -117,8 +132,8 @@ const blogPosting = toBlogPosting(posts[0], {
 | Dependency | Supported Range | Notes |
 | :--- | :--- | :--- |
 | **Astro** | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0` | Server-rendered and static output. Component adds 0 KB client JS. |
-| **Node.js** | `>=22.12.0` | Runtime and build tooling. |
-| **Zod** | `^4.6.0` | Peer dependency for schema validation. |
+| **Node.js** | `>=22.12.0` | Oldest maintained LTS baseline tested in CI. |
+| **Zod** | `^4.6.0` | Required by the bundled Core dependency's peer contract. |
 
 ---
 

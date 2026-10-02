@@ -33,6 +33,9 @@ const job = JobPosting({
 
 :::tip
 Relative date expressions (`'today'`, `'+30d'`) are computed at build or SSR execution time.
+Only a direct `parseDate(input, referenceDate)` call can use a fixed clock. Builders,
+`IsoDateSchema`, and `formatIsoDate()` use the live clock, so pass explicit ISO values when
+the generated output must be reproducible.
 :::
 
 ---

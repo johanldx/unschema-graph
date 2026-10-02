@@ -92,5 +92,9 @@ const schema = toBlogPosting(post, {
 ```
 
 :::note
-Si des champs obligatoires (comme `headline`, `image`, `datePublished` ou `author`) ne peuvent pas être résolus, une exception `SchemaValidationError` est levée. Les helpers n'inventent jamais de fausses données d'attente.
+Les helpers appellent les mêmes builders génériques `Article`, `BlogPosting` et
+`NewsArticle` que le code manuel. Ils partagent donc propriétés strictes, normalisation
+des références et diagnostics `SchemaValidationError` actionnables, sans inventer de
+valeurs. Utilisez séparément un profil consommateur explicite pour des contraintes de
+moteur de recherche plus strictes.
 :::

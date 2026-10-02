@@ -92,5 +92,8 @@ const schema = toBlogPosting(post, {
 ```
 
 :::note
-If required fields (such as `headline`, `image`, `datePublished`, or `author`) cannot be resolved from the frontmatter or overrides, a standard `SchemaValidationError` is raised. The helpers do not invent fake placeholders.
+The helpers call the same generic `Article`, `BlogPosting`, and `NewsArticle` builders
+as manual code. They therefore share strict properties, reference normalization, and
+actionable `SchemaValidationError` diagnostics, without inventing placeholders. Use an
+explicit consumer profile separately when you need stricter search-engine requirements.
 :::

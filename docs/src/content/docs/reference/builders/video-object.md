@@ -45,8 +45,8 @@ type VideoObjectOutput = SchemaOutput<typeof VideoObjectSchema, 'VideoObject'>;
 | `thumbnailUrl` | string \| Array<string> \| string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | Yes | non-empty |
 | `uploadDate` | string \| number \| Date | Yes | non-empty |
 | `duration` | string \| number \| DurationObject | No | non-empty; greater than 0 |
-| `contentUrl` | string | No | — |
-| `embedUrl` | string | No | — |
+| `contentUrl` | string | No | non-empty |
+| `embedUrl` | string | No | non-empty |
 | `hasPart` | object \| Array<object> | No | — |
 | `inLanguage` | string | No | — |
 

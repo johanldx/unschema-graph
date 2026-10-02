@@ -39,11 +39,11 @@ type ClipOutput = SchemaOutput<typeof ClipSchema, 'Clip'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `name` | string | Yes | non-empty |
 | `startOffset` | number | Yes | minimum: 0 |
 | `endOffset` | number | Yes | greater than 0 |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'Clip'`.

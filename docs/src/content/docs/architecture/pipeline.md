@@ -4,8 +4,8 @@ description: Public contracts and implementation model from source data to an HT
 ---
 
 This page describes the modules and seams behind unschema-graph. Statements marked
-**public contract** are safe to depend on within the current pre-1.0 release line.
-Implementation notes explain the current design and may change without becoming API.
+**public contract** are governed by strict SemVer stability guarantees in v1.
+Implementation notes explain internal mechanics and may change without breaking the public API.
 
 ## Pipeline overview
 
@@ -95,8 +95,9 @@ non-mutation guarantees.
 `parseDate()` accepts `Date`, timestamps, ISO values and documented relative forms.
 `formatIsoDate()` emits normalized ISO output. `formatIsoDuration()` normalizes ISO,
 human strings and duration objects; `parseDurationToMs()`, `addDuration()` and
-`diffDuration()` provide calculations. Pass a reference date when deterministic tests
-use relative input such as `today`.
+`diffDuration()` provide calculations. A fixed reference date applies only to a direct
+`parseDate()` call; builders and transforming schemas use the live clock. Use explicit ISO
+input when their output must be reproducible.
 
 ## Serialization and threat model
 
@@ -106,11 +107,24 @@ It is not an HTML sanitizer and does not make untrusted values semantically true
 Validate at ingestion, never concatenate serialized fragments, and insert the returned
 string only as the contents of an `application/ld+json` script.
 
+## Core Architectural Convergence (v1)
+
+`unschema-graph` enforces absolute architectural convergence around a single primitive and policy for each core responsibility:
+
+1. **1 relation primitive (`entityRef`):** A single schema primitive handles all entity-object references, `#id` fragment strings, URI references, and inline named entities.
+2. **1 reference model:** Entities are referenced through `{ "@id": "..." }` pointers; relative references are canonicalized deterministically against `baseUrl`.
+3. **1 graph collector (`buildJsonLdGraph`):** A unified recursive collector traverses relation trees, discovers all identified nodes, prevents infinite cycles, and hoists nodes into the `@graph` array.
+4. **1 merge strategy (`mergeEntities`):** A single, deterministic merge algorithm combines duplicate nodes sharing an `@id` with explicit strategies (`merge`, `first`, `last`, `error`).
+5. **1 URL / ID strategy (`resolveId` / `resolveEntityIds`):** Strict semantic separation between web URLs (`url`, `sameAs`) and entity identifiers (`@id`), leaving external URIs untouched.
+6. **1 inline vs node policy:** Identity alone determines hoisting. Any entity with an `@id` becomes a top-level `@graph` node; value objects without `@id` remain inline within their parent.
+7. **1 validation policy:** Strict Schema.org validation enforced at compile time via TypeScript and at runtime via Zod, extensible via `withAdditionalProperties` and `defineSchema`.
+8. **1 shared engine across frameworks:** `@unschema-graph/astro` and `@unschema-graph/svelte` share the exact same `@unschema-graph/core` engine, with 0 kB client JavaScript in Astro and native reactivity in Svelte.
+
 ## Stable contract versus explanation
 
-Public exports, documented inputs, return values, error shapes and non-mutation are the
-interface. File layout, helper functions, traversal passes, merge implementation and
-adapter internals are explanations that may evolve. Tests should cross the same public
+Public exports, documented inputs, return values, error shapes, and non-mutation are the
+interface governed by SemVer. File layout, helper functions, traversal passes, merge implementation, and
+adapter internals are explanations that may evolve. Tests cross the same public
 seam as application code.
 
 Next: [Core reference](/integrations/core/), [helpers and types](/reference/helpers/),

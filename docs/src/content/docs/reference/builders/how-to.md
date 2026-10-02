@@ -45,9 +45,9 @@ type HowToOutput = SchemaOutput<typeof HowToSchema, 'HowTo'>;
 | `description` | string | No | — |
 | `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | No | non-empty |
 | `totalTime` | string \| number \| DurationObject | No | non-empty; greater than 0 |
-| `estimatedCost` | string \| object | No | — |
-| `supply` | string \| Array<string> \| Array<object> | No | — |
-| `tool` | string \| Array<string> \| Array<object> | No | — |
+| `estimatedCost` | string \| string \| object | No | non-empty |
+| `supply` | string \| Array<string> \| Array<string \| object> | No | — |
+| `tool` | string \| Array<string> \| Array<string \| object> | No | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'HowTo'`.

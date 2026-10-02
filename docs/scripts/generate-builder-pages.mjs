@@ -30,21 +30,26 @@ const durationProperties = new Set(['cookTime', 'duration', 'prepTime', 'totalTi
 const objectTypeNames = {
   address: 'PostalAddress | EntityReference',
   aggregateRating: 'AggregateRating',
+  actor: 'Person | EntityReference',
   author: 'Person | Organization | EntityReference',
   brand: 'Brand | Organization | EntityReference',
   contactPoint: 'ContactPoint',
+  creator: 'Person | Organization | EntityReference',
+  director: 'Person | EntityReference',
   distribution: 'DataDownload',
   geo: 'GeoCoordinates',
   hiringOrganization: 'Organization | EntityReference',
   image: 'ImageObject',
   itemReviewed: 'SchemaOrgEntity | EntityReference',
   jobLocation: 'Place | PostalAddress | EntityReference',
+  location: 'Place | VirtualLocation | PostalAddress | EntityReference',
   logo: 'ImageObject',
+  mainEntity: 'Person | Organization | EntityReference',
   offers: 'Offer | AggregateOffer',
   organizer: 'Person | Organization | EntityReference',
   performer: 'Person | Organization | EntityReference',
   provider: 'Person | Organization | LocalBusiness | EntityReference',
-  publisher: 'Organization | EntityReference',
+  publisher: 'Person | Organization | EntityReference',
   review: 'Review',
   reviewRating: 'Rating',
   screenshot: 'ImageObject',
@@ -76,7 +81,7 @@ function describeType(schema, propertyName) {
   if (schema.type === 'object') return objectTypeNames[propertyName] ?? 'object';
   if (schema.type === 'integer' || schema.type === 'number') return 'number';
   if (schema.type) return schema.type;
-  return 'unknown';
+  return objectTypeNames[propertyName] ?? 'unknown';
 }
 
 function collectConstraints(schema) {

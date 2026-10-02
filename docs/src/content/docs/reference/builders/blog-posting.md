@@ -3,7 +3,7 @@ title: BlogPosting builder
 description: Reference for the BlogPosting builder and its validated Schema.org BlogPosting output.
 ---
 
-Creates a BlogPosting using the strict Article input schema. The `BlogPosting` builder injects `@type`, validates synchronously, and
+Creates a BlogPosting using the generic Article input schema. The `BlogPosting` builder injects `@type`, validates synchronously, and
 rejects unknown properties.
 
 ## Import
@@ -40,18 +40,18 @@ type BlogPostingOutput = SchemaOutput<typeof ArticleSchema, 'BlogPosting'>;
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
-| `headline` | string | Yes | non-empty |
-| `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | Yes | non-empty |
-| `datePublished` | string \| number \| Date | Yes | non-empty |
+| `headline` | string | No | non-empty |
+| `image` | string \| [ImageObject](/reference/builders/image-object/) \| Array<string \| [ImageObject](/reference/builders/image-object/)> | No | non-empty |
+| `datePublished` | string \| number \| Date | No | non-empty |
 | `dateModified` | string \| number \| Date | No | non-empty |
-| `author` | string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<string \| [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | Yes | non-empty |
-| `publisher` | string \| [Organization](/reference/builders/organization/) \| EntityReference | No | non-empty |
+| `author` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference \| Array<[Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | No | — |
+| `publisher` | [Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference | No | — |
 | `description` | string | No | — |
 | `articleBody` | string | No | — |
 | `articleSection` | string \| Array<string> | No | — |
 | `keywords` | string \| Array<string> | No | — |
 | `inLanguage` | string | No | — |
-| `mainEntityOfPage` | string \| object | No | — |
+| `mainEntityOfPage` | string \| object | No | non-empty |
 | `wordCount` | number | No | integer; greater than 0; maximum: 9007199254740991 |
 | `speakable` | string \| Array<string> \| object | No | — |
 

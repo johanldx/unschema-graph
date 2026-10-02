@@ -33,9 +33,9 @@ Relative identities keep code portable between local, staging, and production si
 | `https://profiles.example/ada` | unchanged absolute identity |
 | `urn:isbn:9780000000000` | unchanged URN identity |
 
-Astro resolves from the component prop, then `Astro.site`, then global integration
-configuration. Svelte requires the component `baseUrl` prop. Core uses the `baseUrl`
-passed to `buildJsonLdGraph()`.
+Astro resolves from the component prop, then the integration/global default, then
+`Astro.site`. Svelte uses its component prop and then the global default. Core only uses
+the explicit `baseUrl` passed to `buildJsonLdGraph()`.
 
 ## Reference an existing entity
 

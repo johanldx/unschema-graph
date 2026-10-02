@@ -1,0 +1,12 @@
+{
+  "name": "published-astro-consumer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro check && astro build"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "typescript": "^6.0.0"
+  }
+}

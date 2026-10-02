@@ -70,25 +70,22 @@ section {
 .comparison-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  border: 1px solid var(--ug-line);
-  border-radius: var(--ug-radius-md);
-  background: var(--ug-line);
-  overflow: hidden;
+  gap: clamp(0.85rem, 2vw, 1.25rem);
 }
 
 .pane {
   display: grid;
   grid-template-rows: auto auto 1fr;
   min-width: 0;
-  border: 0;
-  border-radius: 0;
+  border: 1px solid var(--ug-line);
+  border-radius: var(--ug-radius-md);
   background: var(--ug-paper-raised);
   overflow: hidden;
+  box-shadow: var(--ug-shadow-sm);
 }
 
 .pane-recommended {
-  background: var(--ug-paper-raised);
+  border-color: var(--ug-pastel-lavender-border);
 }
 
 header {
@@ -141,8 +138,10 @@ header {
 }
 
 .code-viewport {
+  --astro-code-foreground: #e6edf3;
+  --astro-code-background: var(--ug-code, #14111d);
   --astro-code-color-text: #e6edf3;
-  --astro-code-color-background: var(--ug-code);
+  --astro-code-color-background: var(--ug-code, #14111d);
   --astro-code-token-constant: #79c0ff;
   --astro-code-token-string: #a5d6ff;
   --astro-code-token-comment: #8b949e;
@@ -152,17 +151,19 @@ header {
   --astro-code-token-string-expression: #a5d6ff;
   --astro-code-token-punctuation: #c9d1d9;
   --astro-code-token-link: #a5d6ff;
-  height: 18rem;
+  min-height: 21rem;
   min-width: 0;
-  background: var(--ug-code);
-  overflow: hidden;
+  background: var(--ug-code, #14111d);
+  overflow: visible;
+  overflow-y: visible;
 }
 
 .code-viewport :global(.syntax-code) {
+  display: block;
   width: 100%;
-  min-width: 0;
+  min-width: 100%;
   min-height: 100%;
-  margin: 0;
+  margin: 0 !important;
   padding: 1.4rem 1.5rem;
   border: 0;
   border-radius: 0;
@@ -170,7 +171,7 @@ header {
   font-size: clamp(0.76rem, 1.05vw, 0.86rem);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .code-viewport :global(.syntax-code > code) {
@@ -246,10 +247,35 @@ li span {
   }
 
   .code-viewport {
-    height: auto;
+    min-height: 0;
   }
 
   .code-viewport :global(.syntax-code) {
+    padding: 1.1rem 1rem;
+  }
+}
+
+@media (max-width: 36rem) {
+  section {
+    padding-block: 3rem;
+  }
+
+  header {
+    align-items: flex-start;
+    padding: 0.75rem;
+  }
+
+  .file {
+    padding-block: 0.15rem;
+  }
+
+  .badge {
+    max-width: 55%;
+    text-align: end;
+    white-space: normal;
+  }
+
+  .result {
     padding: 1.1rem 1rem;
   }
 }

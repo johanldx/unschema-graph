@@ -172,6 +172,7 @@ export function parseDate(input: unknown, referenceDate = new Date()): Date | nu
  * Formats any date input into a compliant ISO 8601 string or YYYY-MM-DD date.
  * Pure dates ('YYYY-MM-DD' or 'today') are preserved as 'YYYY-MM-DD'.
  * Full datetimes, timestamps, and relative offsets are formatted as full ISO 8601 timestamps.
+ * Relative input uses the live execution-time clock; use explicit ISO input for reproducibility.
  */
 export function formatIsoDate(input: unknown): string {
   if (typeof input === 'string') {

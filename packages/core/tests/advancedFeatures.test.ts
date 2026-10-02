@@ -214,6 +214,147 @@ describe('Advanced Feature 3: Static Build Audit Engine', () => {
     expect(res.errors[0].message).toMatch(/missing "@type"/);
   });
 
+  it('should resolve local graph references and report broken ones with their path', () => {
+    const valid = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@graph":[
+          {"@type":"Organization","@id":"#organization","name":"Acme"},
+          {"@type":"WebSite","publisher":{"@id":"#organization"}}
+        ]
+      }</script>`,
+      'valid-reference.html'
+    );
+    expect(valid.resolvedLocalReferences).toBe(1);
+    expect(valid.errors).toHaveLength(0);
+
+    const broken = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@type":"WebSite",
+        "publisher":{"@id":"#missing"}
+      }</script>`,
+      'broken-reference.html'
+    );
+    expect(broken.errors).toContainEqual({
+      code: 'broken-reference',
+      severity: 'error',
+      file: 'broken-reference.html',
+      id: '#missing',
+      path: 'WebSite.publisher',
+      message: 'Broken @id reference: #missing\nReferenced from: WebSite.publisher',
+    });
+  });
+
+  it('only audits fragment-only references as local without a canonical URL', () => {
+    const result = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@type":"WebPage",
+        "@id":"#page",
+        "fragmentReference":{"@id":"#missing"},
+        "rootPathReference":{"@id":"/about#missing"},
+        "relativePathReference":{"@id":"./about#missing"},
+        "parentPathReference":{"@id":"../about#missing"}
+      }</script>`,
+      'no-canonical-reference.html'
+    );
+
+    expect(result.errors).toEqual([
+      {
+        code: 'broken-reference',
+        severity: 'error',
+        file: 'no-canonical-reference.html',
+        id: '#missing',
+        path: 'WebPage.fragmentReference',
+        message: 'Broken @id reference: #missing\nReferenced from: WebPage.fragmentReference',
+      },
+    ]);
+  });
+
+  it('reports a missing absolute reference to the canonical document', () => {
+    const result = auditHtmlContent(
+      `<html><head>
+        <link href="https://example.com/" rel="canonical">
+        <script type="application/ld+json">{
+          "@context":"https://schema.org",
+          "@graph":[
+            {
+              "@type":"WebSite",
+              "@id":"#website",
+              "publisher":{"@id":"https://example.com/#missing"}
+            }
+          ]
+        }</script>
+      </head></html>`,
+      'canonical-reference.html'
+    );
+
+    expect(result.resolvedLocalReferences).toBe(0);
+    expect(result.errors).toEqual([
+      {
+        code: 'broken-reference',
+        severity: 'error',
+        file: 'canonical-reference.html',
+        id: 'https://example.com/#missing',
+        path: 'WebSite.publisher',
+        message:
+          'Broken @id reference: https://example.com/#missing\nReferenced from: WebSite.publisher',
+      },
+    ]);
+  });
+
+  it('does not treat a same-origin different-document reference as locally broken', () => {
+    const result = auditHtmlContent(
+      `<html><head>
+        <link href="https://example.com/" rel="canonical">
+        <script type="application/ld+json">{
+          "@context":"https://schema.org",
+          "@type":"WebSite",
+          "@id":"#website",
+          "publisher":{"@id":"https://example.com/about#organization"}
+        }</script>
+      </head></html>`,
+      'different-document-reference.html'
+    );
+
+    expect(result.resolvedLocalReferences).toBe(0);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should distinguish duplicate declarations from conflicting @id values', () => {
+    const duplicate = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@graph":[
+          {"@type":"Organization","@id":"#organization","name":"Acme"},
+          {"@type":"Organization","@id":"#organization","name":"Acme","url":"/about"}
+        ]
+      }</script>`,
+      'duplicate.html'
+    );
+    expect(duplicate.errors).toHaveLength(0);
+    expect(duplicate.warnings[0]).toMatchObject({
+      code: 'duplicate-id',
+      id: '#organization',
+    });
+
+    const conflict = auditHtmlContent(
+      `<script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@graph":[
+          {"@type":"Organization","@id":"#organization","name":"Acme"},
+          {"@type":"Organization","@id":"#organization","name":"Other"}
+        ]
+      }</script>`,
+      'conflict.html'
+    );
+    expect(conflict.errors[0]).toMatchObject({
+      code: 'duplicate-conflict',
+      id: '#organization',
+    });
+  });
+
   it('should audit a directory recursively and pass clean directories', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'asg-audit-test-'));
     const subDir = path.join(tmpDir, 'blog');
@@ -232,8 +373,10 @@ describe('Advanced Feature 3: Static Build Audit Engine', () => {
     expect(report.scannedFiles).toBe(2);
     expect(report.totalBlocks).toBe(2);
     expect(report.totalEntities).toBe(2);
+    expect(report.resolvedLocalReferences).toBe(0);
     expect(report.passed).toBe(true);
     expect(report.errors).toHaveLength(0);
+    expect(report.warnings).toHaveLength(0);
 
     // Clean up
     fs.rmSync(tmpDir, { recursive: true, force: true });

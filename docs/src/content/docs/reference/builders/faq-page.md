@@ -40,7 +40,7 @@ type FAQPageOutput = SchemaOutput<typeof FAQPageSchema, 'FAQPage'>;
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
 | `@id` | string | No | non-empty |
-| `mainEntity` | Array<object> | Conditional | — |
+| `mainEntity` | Array<[Person](/reference/builders/person/) \| [Organization](/reference/builders/organization/) \| EntityReference> | Conditional | — |
 | `questions` | Array<object> | Conditional | — |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a

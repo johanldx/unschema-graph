@@ -1,6 +1,15 @@
 import {
+  AnswerSchema,
+  Article,
   defineSchema,
+  FAQPage,
+  ImageObjectSchema,
+  LocalBusinessSchema,
+  Organization,
+  PostalAddressSchema,
+  SchemaTypeSchema,
   SchemaValidationError,
+  TypedEntitySchema,
   withAdditionalProperties,
   withAdditionalTypes,
 } from '@unschema-graph/core';
@@ -54,6 +63,50 @@ describe('core/defineSchema', () => {
     });
   });
 
+  it('uses the shared entity ID validation for builders and nested schemas', () => {
+    for (const id of ['', '   ']) {
+      expect(() => Organization({ '@id': id, name: 'Acme' }), JSON.stringify(id)).toThrowError(
+        SchemaValidationError
+      );
+      expect(AnswerSchema.safeParse({ '@type': 'Answer', '@id': id, text: 'Answer' }).success).toBe(
+        false
+      );
+      expect(
+        ImageObjectSchema.safeParse({ '@type': 'ImageObject', '@id': id, url: '/image.jpg' })
+          .success
+      ).toBe(false);
+      expect(PostalAddressSchema.safeParse({ '@type': 'PostalAddress', '@id': id }).success).toBe(
+        false
+      );
+      expect(TypedEntitySchema.safeParse({ '@type': 'Thing', '@id': id }).success).toBe(false);
+    }
+
+    for (const id of [
+      '#organization',
+      '/about#organization',
+      'https://example.com/#organization',
+      'urn:example:organization',
+    ]) {
+      expect(Organization({ '@id': id, name: 'Acme' })['@id']).toBe(id);
+    }
+
+    expect(Organization({ '@id': ' #organization ', name: 'Acme' })['@id']).toBe('#organization');
+  });
+
+  it('protects builder-owned metadata in the additional-properties escape hatch', () => {
+    const app = SoftwareApplication({
+      name: 'Astro Studio',
+      operatingSystem: 'Linux',
+    });
+
+    expect(() => withAdditionalProperties(app, { '@type': 'Product' } as never)).toThrowError(
+      'withAdditionalProperties() cannot replace @type or @id'
+    );
+    expect(() => withAdditionalProperties(app, { '@id': '#replacement' } as never)).toThrowError(
+      'withAdditionalProperties() cannot replace @type or @id'
+    );
+  });
+
   it('rejects unknown properties and incompatible @type values', () => {
     expect(() =>
       SoftwareApplication({
@@ -86,20 +139,68 @@ describe('core/defineSchema', () => {
     ).toThrowError(SchemaValidationError);
   });
 
-  it('allows overriding @type with an array (multi-typing)', () => {
+  it('normalizes multiple types with the primary type first and no duplicates', () => {
     const app = withAdditionalTypes(
       SoftwareApplication({
         name: 'Mobile Studio',
         operatingSystem: 'iOS, Android',
       }),
-      ['MobileApplication']
+      ['MobileApplication', 'SoftwareApplication', 'MobileApplication']
     );
+
+    const expanded = withAdditionalTypes(app, ['DesktopApplication', 'MobileApplication']);
 
     expect(app).toEqual({
       '@type': ['SoftwareApplication', 'MobileApplication'],
       name: 'Mobile Studio',
       operatingSystem: 'iOS, Android',
     });
+    expect(expanded['@type']).toEqual([
+      'SoftwareApplication',
+      'MobileApplication',
+      'DesktopApplication',
+    ]);
+    expect(SchemaTypeSchema.parse(['Thing', 'Thing', 'Product'])).toEqual(['Thing', 'Product']);
+    expect(SchemaTypeSchema.safeParse([]).success).toBe(false);
+    expect(() => withAdditionalTypes(app, [''])).toThrow();
+  });
+
+  it('keeps Article as the primary type while deduplicating additional types stably', () => {
+    const article = Article({ headline: 'Typed article' });
+
+    expect(withAdditionalTypes(article, ['CreativeWork'])['@type']).toEqual([
+      'Article',
+      'CreativeWork',
+    ]);
+    expect(withAdditionalTypes(article, ['Article'])['@type']).toEqual(['Article']);
+    expect(withAdditionalTypes(article, ['CreativeWork', 'Thing'])['@type']).toEqual([
+      'Article',
+      'CreativeWork',
+      'Thing',
+    ]);
+  });
+
+  it('rejects unknown properties in exported and nested built-in schemas', () => {
+    expect(
+      LocalBusinessSchema.safeParse({
+        name: 'Acme Paris',
+        address: '1 rue de Rivoli',
+        unexpected: true,
+      }).success
+    ).toBe(false);
+
+    expect(() =>
+      FAQPage({
+        questions: [
+          {
+            question: 'What is JSON-LD?',
+            answer: 'Linked data expressed as JSON.',
+            // @ts-expect-error Nested shorthand objects are strict.
+            unexpected: true,
+          },
+        ],
+      })
+    ).toThrowError(SchemaValidationError);
   });
 
   it('throws SchemaValidationError on missing required fields by default', () => {
@@ -152,5 +253,60 @@ describe('core/defineSchema', () => {
     expect(invalid.success).toBe(false);
     expect(invalid.error).toBeInstanceOf(SchemaValidationError);
     expect(invalid.error?.entityType).toBe('SoftwareApplication');
+  });
+
+  it('strictly protects reserved JSON-LD keywords against user overrides', () => {
+    const validApp = SoftwareApplication({
+      name: 'Safe App',
+      operatingSystem: 'Linux',
+    });
+
+    // Builder level rejection
+    expect(() =>
+      SoftwareApplication({
+        name: 'App',
+        operatingSystem: 'Linux',
+        // @ts-expect-error Testing reserved @context
+        '@context': 'https://schema.org',
+      })
+    ).toThrowError(SchemaValidationError);
+
+    expect(() =>
+      SoftwareApplication({
+        name: 'App',
+        operatingSystem: 'Linux',
+        // @ts-expect-error Testing reserved @graph
+        '@graph': [],
+      })
+    ).toThrowError(SchemaValidationError);
+
+    // withAdditionalProperties rejection
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@context': 'https://schema.org',
+      })
+    ).toThrowError(TypeError);
+
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@graph': [],
+      })
+    ).toThrowError(TypeError);
+
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@id': '#override',
+      })
+    ).toThrowError(TypeError);
+
+    expect(() =>
+      withAdditionalProperties(validApp, {
+        // @ts-expect-error Reserved keyword
+        '@type': 'Other',
+      })
+    ).toThrowError(TypeError);
   });
 });

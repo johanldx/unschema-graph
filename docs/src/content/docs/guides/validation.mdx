@@ -5,6 +5,40 @@ description: Catch typos, configure error severity modes, safe-parse CMS payload
 
 Every builder in `unschema-graph` enforces two layers of protection: **compile-time TypeScript types** for your code editor, and **strict runtime Zod validation** for dynamic and external data.
 
+`unschema-graph` validates the constraints implemented by its schemas. It does not claim
+to validate the entire Schema.org vocabulary or guarantee eligibility for search-engine
+rich results.
+
+## Validation layers
+
+The library keeps three concerns separate:
+
+| Layer | What it checks |
+| --- | --- |
+| JSON-LD syntax and graph composition | Serializable structure, identities, references, and graph rules implemented by Core. |
+| Implemented Schema.org model | Types and properties supported by a generic builder such as `Article`. |
+| Consumer profile | Additional rules implemented for a consumer, such as `GoogleArticle`. |
+
+Generic builders do not reject an entity only because a Google-required field is
+missing. Opt into a consumer profile when that is your target:
+
+```ts
+import { Article, GoogleArticle } from '@unschema-graph/core';
+
+const genericArticle = Article({ headline: 'Schema.org article' });
+
+const googleProfileArticle = GoogleArticle({
+  headline: 'Article profile',
+  image: '/cover.jpg',
+  datePublished: '2026-10-01',
+  author: 'Ada Lovelace',
+});
+```
+
+`GoogleArticleSchema` and `GoogleRecipeSchema` are exported for direct composition.
+Their rules describe the profiles currently implemented by the library; passing them
+is not a promise that Google will index or display a rich result.
+
 ---
 
 ## 1. Strict Runtime Validation
@@ -102,6 +136,20 @@ interface IssueDetail {
   suggestion?: string;    // Typo suggestion if applicable
 }
 ```
+
+Entity relationships add specialized guidance. For example, passing a `Product` as a
+`WebSite.publisher` produces:
+
+```text
+Property "WebSite.publisher"
+Expected: Organization | Person | @id reference
+Received: Product
+Suggestion: Pass Organization(...), Person(...), '#organization', or { '@id': '#organization' }.
+```
+
+The same `path`, `expected`, `received`, and `suggestion` values are available in
+`error.details`, so terminal output, CI, the Astro development toolbar, and future IDE
+tooling can consume one stable diagnostic shape.
 
 ---
 

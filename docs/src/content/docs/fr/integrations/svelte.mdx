@@ -35,6 +35,7 @@ bun add @unschema-graph/svelte zod
 
 
 Aucun plugin Vite n'est nécessaire : importez le composant et les builders directement dans vos fichiers `.svelte`.
+Svelte 5 est une peer dependency explicite ; cette version du package ne prend pas en charge Svelte 4.
 
 ---
 
@@ -85,6 +86,10 @@ const article = $derived(
 ## 3. Rendu serveur SSR avec SvelteKit
 
 Dans SvelteKit, les données structurées générées par `<Schema />` sont sérialisées au moment du rendu serveur (SSR) et directement incluses dans le HTML initial reçu par les moteurs de recherche.
+Chaque instance du composant émet exactement un script JSON-LD dans `<svelte:head>`. Le
+composant n’a aucune dépendance exclusive au navigateur ni d'effet propre, mais participe au
+runtime et à l'hydratation normaux de Svelte lorsque l'application utilise la navigation côté client
+ou des mises à jour réactives.
 
 ### Modèle de Layout global (`+layout.svelte`)
 
@@ -155,3 +160,8 @@ import {
   type SchemaInput,
 } from '@unschema-graph/svelte';
 ```
+
+L’adaptateur Svelte délègue directement au Core la construction du graphe, la résolution
+des IDs, la validation et la sérialisation anti-XSS. Les props `baseUrl` et `inLanguage`
+remplacent les valeurs par défaut optionnelles configurées avec `setGlobalConfig()` ;
+les entrées sont copiées et jamais modifiées.

@@ -40,11 +40,11 @@ type RecipeOutput = SchemaOutput<typeof RecipeSchema, 'Recipe'>;
 | Propriété | Type d’entrée | Obligatoire | Valeur par défaut / contraintes |
 | --- | --- | :---: | --- |
 | `@id` | string | Non | non-empty |
-| `name` | string | Oui | non-empty |
-| `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Oui | non-empty |
-| `recipeIngredient` | Array<string> | Oui | minimum items: 1 |
-| `recipeInstructions` | Array<string \| object> \| string | Oui | — |
-| `author` | string \| [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | non-empty |
+| `name` | string | Non | non-empty |
+| `image` | string \| [ImageObject](/fr/reference/builders/image-object/) \| Array<string \| [ImageObject](/fr/reference/builders/image-object/)> | Non | non-empty |
+| `recipeIngredient` | Array<string> | Non | minimum items: 1 |
+| `recipeInstructions` | Array<string \| object> \| string | Non | minimum items: 1 |
+| `author` | [Person](/fr/reference/builders/person/) \| [Organization](/fr/reference/builders/organization/) \| EntityReference | Non | — |
 | `datePublished` | string \| number \| Date | Non | non-empty |
 | `description` | string | Non | — |
 | `prepTime` | string \| number \| DurationObject | Non | non-empty; greater than 0 |

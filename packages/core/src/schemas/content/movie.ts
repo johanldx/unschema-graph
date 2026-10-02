@@ -3,10 +3,15 @@ import { defineSchema } from '../../core/defineSchema.js';
 import { IsoDateSchema, IsoDurationSchema } from '../../core/temporal.js';
 import { AggregateRatingSchema, ReviewSchema } from '../commerce/review.js';
 import { ImageUrlOrObject } from '../common/image.js';
+import { entityRef } from '../common/reference.js';
 import { PersonSchema } from '../identity/person.js';
 import { VideoObjectSchema } from './video.js';
 
-const CastMemberSchema = z.union([z.string(), PersonSchema]);
+const CastMemberSchema = entityRef({
+  schemas: [PersonSchema],
+  types: ['Person'],
+  fallbackType: 'Person',
+});
 const CastSchema = z.union([CastMemberSchema, z.array(CastMemberSchema)]);
 
 /**

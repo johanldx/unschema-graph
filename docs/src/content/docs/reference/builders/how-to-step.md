@@ -39,11 +39,11 @@ type HowToStepOutput = SchemaOutput<typeof HowToStepSchema, 'HowToStep'>;
 
 | Property | Input type | Required | Default / constraints |
 | --- | --- | :---: | --- |
-| `@id` | string | No | — |
+| `@id` | string | No | non-empty |
 | `name` | string | No | — |
 | `text` | string | Yes | non-empty |
 | `image` | string \| [ImageObject](/reference/builders/image-object/) | No | non-empty |
-| `url` | string | No | — |
+| `url` | string | No | non-empty |
 
 The aliases above remain the exact authority for nested object types. The builder also accepts a
 validation configuration as its second argument and always returns `@type: 'HowToStep'`.

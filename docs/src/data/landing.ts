@@ -61,13 +61,27 @@ export const landingCopy = {
         badge: 'Without unschema-graph',
         title: 'Manual JSON‑LD Object',
         subtitle: 'Unchecked handwritten object prone to silent typos and script breakouts.',
-        code: `const article = {
-  "@type": "Article",
-  "headline": "Structured Data",
-  "publisher": { "@id": "#publsher" }
+        code: `const publisherId = 'https://example.com/news/#publisher';
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': publisherId,
+      name: 'Acme Media',
+      url: 'https://example.com'
+    },
+    {
+      '@type': 'Article',
+      '@id': 'https://example.com/news/#article',
+      headline: 'Structured Data',
+      publisher: { '@id': publisherId }
+    }
+  ]
 };
 
-const jsonLd = JSON.stringify(article);`,
+const jsonLd = JSON.stringify(graph, null, 2);`,
         points: [
           'No schema checks: typos and missing required properties go unnoticed',
           'Duplicated @id strings risk silent reference mismatches across entities',
@@ -77,26 +91,36 @@ const jsonLd = JSON.stringify(article);`,
       with: {
         badge: 'With unschema-graph',
         title: 'Typed & Resolved Builders',
-        subtitle: 'Schema.org autocompletion with runtime Zod verification and safe serialization.',
-        code: `// Typed, validated, and linked
+        subtitle:
+          'Direct entity graphing with Zod validation, canonical IDs, and safe serialization.',
+        code: `import {
+  Article, Organization,
+  buildJsonLdGraph, serializeJsonLd
+} from '@unschema-graph/core';
+
 const publisher = Organization({
   '@id': '#publisher',
-  name: 'Acme Media'
+  name: 'Acme Media',
+  url: 'https://example.com'
 });
 
 const article = Article({
+  '@id': '#article',
   headline: 'Structured Data',
-  publisher: '#publisher'
+  publisher
 });
 
-const jsonLd = serializeJsonLd(buildJsonLdGraph([publisher, article]));`,
+const graph = buildJsonLdGraph(article, {
+  baseUrl: 'https://example.com/news'
+});
+const jsonLd = serializeJsonLd(graph, { pretty: true });`,
         points: [
           '51 Zod builders with full TypeScript property completion for Schema.org types',
-          'buildJsonLdGraph unifies entities and resolves relative #id references automatically',
+          'Direct entity references are crawled, hoisted, deduplicated, and resolved against baseUrl',
           'serializeJsonLd safely escapes </script> and <!-- sequences for HTML inclusion',
         ],
       },
-      statusResolved: 'Graph resolved · Zod-validated data · Safe <script> escaping',
+      statusResolved: 'Graph crawled · Canonical IDs · Zod validated · Safe <script> escaping',
     },
     integrations: {
       kicker: 'Ecosystem',
@@ -244,13 +268,27 @@ const jsonLd = serializeJsonLd(buildJsonLdGraph([publisher, article]));`,
         badge: 'Sans unschema-graph',
         title: 'Objet JSON‑LD manuel',
         subtitle: 'Objet écrit à la main, exposé aux fautes de frappe et aux ruptures de balise.',
-        code: `const article = {
-  "@type": "Article",
-  "headline": "Données structurées",
-  "publisher": { "@id": "#publsher" }
+        code: `const publisherId = 'https://example.com/actualites/#publisher';
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': publisherId,
+      name: 'Acme Media',
+      url: 'https://example.com'
+    },
+    {
+      '@type': 'Article',
+      '@id': 'https://example.com/actualites/#article',
+      headline: 'Données structurées',
+      publisher: { '@id': publisherId }
+    }
+  ]
 };
 
-const jsonLd = JSON.stringify(article);`,
+const jsonLd = JSON.stringify(graph, null, 2);`,
         points: [
           'Absence de schéma : fautes de frappe et propriétés requises manquantes non détectées',
           'Chaînes @id dupliquées risquant des références orphelines dans le graphe',
@@ -261,27 +299,36 @@ const jsonLd = JSON.stringify(article);`,
         badge: 'Avec unschema-graph',
         title: 'Builders typés & reliés',
         subtitle:
-          'Autocomplétion Schema.org avec vérification Zod à l’exécution et sérialisation sûre.',
-        code: `// Typé, validé et relié
+          'Graphe direct d’entités avec validation Zod, identifiants canoniques et sérialisation sûre.',
+        code: `import {
+  Article, Organization,
+  buildJsonLdGraph, serializeJsonLd
+} from '@unschema-graph/core';
+
 const publisher = Organization({
   '@id': '#publisher',
-  name: 'Acme Media'
+  name: 'Acme Media',
+  url: 'https://example.com'
 });
 
 const article = Article({
+  '@id': '#article',
   headline: 'Données structurées',
-  publisher: '#publisher'
+  publisher
 });
 
-const jsonLd = serializeJsonLd(buildJsonLdGraph([publisher, article]));`,
+const graph = buildJsonLdGraph(article, {
+  baseUrl: 'https://example.com/actualites'
+});
+const jsonLd = serializeJsonLd(graph, { pretty: true });`,
         points: [
           '51 builders Zod avec autocomplétion TypeScript des propriétés Schema.org',
-          'buildJsonLdGraph unifie les entités et résout automatiquement les références locales #id',
+          'Les entités imbriquées sont parcourues, extraites, dédupliquées et résolues via baseUrl',
           'serializeJsonLd neutralise les séquences </script> et <!-- pour une inclusion HTML sûre',
         ],
       },
       statusResolved:
-        'Graphe résolu · Données validées par Zod · Échappement anti-rupture <script>',
+        'Graphe parcouru · IDs canoniques · Validation Zod · Échappement anti-rupture <script>',
     },
     integrations: {
       kicker: 'Écosystème',
