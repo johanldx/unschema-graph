@@ -85,6 +85,10 @@ A production article usually belongs to a `WebPage` and `WebSite`, has a publish
 together with `items={[organization, website, page, article]}` instead of rendering
 separate scripts.
 
+If your `<Schema />` component lives in a shared layout, pass page-level entities explicitly
+to the layout through a prop such as `schemaItems`. Related entities referenced from those
+root entities are still discovered automatically. See how to [pass page entities to a layout](/integrations/astro/#passing-page-entities-to-a-layout).
+
 [Build that connected graph](/guides/mental-model/).
 
 ## Next step
