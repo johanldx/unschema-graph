@@ -136,7 +136,7 @@ Run `npx @unschema-graph/core audit dist` in your deployment pipeline. The CLI d
 
 | Package | Environment | Purpose |
 | :--- | :--- | :--- |
-| **[`@unschema-graph/core`](https://unschema-graph.jhdx.dev/getting-started/quick-start/core/)** | Any (Node.js, Deno, Bun, Edge) | Universal engine: 51 Zod builders, graph resolver, serializer, and audit CLI. |
+| **[`@unschema-graph/core`](https://unschema-graph.jhdx.dev/getting-started/quick-start/core/)** | Node >=22.12; browser-safe root; Bun/Deno best-effort | Framework-neutral engine; Node-only audit CLI/API |
 | **[`@unschema-graph/astro`](https://unschema-graph.jhdx.dev/getting-started/quick-start/astro/)** | Astro 5, 6, 7 | Astro integration, `<Schema />` component, Dev Toolbar inspector, Content Collections helpers. |
 | **[`@unschema-graph/svelte`](https://unschema-graph.jhdx.dev/getting-started/quick-start/svelte/)** | Svelte 5 & SvelteKit | Native Svelte 5 `<Schema />` component using reactive runes with `<svelte:head>`. |
 

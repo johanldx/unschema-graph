@@ -38,7 +38,7 @@ const report = auditHtmlDirectory('./dist');
 console.log(`Scanned ${report.scannedFiles} HTML files.`);
 console.log(`Found ${report.totalBlocks} JSON-LD blocks.`);
 console.log(`Resolved ${report.resolvedLocalReferences} local graph references.`);
-console.log(`Validated ${report.totalEntities} entities.`);
+console.log(`Found ${report.totalEntities} entities.`);
 
 for (const warning of report.warnings) {
   console.warn(warning.code, warning.message);
