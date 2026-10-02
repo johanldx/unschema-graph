@@ -122,6 +122,158 @@ const org = Organization({
 
 ---
 
+## Transmettre les entités d’une page à un layout
+
+`unschema-graph` découvre automatiquement les entités **au sein du graphe d’objets qu’il reçoit**. Il parcourt les relations imbriquées, remonte les entités référencées dotées d’un `@id`, les déduplique et émet un `@graph` unifié.
+
+```ts
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme',
+});
+
+const article = Article({
+  '@id': '#article',
+  headline: 'Hello',
+  publisher: organization,
+});
+```
+
+Transmettre uniquement `article` à `<Schema />` suffit pour qu’`organization` soit découverte automatiquement :
+
+```text
+Article
+  ↓ publisher
+Organization
+  ↓
+automatic discovery
+  ↓
+Organization promoted into @graph
+  ↓
+Article.publisher replaced by { "@id": ... }
+```
+
+En revanche, Astro n’expose pas implicitement les variables arbitraires créées dans une page à son layout parent. Il s’agit d’une contrainte de flux de données propre aux composants Astro, et non d’une limitation de résolution de graphe : les variables de page doivent être transmises explicitement au layout via des props.
+
+### Le modèle `schemaItems`
+
+Le modèle recommandé consiste à transmettre les entités racines de la page au layout via une prop telle que `schemaItems`.
+
+```astro title="src/pages/blog/building-structured-data.astro"
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  Article,
+  Organization,
+} from '@unschema-graph/astro';
+
+const organization = Organization({
+  '@id': '#organization',
+  name: 'Acme Media',
+  url: 'https://example.com',
+});
+
+const article = Article({
+  '@id': '#article',
+  headline: 'Building structured data with Astro',
+  author: 'Ada Lovelace',
+  publisher: organization,
+});
+---
+
+<BaseLayout
+  title="Building structured data with Astro"
+  schemaItems={[article]}
+>
+  <article>
+    <h1>Building structured data with Astro</h1>
+  </article>
+</BaseLayout>
+```
+
+Seul `article` est transmis à `schemaItems`. `organization` n’a pas besoin d’être passée séparément car elle est accessible via `article.publisher` et découverte automatiquement par le moteur de graphe.
+
+Dans le layout partagé, déclarez `schemaItems` dans `Props` à l’aide du type public `SchemaOrgEntity`, puis transmettez-le à `<Schema items={schemaItems} />` :
+
+```astro title="src/layouts/BaseLayout.astro"
+---
+import { Schema } from '@unschema-graph/astro';
+import type { SchemaOrgEntity } from '@unschema-graph/astro';
+
+interface Props {
+  title: string;
+  schemaItems?: SchemaOrgEntity[];
+}
+
+const {
+  title,
+  schemaItems = [],
+} = Astro.props;
+---
+
+<html lang="fr">
+  <head>
+    <title>{title}</title>
+    <Schema items={schemaItems} />
+  </head>
+
+  <body>
+    <slot />
+  </body>
+</html>
+```
+
+> Vous devez seulement transmettre les entités racines à rendre.
+> Les entités liées présentes dans ces objets et disposant d’un `@id`
+> sont découvertes et remontées automatiquement dans le graphe.
+
+### Pourquoi cette approche est recommandée
+
+Ce modèle est recommandé pour plusieurs raisons :
+
+- Il maintient la création de schéma au plus près de la page et du contenu concerné.
+- Il confie au layout partagé la responsabilité d’afficher un unique `<Schema />` dans `<head>`.
+- Il préserve un script JSON-LD et un `@graph` unifiés.
+- Il évite les instances `<Schema />` dupliquées lors de l’imbrication de pages et layouts.
+- Il ne requiert aucun middleware ni état global.
+- Il s’intègre naturellement au modèle de props explicites d’Astro.
+
+### Modèle mental
+
+La frontière entre Astro et `unschema-graph` s’organise en deux flux distincts :
+
+```text
+Astro data flow:
+
+Page
+  ↓ explicit prop
+BaseLayout
+  ↓
+<Schema items={schemaItems} />
+
+unschema-graph data flow:
+
+root entities
+  ↓
+relationship traversal
+  ↓
+entity discovery
+  ↓
+ID resolution
+  ↓
+deduplication
+  ↓
+single @graph
+```
+
+### Approches alternatives
+
+- **`<Schema />` directement dans chaque page** : Valide, mais si le layout rend également des données structurées (comme des métadonnées `WebSite` ou `Organization` globales), la page produit plusieurs balises `<script type="application/ld+json">`. Bien que la présence de plusieurs scripts JSON-LD soit syntaxiquement valide en HTML et Schema.org, le modèle basé sur les props du layout est préférable lorsque l’on souhaite un `@graph` centralisé.
+- **Construire tous les schémas dans le layout** : Possible, mais moins modulaire car le layout doit connaître le contenu spécifique à chaque page, son frontmatter ou les paramètres de route.
+- **Middleware, contexte ou store global** : Envisageable dans des architectures spécifiques, mais inutile pour les applications Astro classiques (statiques ou SSR) où les props gèrent le flux de données de manière explicite.
+
+---
+
 ## 4. Application Dev Toolbar pour Astro
 
 En mode développement (`astro dev`), `@unschema-graph/astro` injecte automatiquement une icône interactive dans la Dev Toolbar d'Astro au bas de votre navigateur.

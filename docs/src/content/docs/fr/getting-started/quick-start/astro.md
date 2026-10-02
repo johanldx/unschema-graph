@@ -86,6 +86,10 @@ possède une `Organization` éditrice et référence ces entités avec des valeu
 stables. Passez-les ensemble avec
 `items={[organization, website, page, article]}` plutôt que de générer plusieurs scripts.
 
+Si votre composant `<Schema />` se trouve dans un layout partagé, transmettez explicitement
+les entités de la page au layout via une prop comme `schemaItems`. Les entités liées depuis
+ces entités racines restent découvertes automatiquement. Consultez comment [transmettre les entités d’une page à un layout](/fr/integrations/astro/#transmettre-les-entités-dune-page-à-un-layout).
+
 [Construire ce graphe relié](/fr/guides/mental-model/).
 
 ## Étape suivante
