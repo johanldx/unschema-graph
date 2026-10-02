@@ -132,8 +132,23 @@ function assertPackageMetadata(tarball, entries, expected) {
   equal(manifest.engines, { node: '>=22.12.0' }, 'engines');
   equal(manifest.repository?.directory, expected.directory, 'repository.directory');
   equal(manifest.homepage, 'https://unschema-graph.jhdx.dev', 'homepage');
-  equal(manifest.bugs?.url, 'https://github.com/johanldx/unschema-graph/issues', 'bugs.url');
   equal(manifest.publishConfig, { access: 'public', provenance: true }, 'publishConfig');
+
+  // Verify negative package-surface and exact export keys (Étape 8)
+  const actualExports = Object.keys(manifest.exports ?? {}).sort();
+  const expectedExports = [...expected.exports].sort();
+  equal(actualExports, expectedExports, 'exports keys');
+
+  for (const exp of actualExports) {
+    if (
+      exp.startsWith('./core') ||
+      exp.startsWith('./schemas') ||
+      exp.startsWith('./internal') ||
+      exp.startsWith('./dist')
+    ) {
+      throw new Error(`${manifest.name} exposes forbidden deep import: ${exp}`);
+    }
+  }
 
   const entryTargets = [
     manifest.main,
@@ -234,18 +249,21 @@ try {
     directory: 'packages/core',
     files: ['dist', 'bin'],
     peerDependencies: { zod: '^4.6.0' },
+    exports: ['.', './audit'],
   });
   assertPackageMetadata(astroTarball, astroEntries, {
     name: '@unschema-graph/astro',
     directory: 'packages/astro',
     files: ['dist'],
     peerDependencies: { astro: '^5.0.0 || ^6.0.0 || ^7.0.0' },
+    exports: ['.', './integration', './content', './Schema.astro'],
   });
   assertPackageMetadata(svelteTarball, svelteEntries, {
     name: '@unschema-graph/svelte',
     directory: 'packages/svelte',
     files: ['dist'],
     peerDependencies: { svelte: '^5.15.0' },
+    exports: ['.', './Schema.svelte'],
   });
 
   await writeFile(

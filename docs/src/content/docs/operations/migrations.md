@@ -5,8 +5,35 @@ description: Upgrade guide, architectural evolutions, and migration patterns for
 
 `unschema-graph` 1.0 stabilizes the public API, introduces relational entity-object references, enforces strict Schema.org validation with Zod, and brings deterministic graph discovery.
 
-> **Version 0.9.0 — v1 stabilization candidate**
-> Release **0.9.0** is the pre-v1 stabilization release. The actual Release Candidate will be `1.0.0-rc.1`, followed by stable `1.0.0`. If you are upgrading from an earlier pre-1.0 setup, this guide covers the relevant architectural changes.
+> **Version 0.10.0 — Public API Freeze**
+> Release **0.10.0** freezes the public API contract across Core, Astro, and Svelte ahead of `1.0.0-rc.1`. If you are upgrading from `0.9.x` or earlier setups, this guide covers the cleanup and architectural changes.
+
+---
+
+## 0.9.x → 0.10.0 — Public API cleanup
+
+Release `0.10.0` intentionally cleans up accidental root exports and internal primitives ahead of `1.0.0-rc.1`.
+
+### 1. `createEntityRef` removed in favor of `entityRef`
+
+The deprecated alias `createEntityRef` has been removed. Use `entityRef` instead:
+
+```ts
+// Before (deprecated):
+import { createEntityRef } from '@unschema-graph/core';
+
+// In 0.10.0+:
+import { entityRef } from '@unschema-graph/core';
+```
+
+### 2. Internal helpers removed from root exports
+
+Lower-level implementation primitives have been removed from the package roots to protect internal evolution:
+
+- `resolveId` and `resolveEntityIds`: pass `baseUrl` to `buildJsonLdGraph(entities, { baseUrl })` instead of resolving IDs manually.
+- `EntityIdSchema`, `isIdReference`, `IdObjectSchema`, `TypedEntitySchema`, and `EntityReferenceSchema`: use builder validation, `entityRef()`, or `withAdditionalProperties()` instead of validating ID strings or reference shapes directly.
+- `normalizeZodIssues` and `formatZodError`: validation errors are automatically formatted by `SchemaValidationError` thrown by builders and `validateSchema()`.
+- Common internal schemas (`WebUrlSchema`, `RelativeOrAbsoluteUrlSchema`, `SearchActionSchema`, `SpeakableSchema`, `ImageUrlOrObject`, `IsoDateSchema`, `IsoDurationSchema`): use high-level builders (`SearchAction()`, `ImageObject()`) or temporal helpers (`formatIsoDate()`, `formatIsoDuration()`).
 
 ---
 

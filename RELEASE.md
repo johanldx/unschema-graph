@@ -1,132 +1,118 @@
-# Release Process toward v1
+# Release Policy & Process
 
-This document specifies the release trajectory and verification gates for `unschema-graph` according to the v1 migration roadmap.
+This document defines the versioning policy, quality gates, and release procedures for the `@unschema-graph` monorepo.
 
 ---
 
-## 1. Release Trajectory
+## 1. Versioning & SemVer Policy
 
-To guarantee maximum reliability and prevent premature breaking changes in the stable branch, releases follow a staged, progressive trajectory:
+All publishable packages (`@unschema-graph/core`, `@unschema-graph/astro`, `@unschema-graph/svelte`) follow [Semantic Versioning 2.0.0](https://semver.org/):
+
+- **PATCH** (`0.10.x` / `1.0.x`): Bug fixes, internal performance optimizations, documentation adjustments, without changing public API signatures or making documented valid input invalid.
+- **MINOR** (`0.x.0` / `1.x.0`): Backward-compatible additions (new Schema.org builders, optional schema properties, new utility helpers, new documented entry points).
+- **MAJOR** (`x.0.0`): Breaking changes (removal/renaming of public symbols, changing output AST/JSON-LD structure, rejecting previously valid inputs, changing graph resolution semantics).
+
+### Public API Surface
+
+Only symbols exported through documented entry points in `package.json#exports` form the contract governed by SemVer:
+- `@unschema-graph/core`: `.`, `./audit`
+- `@unschema-graph/astro`: `.`, `./integration`, `./content`, `./Schema.astro`
+- `@unschema-graph/svelte`: `.`, `./Schema.svelte`
+
+Deep imports (e.g., `dist/*`, `src/*`, internal schemas, or unpublished utilities) are strictly private implementation details.
+
+---
+
+## 2. Release Roadmap towards 1.0.0
 
 ```text
-0.x (Iterative hardening & refactoring)
- ↓
-[x] Refactor relational entity model (Step 3)
-[x] Unified graph collector & node hoisting (Steps 4 & 5)
-[x] Canonical identifier & URL resolution (Step 6)
-[x] Deterministic node merge & deduplication (Step 7)
-[x] Validation & Schema.org / Google guidelines alignment (Steps 9–13)
-[x] Audit CLI & CI diagnostics (Step 14)
-[x] Astro Dev Toolbar & Svelte 5 SSR hardening (Steps 15 & 16)
-[x] Security: Anti-XSS Unicode serializer (Step 19)
-[x] API polish, golden snapshots, and benchmarks (Step 20)
-[x] Real consumer npm tarball testing (Steps 18 & 22)
-[x] Documentation v1 & Onboarding journey (Step 23)
-[x] Backwards compatibility & 0.x migration tests (Step 24)
- ↓
 0.9.0 (v1 stabilization candidate)
- ↓
-1.0.0-rc.1 (Release Candidate)
- ↓
-Dogfooding & real-world testing across production Astro & Svelte sites
- ↓
-Targeted patches (bug fixes without conceptual API restructurings)
- ↓
-1.0.0 (Stable v1 Release)
+  ↓
+0.10.0 (Public API cleanup & contract freeze)
+  ↓
+1.0.0-rc.1 (Release Candidate — final pre-release testing)
+  ↓
+1.0.0 (Stable release)
 ```
 
-> **Guiding Principle:**
-> Do not cut `1.0.0` as long as any part of the public API is under consideration for renaming or structural alteration.
+> **RC Stability Rule:** After `1.0.0-rc.1`, no public API will be renamed, removed, or structurally altered. Only critical bug fixes addressing confirmed defects are accepted ahead of `1.0.0`.
 
 ---
 
-## 2. Pre-Release Verification Checklist
+## 3. Pre-Flight Verification Gate
 
-Before publishing any release candidate or stable version, the comprehensive quality gate must pass:
+Before any release (pre-release or stable), the comprehensive automated quality gate must succeed:
 
 ```bash
 pnpm run release:check
 ```
 
-This automated gate runs:
-1. **Linting & formatting check:** `biome check --error-on-warnings .`
-2. **Typecheck:** `pnpm run typecheck` across all 7 workspace packages.
-3. **Unit & integration test suites:** the complete `vitest run` suite.
-4. **Package builds:** all three publishable packages are compiled.
-5. **Strict Astro output audit:** `pnpm run audit:strict` fails on warnings as well as errors.
-6. **Example verification:** the Core example is built and audited, and the Svelte example is built.
-7. **Documentation verification:** locale parity, recipe and compatibility checks, generated Markdown, and internal links are validated around the production docs build.
-8. **Real-world tarball installation test:** `node scripts/test-published-packages.mjs` packs actual `.tgz` archives and verifies consumption under Astro 5, 6, 7 and SvelteKit.
-
-For local development, `pnpm run audit` runs the same build and audit without `--strict`, so
-warnings remain visible without blocking iteration. CI and every release path share the
-`pnpm run verify` gate, whose Astro audit is strict.
-
-The automated publish workflow runs `pnpm run release:check` independently on the exact release
-commit before invoking `changeset publish`.
+This gate executes:
+1. **Code Standards:** Biome formatting and linting (`biome check --error-on-warnings .`).
+2. **Type Safety:** Typechecks across all packages and examples (`tsc --noEmit`).
+3. **Automated Tests:** Full unit and integration test suite (`vitest run`).
+4. **Build Pipelines:** Builds all monorepo packages, examples, and Starlight documentation.
+5. **Static JSON-LD Audit:** Strict Schema.org graph validation on built static output (`audit:strict`).
+6. **Documentation Health:** Validates internal links, markdown output, and EN/FR translation parity.
+7. **Production Tarball Verification:** Generates real `.tgz` archives and verifies installation/compilation against external peer versions (Astro 5/6/7, Svelte 5, Zod 4, and Node.js >=22.12.0).
 
 ---
 
-## 3. Pre-Release (Release Candidate) Workflow
+## 4. Release Procedures
 
-When ready to publish a Release Candidate:
+We use [Changesets](https://github.com/changesets/changesets) for managing versioning and changelogs.
 
-### Step 3.0: Public API Contract Review (Pre-RC Gate)
+### Standard Workflow (Development / Releases)
 
-Before cutting `1.0.0-rc.1`:
-Audit root exports across all packages (`@unschema-graph/core`, `@unschema-graph/astro`, `@unschema-graph/svelte`) and either:
-- **Option A:** Guarantee every exported symbol under Semantic Versioning.
-- **Option B (Recommended):** Narrow root exports to the intended public API surface and move internal helpers (`EntityIdSchema`, `isIdReference`, `resolveId`, etc.) to internal or private subpaths.
+1. **Create a Changeset:**
+   ```bash
+   pnpm changeset
+   ```
+   Select impacted packages and specify the bump type (`patch`, `minor`, `major`) with a concise explanation.
 
-### Step 3.1: Enter Pre-Release Mode
+2. **Run Verification Gate:**
+   ```bash
+   pnpm run release:check
+   ```
 
-```bash
-pnpm run pre-rc
-```
-This configures Changesets into pre-release mode targeting tag `rc`.
+3. **Version Packages:**
+   ```bash
+   pnpm run version-packages
+   ```
+   Updates package versions and generates updated `CHANGELOG.md` files.
 
-### Step 3.2: Version Packages
-
-```bash
-pnpm run version-packages
-```
-This updates `@unschema-graph/*` versions to `1.0.0-rc.X` and generates changelogs.
-
-### Step 3.3: Publish Release Candidate
-
-```bash
-pnpm run release:rc
-```
-Packages are published to npm under the `rc` dist-tag (e.g. `npm install @unschema-graph/core@rc`), keeping the `@latest` dist-tag untouched for production users.
+4. **Publish to npm:**
+   ```bash
+   pnpm run release
+   ```
+   Publishes packages to npm with provenance.
 
 ---
 
-## 4. Graduating to Stable 1.0.0
+### Release Candidate (RC) Workflow
 
-After successful dogfooding and real-world validation without conceptual defects:
+When preparing a Release Candidate:
 
-### Step 4.1: Exit Pre-Release Mode
+1. **Enter Pre-Release Mode:**
+   ```bash
+   pnpm run pre-rc
+   ```
+   Configures Changesets to produce `1.0.0-rc.X` pre-releases.
 
-```bash
-pnpm run exit-pre
-```
+2. **Bump and Version:**
+   ```bash
+   pnpm run version-packages
+   ```
 
-### Step 4.2: Final Versioning & Review
+3. **Publish with `rc` tag:**
+   ```bash
+   pnpm run release:rc
+   ```
+   Publishes packages under the npm `rc` dist-tag (`npm install @unschema-graph/core@rc`), leaving `@latest` unaffected.
 
-```bash
-pnpm run version-packages
-```
-This graduates packages to `1.0.0` and finalizes `CHANGELOG.md`.
-
-### Step 4.3: Final Pre-Flight Quality Gate
-
-```bash
-pnpm run release:check
-```
-
-### Step 4.4: Publish Stable 1.0.0
-
-```bash
-pnpm run release
-```
-Packages are published with npm provenance to the `@latest` dist-tag. The GitHub release `v1.0.0` is created automatically.
+4. **Exit Pre-Release Mode (for Stable):**
+   ```bash
+   pnpm run exit-pre
+   pnpm run version-packages
+   pnpm run release
+   ```

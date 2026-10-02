@@ -1,5 +1,6 @@
-import { buildJsonLdGraph, resolveEntityIds, serializeJsonLd } from '@unschema-graph/core';
+import { buildJsonLdGraph, serializeJsonLd } from '@unschema-graph/core';
 import { describe, expect, it } from 'vitest';
+import { resolveEntityIds } from '../src/core/graph.js';
 
 describe('Step 21 — Security Hardening, Prototype Safety & Non-Serializable Types', () => {
   describe('Sensitive keys and prototype safety', () => {

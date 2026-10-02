@@ -4,10 +4,8 @@ import {
   BreadcrumbList,
   buildJsonLdGraph,
   Dataset,
-  EntityIdSchema,
   Event,
   entityRef,
-  isIdReference,
   Movie,
   Offer,
   Organization,
@@ -15,15 +13,18 @@ import {
   Person,
   Product,
   ProfilePage,
-  RelativeOrAbsoluteUrlSchema,
   Review,
   Service,
-  TypedEntitySchema,
   WebPage,
   WebSite,
-  WebUrlSchema,
 } from '@unschema-graph/core';
 import { describe, expect, it } from 'vitest';
+import {
+  EntityIdSchema,
+  isIdReference,
+  TypedEntitySchema,
+} from '../src/schemas/common/reference.js';
+import { RelativeOrAbsoluteUrlSchema, WebUrlSchema } from '../src/schemas/common/url.js';
 
 describe('entity relationships', () => {
   it('distinguishes entity IDs, references, and web URLs through dedicated primitives', () => {

@@ -124,23 +124,18 @@ The Svelte-specific contract includes `Schema` and the complete Core re-export. 
 `indent`, `context`, `graph`, `baseUrl`, `inLanguage`), renders through `svelte:head`,
 supports SSR and SvelteKit, and requires no client JavaScript for static input.
 
-While root barrel exports currently re-export various lower-level schemas and helpers (such as
-`EntityIdSchema`, `isIdReference`, `resolveId`), symbols not listed in the guaranteed surface above
-are considered implementation details for `0.9.0`. Before `1.0.0-rc.1`, package root exports will be
-audited and frozen: either all exported symbols will be guaranteed under SemVer, or root exports will
-be restricted strictly to the documented public API. Always rely on the documented public surface.
+Every symbol documented as exported from a supported package entry point is governed by Semantic Versioning starting with the v1 API freeze.
+
+Source files, `dist/*` paths, undocumented deep imports, and internal implementation helpers are not public APIs.
 
 ## Semantic Versioning policy in `1.x`
 
-> **Version 0.9.0 — v1 stabilization candidate**
-> Release `0.9.0` is the pre-v1 stabilization release. The actual Release Candidate is `1.0.0-rc.1`, followed by stable `1.0.0`; breaking corrections can therefore still occur before the RC contract is frozen.
+> **Version 0.10.0 — Public API Freeze**
+> Release `0.10.0` freezes the public API contract across Core, Astro, and Svelte ahead of `1.0.0-rc.1`. All root barrels have been restricted strictly to the documented public API, internal primitives have been removed from the public surface, and deep imports are blocked.
 
-- **PATCH** fixes a defect without removing an API or changing documented valid input
-  into invalid input.
-- **MINOR** adds backward-compatible builders, optional properties, overloads or entry
-  points.
-- **MAJOR** removes or renames a public symbol, rejects previously documented valid
-  input, or changes documented JSON-LD, reference, merge, deduplication or error behavior.
+- **PATCH** fixes a defect without removing an API or changing documented valid input into invalid input.
+- **MINOR** adds backward-compatible builders, optional properties, overloads or entry points.
+- **MAJOR** removes or renames a public symbol, rejects previously documented valid input, or changes documented JSON-LD, reference, merge, deduplication or error behavior.
 
 Validation rules and documented output are part of the compatibility contract, not
 implementation details. Tightening a rule or changing a normalized output therefore

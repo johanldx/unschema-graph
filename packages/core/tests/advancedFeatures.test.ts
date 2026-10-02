@@ -1,15 +1,10 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {
-  Article,
-  createSearchAction,
-  SpeakableSchema,
-  WebPage,
-  WebSite,
-} from '@unschema-graph/core';
+import { Article, createSearchAction, WebPage, WebSite } from '@unschema-graph/core';
 import { auditHtmlContent, auditHtmlDirectory } from '@unschema-graph/core/audit';
 import { describe, expect, it } from 'vitest';
+import { SpeakableSchema } from '../src/schemas/common/speakable.js';
 
 describe('Advanced Feature 1: Speakable & Voice/AI Optimization', () => {
   it('should transform a single string selector into SpeakableSpecification', () => {

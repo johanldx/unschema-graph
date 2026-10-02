@@ -124,24 +124,18 @@ Le contrat propre à Svelte comprend `Schema` et le réexport complet du Core. S
 `context`, `graph`, `baseUrl`, `inLanguage`), utilise `svelte:head`, prend en charge le SSR
 et SvelteKit et ne requiert aucun JavaScript client pour une entrée statique.
 
-Bien que les exports racine réexportent actuellement plusieurs schémas et fonctions bas niveau (comme
-`EntityIdSchema`, `isIdReference`, `resolveId`), les symboles non listés dans la surface garantie ci-dessus
-sont considérés comme des détails d'implémentation pour la version `0.9.0`. Avant `1.0.0-rc.1`, les exports
-racine seront audités et figés : soit l'intégralité des symboles exportés sera garantie sous SemVer, soit
-les exports racine seront restreints strictement à l'API publique documentée. Fiez-vous toujours à la surface publique documentée.
+Chaque symbole documenté comme exporté depuis un point d'entrée supporté d'un package est régi par le versionnage sémantique dès le gel d'API v1.
+
+Les fichiers source, chemins `dist/*`, imports profonds non documentés et helpers d'implémentation internes ne constituent pas des APIs publiques.
 
 ## Politique de versionnage sémantique sous `1.x`
 
-> **Version 0.9.0 — candidate de stabilisation v1**
-> La version `0.9.0` est la publication de stabilisation pré-v1. La véritable Release Candidate sera `1.0.0-rc.1`, puis viendra la version stable `1.0.0` ; des corrections incompatibles restent donc possibles avant le gel du contrat RC.
+> **Version 0.10.0 — Gel de l'API publique**
+> La version `0.10.0` fige le contrat d'API publique pour Core, Astro et Svelte avant `1.0.0-rc.1`. Les barils racine ont été restreints strictement à l'API publique documentée, les primitives internes ont été retirées de la surface publique et les imports profonds sont bloqués.
 
-- **PATCH** corrige un défaut sans supprimer d’API ni rendre invalide une entrée valide
-  documentée.
-- **MINOR** ajoute de façon rétrocompatible des builders, propriétés optionnelles,
-  surcharges ou points d’entrée.
-- **MAJOR** supprime ou renomme un symbole public, rejette une entrée valide documentée,
-  ou modifie un comportement documenté du JSON-LD, des références, du merge, de la
-  déduplication ou des erreurs.
+- **PATCH** corrige un défaut sans supprimer d’API ni rendre invalide une entrée valide documentée.
+- **MINOR** ajoute de façon rétrocompatible des builders, propriétés optionnelles, surcharges ou points d’entrée.
+- **MAJOR** supprime ou renomme un symbole public, rejette une entrée valide documentée, ou modifie un comportement documenté du JSON-LD, des références, du merge, de la déduplication ou des erreurs.
 
 Les règles de validation et la sortie documentée appartiennent au contrat de compatibilité,
 ce ne sont pas des détails d’implémentation. Durcir une règle ou modifier une sortie

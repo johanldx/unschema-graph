@@ -1,5 +1,4 @@
 import {
-  formatZodError,
   Product,
   SchemaValidationError,
   safeValidateSchema,
@@ -8,6 +7,7 @@ import {
 } from '@unschema-graph/core';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
+import { formatZodError } from '../src/core/validator.js';
 
 describe('core/validator', () => {
   const UserSchema = z.object({
