@@ -58,6 +58,7 @@ import { ProfilePage } from '@unschema-graph/core';
 
 const entity = ProfilePage({
   "mainEntity": {
+    "@type": "Person",
     "name": "Ada Lovelace"
   }
 });
@@ -69,6 +70,7 @@ const entity = ProfilePage({
 {
   "@type": "ProfilePage",
   "mainEntity": {
+    "@type": "Person",
     "name": "Ada Lovelace"
   }
 }

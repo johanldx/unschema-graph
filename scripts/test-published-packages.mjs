@@ -217,6 +217,7 @@ try {
   const astroEntries = assertTarballContents(astroTarball, [
     'dist/index.js',
     'dist/index.d.ts',
+    'dist/index.node.js',
     'dist/integration.js',
     'dist/content.js',
     'dist/Schema.astro',

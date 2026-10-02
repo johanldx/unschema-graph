@@ -11,6 +11,14 @@ The complete curated Schema.org 30.1 builder surface from `@unschema-graph/core`
 
 ## Installation
 
+Automatic setup:
+
+```bash
+npx astro add @unschema-graph/astro
+```
+
+Manual installation:
+
 ```bash
 # pnpm
 pnpm add @unschema-graph/astro zod
@@ -33,7 +41,7 @@ Add the integration in `astro.config.mjs` to enable automatic `baseUrl` inferenc
 
 ```javascript
 // astro.config.mjs
-import schemaGraph from '@unschema-graph/astro/integration';
+import schemaGraph from '@unschema-graph/astro';
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
@@ -46,6 +54,8 @@ export default defineConfig({
   ],
 });
 ```
+
+The named `schemaGraph` export and the `@unschema-graph/astro/integration` subpath remain supported.
 
 The integration stores these defaults in Core's module-level global configuration. During Astro
 rendering, `baseUrl` resolves in this order: component prop, integration/global default, then

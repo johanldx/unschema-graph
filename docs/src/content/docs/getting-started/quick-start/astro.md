@@ -12,11 +12,30 @@ You need Node.js 22.12 or newer and an Astro 5, 6, or 7 project.
 
 ## 1. Install
 
+For automatic installation and configuration:
+
+```bash
+npx astro add @unschema-graph/astro
+```
+
+Or install the package manually:
+
 ```bash
 pnpm add @unschema-graph/astro zod
 ```
 
 Using npm, yarn, or bun? See [all installation commands](/getting-started/installation/).
+
+For a manual integration setup, register the package root in `astro.config.mjs`:
+
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import schemaGraph from '@unschema-graph/astro';
+
+export default defineConfig({
+  integrations: [schemaGraph()],
+});
+```
 
 ## 2. Add an Article
 

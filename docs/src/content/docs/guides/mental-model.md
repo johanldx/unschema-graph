@@ -126,7 +126,7 @@ Passing just `webpage` automatically traverses `isPartOf` and `publisher`, disco
 
 ## Framework integrations
 
-In Astro and Svelte 5, the `<Schema />` component executes this pipeline during static build (SSG) or server-side rendering (SSR), outputting the sanitized `<script type="application/ld+json">` tag directly into the document `<head>` with **0 kB** of client-side JavaScript:
+During static build (SSG) or server-side rendering (SSR), the `<Schema />` component executes this pipeline, outputting the sanitized `<script type="application/ld+json">` tag directly into the document `<head>` (adding **0 kB** of client-side JavaScript in Astro):
 
 ```astro title="src/pages/index.astro"
 ---

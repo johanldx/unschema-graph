@@ -87,8 +87,8 @@ const article = $derived(
 
 In SvelteKit, structured data rendered by `<Schema />` is serialized during Server-Side Rendering (SSR) and included in the initial HTML payload sent to crawlers and search engine bots.
 Each component instance emits exactly one JSON-LD script in `<svelte:head>`. The component
-uses no effects, lifecycle hooks, DOM listeners, or browser globals; only prop-driven
-head updates participate in client reactivity.
+has no browser-only dependency or effect of its own, but participates in normal Svelte runtime/hydration
+when the application uses client-side navigation or reactive updates.
 
 ### Global Layout Pattern (`+layout.svelte`)
 

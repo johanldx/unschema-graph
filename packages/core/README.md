@@ -5,7 +5,7 @@
 
 Framework-independent Schema.org JSON-LD builders, runtime Zod validation, `@graph` resolution, Unicode anti-XSS serialization, duration parsing, and static HTML auditing.
 
-`@unschema-graph/core` is the engine behind `@unschema-graph/astro` and `@unschema-graph/svelte`. It can also be used directly in any Node.js, Bun, Deno, or front-end application.
+`@unschema-graph/core` is the engine behind `@unschema-graph/astro` and `@unschema-graph/svelte`. The framework-neutral Core root export does not depend on Node built-ins and is suitable for browser/server runtimes. The maintained compatibility matrix is tested primarily on Node; Bun and Deno usage is best-effort unless explicitly listed in the compatibility matrix.
 
 ---
 
@@ -82,11 +82,13 @@ if (result.success) {
 
 ## Static Build Audit CLI
 
-The package provides a built-in static audit CLI to inspect built HTML files (in `dist/` or `build/`):
+The package provides a built-in static audit CLI to perform structural JSON-LD and `@graph` checks on built HTML files (in `dist/` or `build/`):
 
 ```bash
 npx @unschema-graph/core audit dist
 ```
+
+It inspects JSON-LD script blocks, parses JSON syntax, verifies `@context` and `@type` presence, and checks internal reference integrity without claiming full semantic or Google Rich Result eligibility validation.
 
 You can also import the Node-only audit API directly in scripts:
 
@@ -105,8 +107,10 @@ console.log(`Scanned ${report.scannedFiles} HTML files with ${report.errors.leng
 | :--- | :--- | :--- |
 | **Node.js** | `>=22.12.0` | Oldest maintained LTS baseline tested in CI; required for tooling and `@unschema-graph/core/audit`. |
 | **Zod** | `^4.6.0` | Peer dependency for runtime validation. |
-| **TypeScript** | `>=5.0` | Strict mode recommended. |
+| **TypeScript** | Project compiler | Strict mode recommended; generated declarations are tested through package consumers. |
 | **Browser** | Modern browsers | Root export is pure TypeScript/JavaScript with zero Node built-ins. |
+
+The framework-neutral Core root export does not depend on Node built-ins and is suitable for browser/server runtimes. The maintained compatibility matrix is tested primarily on Node; Bun and Deno usage is best-effort unless explicitly listed in the compatibility matrix. Note that `@unschema-graph/core/audit` relies on Node filesystem APIs and is strictly Node-only.
 
 Built-in schemas model a curated subset of the Schema.org `30.1` vocabulary baseline;
 this is not a claim of complete vocabulary or Google rich-result coverage.

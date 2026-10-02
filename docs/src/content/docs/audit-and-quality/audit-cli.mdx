@@ -32,7 +32,7 @@ yarn unschema-graph audit dist
 **bun**
 
 ```bash
-bunx unschema-graph audit dist
+bunx @unschema-graph/core audit dist
 ```
 
 
@@ -67,15 +67,26 @@ In the `unschema-graph` repository, the root scripts deliberately separate the t
 
 ## 2. What the Audit Validates
 
-The audit engine runs thorough structural checks across all compiled output:
+The audit engine performs structural and graph-level verification across all compiled output:
 
-1. **HTML File Discovery:** Recursively scans directories to locate every generated `.html` file.
-2. **Robust Tag Extraction:** Parses real HTML syntax and finds LD+JSON script tags regardless of attribute order or casing.
-3. **JSON Syntax:** Confirms that each block is well-formed JSON without truncation or parse errors.
-4. **Root Context Check:** Ensures `@context` is present and targets `https://schema.org` (or `http://schema.org`).
-5. **Entity Type Validation:** Verifies that root nodes contain a valid `@type` or a valid `@graph` array containing typed entities.
-6. **Detailed Reporting:** Outputs the number of scanned files, total JSON-LD blocks, total entities detected, and any actionable errors with exact file paths.
-7. **Graph Integrity:** Detects broken local `@id` references, duplicate declarations, and conflicting values for the same ID.
+1. **HTML File Discovery:** Recursively scans directories to discover every `.html` file.
+2. **Script Block Extraction:** Detects `<script type="application/ld+json">` blocks across discovered HTML files.
+3. **JSON Syntax Validation:** Confirms that each block is well-formed JSON without truncation or syntax errors.
+4. **Root Context Presence:** Checks the presence of the required `@context` property.
+5. **Entity Node Type Presence:** Verifies that root entities and `@graph` nodes declare a `@type` property.
+6. **Graph Structure Integrity:** Detects malformed graph payloads (such as non-array `@graph` properties).
+7. **Local Reference Resolution:** Detects broken provably-local references (`#id` or same-document URIs).
+8. **Identity and Conflict Detection:** Identifies duplicate `@id` declarations and conflicting values for identical IDs.
+9. **Deterministic Reporting:** Emits structured diagnostics with exact file paths, codes, and severity levels.
+10. **Strict Enforcement:** Supports a strict warnings-as-errors mode (`--strict`) for release gates and CI.
+
+### Explicit Non-Goals
+
+The audit focuses strictly on JSON-LD structure and internal graph integrity. As detailed in [Known Limitations](/operations/known-limitations/), the audit does **not** provide:
+- Full Schema.org vocabulary or property-range semantic validation.
+- Verification of HTML syntax conformance or full DOM parsing.
+- Google Rich Result eligibility or search display guarantees.
+- External URL reachability or network-level checks.
 
 ---
 

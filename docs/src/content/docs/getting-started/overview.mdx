@@ -25,9 +25,9 @@ directly to the [Astro quick start](/getting-started/quick-start/astro/).
 
 ## Core Pillars
 
-### Zero Client JavaScript (0 kB)
+### Server-First with Zero Client JS in Astro
 
-Structured data belongs exclusively in the HTML `<head>`. Our components render during static build (SSG) or server-side rendering (SSR), adding **0 kB** to your client bundle.
+Structured data is rendered server-side or during static build. In Astro, the `<Schema />` component emits static JSON-LD without hydration directives, adding **0 kB** to your client bundle. In Svelte 5, the component integrates with framework reactivity for dynamic updates without browser-only dependencies.
 
 ### Strict Zod Builders
 
@@ -56,7 +56,7 @@ Generating structured data manually or with loose TypeScript definitions often l
 | **XSS sanitization (`</script>`)** | Manual | ❌ | ✅ (Automatic Unicode escaping) |
 | **Astro Dev Toolbar inspector** | ❌ | ❌ | ✅ (Live interactive debugger) |
 | **Svelte 5 runes support** | ❌ | ❌ | ✅ (Native `$props` & `$derived`) |
-| **Client bundle cost** | 0 kB | 0 kB | **0 kB** |
+| **Client bundle cost** | 0 kB | 0 kB | **0 kB in Astro / native Svelte** |
 
 ---
 
@@ -101,7 +101,7 @@ The journey of your data from page source to the final HTML `<script>`:
                             │
                             ▼
 ┌────────────────────────────────────────────────────────┐
-│  HTML <script type="application/ld+json">              │  ◄── Injected in SSR / Static <head> (0 kB JS)
+│  HTML <script type="application/ld+json">              │  ◄── Injected in SSR / Static <head> (0 kB JS in Astro)
 └────────────────────────────────────────────────────────┘
 ```
 

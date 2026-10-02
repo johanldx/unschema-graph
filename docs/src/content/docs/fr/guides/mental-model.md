@@ -126,7 +126,7 @@ En recevant seulement `webpage`, le moteur parcourt récursivement `isPartOf` et
 
 ## Intégrations aux frameworks
 
-Dans Astro et Svelte 5, le composant `<Schema />` exécute ce pipeline lors de la compilation statique (SSG) ou du rendu serveur (SSR), injectant la balise sécurisée `<script type="application/ld+json">` directement dans le `<head>` sans aucun JavaScript côté client (**0 kB**) :
+Lors de la compilation statique (SSG) ou du rendu serveur (SSR), le composant `<Schema />` exécute ce pipeline, injectant la balise sécurisée `<script type="application/ld+json">` directement dans le `<head>` (avec **0 kB** de JavaScript côté client sous Astro) :
 
 ```astro title="src/pages/index.astro"
 ---

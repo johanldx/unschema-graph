@@ -48,7 +48,7 @@ Register the integration in `astro.config.mjs`:
 
 ```js title="astro.config.mjs"
 import { defineConfig } from 'astro/config';
-import { schemaGraph } from '@unschema-graph/astro';
+import schemaGraph from '@unschema-graph/astro';
 
 export default defineConfig({
   site: 'https://example.com',
@@ -60,6 +60,8 @@ export default defineConfig({
   ],
 });
 ```
+
+The named `schemaGraph` export remains available for existing configurations.
 
 ### Options Reference
 

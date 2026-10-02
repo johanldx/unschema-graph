@@ -32,7 +32,7 @@ yarn unschema-graph audit dist
 **bun**
 
 ```bash
-bunx unschema-graph audit dist
+bunx @unschema-graph/core audit dist
 ```
 
 
@@ -67,15 +67,26 @@ Dans le dépôt `unschema-graph`, les scripts racine séparent volontairement le
 
 ## 2. Vérifications effectuées
 
-Le moteur d'audit applique des contrôles structurels stricts sur tous les fichiers générés :
+Le moteur d'audit effectue un contrôle structurel et d'intégrité de graphe sur tous les fichiers générés :
 
-1. **Découverte récursive des fichiers HTML :** Analyse l'ensemble des sous-dossiers pour identifier chaque page `.html`.
-2. **Extraction HTML robuste :** Parse le HTML réel pour extraire les balises script LD+JSON quel que soit l'ordre ou la casse des attributs.
-3. **Syntaxe JSON :** Vérifie que chaque bloc est un JSON valide et complet sans troncature.
-4. **Conformité du contexte racine :** S'assure que `@context` pointe vers `https://schema.org` (ou `http://schema.org`).
-5. **Validation des types d'entités :** Contrôle que chaque nœud racine possède un `@type` valide ou un tableau `@graph` d'entités typées.
-6. **Rapport détaillé :** Affiche le nombre de fichiers analysés, les blocs JSON-LD trouvés, le total d'entités et la liste des erreurs avec les chemins de fichiers exacts.
-7. **Intégrité du graphe :** Détecte les références `@id` locales cassées, les déclarations dupliquées et les valeurs conflictuelles pour un même ID.
+1. **Découverte récursive des fichiers HTML :** Analyse l'ensemble des dossiers pour identifier chaque fichier `.html`.
+2. **Détection des blocs de script :** Détecte les balises `<script type="application/ld+json">` dans les fichiers HTML découverts.
+3. **Validation syntaxique JSON :** Vérifie que chaque bloc est un JSON valide et complet sans erreur de parsing.
+4. **Présence du contexte racine :** Contrôle la présence de la propriété requise `@context`.
+5. **Présence de @type sur les nœuds :** Vérifie que les entités racine et les nœuds du tableau `@graph` déclarent une propriété `@type`.
+6. **Intégrité de la structure de graphe :** Détecte les structures de graphe malformées (ex. propriété `@graph` non-tableau).
+7. **Résolution des références locales :** Détecte les références locales cassées (`#id` ou URIs du même document).
+8. **Détection des identifiants et conflits :** Identifie les doublons d'identifiants (`@id`) et les valeurs conflictuelles pour un même ID.
+9. **Rapports déterministes :** Émet des diagnostics structurés avec chemins de fichiers exacts, codes d'erreur et niveaux de sévérité.
+10. **Mode strict :** Prend en charge un mode transformant les avertissements en erreurs (`--strict`) pour la CI et les contrôles de publication.
+
+### Limites et non-objectifs explicites
+
+L'audit est intentionnellement centré sur la structure du JSON-LD et l'intégrité du graphe. Comme précisé dans la page [Limites connues](/fr/operations/known-limitations/), l'audit ne garantit **pas** :
+- Une validation sémantique complète de tout le vocabulaire ou des types de propriétés Schema.org.
+- Une conformité syntaxique HTML complète ou un parsing DOM complet.
+- L'éligibilité aux Google Rich Results ou l'affichage dans les moteurs de recherche.
+- L'accessibilité réseau des URLs externes.
 
 ---
 

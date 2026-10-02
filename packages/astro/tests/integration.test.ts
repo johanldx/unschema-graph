@@ -1,4 +1,5 @@
-import schemaGraph from '@unschema-graph/astro/integration';
+import integration, { schemaGraph } from '@unschema-graph/astro';
+import integrationSubpath from '@unschema-graph/astro/integration';
 import {
   buildJsonLdGraph,
   GoogleArticle,
@@ -114,6 +115,12 @@ describe('Astro Integration & @id Resolution', () => {
   });
 
   describe('schemaGraph Integration', () => {
+    it('exposes the same integration from the root and integration subpath', () => {
+      expect(typeof integration).toBe('function');
+      expect(integration).toBe(schemaGraph);
+      expect(integrationSubpath).toBe(schemaGraph);
+    });
+
     it('returns a properly structured Astro integration', () => {
       const integration = schemaGraph({
         baseUrl: 'https://mon-site.fr',

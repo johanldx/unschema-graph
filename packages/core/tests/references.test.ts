@@ -206,6 +206,72 @@ describe('entity relationships', () => {
     );
   });
 
+  it('rejects ambiguous relation objects containing entity data without @type', () => {
+    expect(() =>
+      ProfilePage({
+        mainEntity: {
+          '@id': '#ada',
+          name: 'Ada Lovelace',
+        },
+      })
+    ).toThrow(/Invalid entity relationship/);
+
+    expect(() =>
+      ProfilePage({
+        mainEntity: {
+          name: 'Ada Lovelace',
+        },
+      })
+    ).toThrow(/Invalid entity relationship/);
+
+    expect(
+      ProfilePage({
+        mainEntity: {
+          '@id': '#ada',
+        },
+      }).mainEntity
+    ).toEqual({
+      '@id': '#ada',
+    });
+
+    expect(
+      ProfilePage({
+        mainEntity: Person({
+          '@id': '#ada',
+          name: 'Ada Lovelace',
+        }),
+      }).mainEntity
+    ).toEqual({
+      '@type': 'Person',
+      '@id': '#ada',
+      name: 'Ada Lovelace',
+    });
+
+    expect(
+      ProfilePage({
+        mainEntity: {
+          '@type': 'Person',
+          '@id': '#ada',
+          name: 'Ada Lovelace',
+        },
+      }).mainEntity
+    ).toMatchObject({
+      '@type': 'Person',
+      '@id': '#ada',
+      name: 'Ada Lovelace',
+    });
+
+    expect(() =>
+      ProfilePage({
+        mainEntity: {
+          '@type': 'Product',
+          '@id': '#product',
+          name: 'Keyboard',
+        },
+      })
+    ).toThrow(/Invalid entity relationship/);
+  });
+
   it('normalizes ProfilePage.mainEntity entity, string ID, and @id object forms', () => {
     const person = Person({ '@id': '#person', name: 'Ada' });
 

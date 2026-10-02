@@ -124,8 +124,11 @@ Le contrat propre à Svelte comprend `Schema` et le réexport complet du Core. S
 `context`, `graph`, `baseUrl`, `inLanguage`), utilise `svelte:head`, prend en charge le SSR
 et SvelteKit et ne requiert aucun JavaScript client pour une entrée statique.
 
-Les fonctions utilitaires internes et les schémas bas niveau non listés ci-dessus sont considérés comme des détails d’implémentation
-et ne doivent pas être importés directement. Fiez-vous toujours à la surface publique documentée.
+Bien que les exports racine réexportent actuellement plusieurs schémas et fonctions bas niveau (comme
+`EntityIdSchema`, `isIdReference`, `resolveId`), les symboles non listés dans la surface garantie ci-dessus
+sont considérés comme des détails d'implémentation pour la version `0.9.0`. Avant `1.0.0-rc.1`, les exports
+racine seront audités et figés : soit l'intégralité des symboles exportés sera garantie sous SemVer, soit
+les exports racine seront restreints strictement à l'API publique documentée. Fiez-vous toujours à la surface publique documentée.
 
 ## Politique de versionnage sémantique sous `1.x`
 

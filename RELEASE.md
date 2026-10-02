@@ -71,6 +71,13 @@ commit before invoking `changeset publish`.
 
 When ready to publish a Release Candidate:
 
+### Step 3.0: Public API Contract Review (Pre-RC Gate)
+
+Before cutting `1.0.0-rc.1`:
+Audit root exports across all packages (`@unschema-graph/core`, `@unschema-graph/astro`, `@unschema-graph/svelte`) and either:
+- **Option A:** Guarantee every exported symbol under Semantic Versioning.
+- **Option B (Recommended):** Narrow root exports to the intended public API surface and move internal helpers (`EntityIdSchema`, `isIdReference`, `resolveId`, etc.) to internal or private subpaths.
+
 ### Step 3.1: Enter Pre-Release Mode
 
 ```bash

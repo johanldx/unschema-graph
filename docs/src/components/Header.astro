@@ -189,24 +189,24 @@ try {
     </div>
 
     {!hasSidebar && (
-      <details class="mobile-nav">
-        <summary aria-label={isFr ? 'Ouvrir la navigation' : 'Open navigation'}>
-          <svg class="menu-open" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16"></path>
-          </svg>
-          <svg class="menu-close" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m6 6 12 12M18 6 6 18"></path>
-          </svg>
-        </summary>
-        <nav class="mobile-nav-panel" aria-label={isFr ? 'Navigation mobile' : 'Mobile navigation'}>
-          {links.map((link) => (
-            <a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>
-              {link.label}
-            </a>
-          ))}
-        </nav>
-      </details>
-    )}
+  <details class="mobile-nav">
+    <summary aria-label={isFr ? 'Ouvrir la navigation' : 'Open navigation'}>
+      <svg class="menu-open" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16"></path>
+      </svg>
+      <svg class="menu-close" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18"></path>
+      </svg>
+    </summary>
+    <nav class="mobile-nav-panel" aria-label={isFr ? 'Navigation mobile' : 'Mobile navigation'}>
+      {links.map((link) => (
+        <a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  </details>
+)}
   </div>
 </div>
 

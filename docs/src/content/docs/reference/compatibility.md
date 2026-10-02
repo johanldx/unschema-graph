@@ -124,8 +124,11 @@ The Svelte-specific contract includes `Schema` and the complete Core re-export. 
 `indent`, `context`, `graph`, `baseUrl`, `inLanguage`), renders through `svelte:head`,
 supports SSR and SvelteKit, and requires no client JavaScript for static input.
 
-Internal helper functions and low-level schemas not listed above are considered implementation details
-and should not be imported directly. Always rely on the documented public surface.
+While root barrel exports currently re-export various lower-level schemas and helpers (such as
+`EntityIdSchema`, `isIdReference`, `resolveId`), symbols not listed in the guaranteed surface above
+are considered implementation details for `0.9.0`. Before `1.0.0-rc.1`, package root exports will be
+audited and frozen: either all exported symbols will be guaranteed under SemVer, or root exports will
+be restricted strictly to the documented public API. Always rely on the documented public surface.
 
 ## Semantic Versioning policy in `1.x`
 

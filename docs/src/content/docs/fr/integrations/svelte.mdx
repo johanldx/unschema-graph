@@ -87,8 +87,9 @@ const article = $derived(
 
 Dans SvelteKit, les données structurées générées par `<Schema />` sont sérialisées au moment du rendu serveur (SSR) et directement incluses dans le HTML initial reçu par les moteurs de recherche.
 Chaque instance du composant émet exactement un script JSON-LD dans `<svelte:head>`. Le
-composant n’utilise ni effet, ni hook de cycle de vie, ni listener DOM, ni globale du
-navigateur ; seules les mises à jour du head pilotées par les props sont réactives.
+composant n’a aucune dépendance exclusive au navigateur ni d'effet propre, mais participe au
+runtime et à l'hydratation normaux de Svelte lorsque l'application utilise la navigation côté client
+ou des mises à jour réactives.
 
 ### Modèle de Layout global (`+layout.svelte`)
 

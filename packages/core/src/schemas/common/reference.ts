@@ -135,8 +135,32 @@ export function entityRef<const TSchemas extends EntitySchemas>({
     }
 
     const parsed = result.data;
-    if (parsed && typeof parsed === 'object' && '@type' in parsed) {
-      const rawType = parsed['@type'];
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const record = parsed as Record<string, unknown>;
+      const keys = Object.keys(record);
+
+      const isPureIdReference =
+        keys.length === 1 && keys[0] === '@id' && typeof record['@id'] === 'string';
+
+      if (isPureIdReference) {
+        return parsed;
+      }
+
+      const rawType = record['@type'];
+      if (rawType === undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Invalid entity relationship',
+          params: {
+            kind: 'entity_relation',
+            expected,
+            received: 'object',
+            suggestion,
+          },
+        });
+        return z.NEVER;
+      }
+
       const entityTypes = Array.isArray(rawType) ? rawType : [rawType];
       if (!entityTypes.some((type) => typeof type === 'string' && types.includes(type))) {
         const received = entityTypes

@@ -113,7 +113,7 @@ chaîne uniquement dans un script `application/ld+json`.
 5. **1 stratégie d'URL / ID (`resolveId` / `resolveEntityIds`) :** Une séparation sémantique stricte entre URLs web (`url`, `sameAs`) et identifiants d'entités (`@id`), préservant les URIs externes.
 6. **1 politique inline vs node :** Seule l'identité détermine le hissage. Toute entité dotée d'un `@id` devient un nœud racine de `@graph` ; les value objects sans `@id` restent imbriqués inline dans leur parent.
 7. **1 politique de validation :** Validation Schema.org stricte appliquée à la compilation via TypeScript et à l'exécution via Zod, extensible via `withAdditionalProperties` et `defineSchema`.
-8. **1 moteur partagé entre les frameworks :** `@unschema-graph/astro` et `@unschema-graph/svelte` partagent exactement le même moteur `@unschema-graph/core` avec 0 kB de JavaScript côté client.
+8. **1 moteur partagé entre les frameworks :** `@unschema-graph/astro` et `@unschema-graph/svelte` partagent exactement le même moteur `@unschema-graph/core`, avec 0 kB de JavaScript client sous Astro et une réactivité native sous Svelte.
 
 ## Contrat stable et explication
 

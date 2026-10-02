@@ -24,14 +24,14 @@
 
 ## 🎯 What is unschema-graph?
 
-Search engines (Google, Bing) and AI search crawlers (Perplexity, ChatGPT Search) rely on **Schema.org JSON-LD** to understand your content, index entities, and award **Rich Results** (Articles, Products, Events, FAQs, Reviews, Breadcrumbs).
+Schema.org JSON-LD gives search engines (Google, Bing) and AI crawlers (Perplexity, ChatGPT Search) machine-readable information about the entities and relationships on a page. Search platforms may use structured data for enhanced features such as Rich Results (Articles, Products, Events, FAQs, Reviews, Breadcrumbs), but valid markup alone does not guarantee eligibility or display.
 
-However, writing JSON-LD by hand or using basic type definitions is a minefield:
-- ❌ **Silent validation failures:** A typo like `publsher` or a missing required property silently disqualifies your page from Google Rich Results without any warning in your build.
-- ❌ **Fragmented data silos:** Spitting out multiple disconnected `<script>` tags prevents search engines from understanding relationships between your authors, articles, organization, and products.
+However, writing JSON-LD by hand or using basic type definitions is error-prone:
+- ❌ **Silent validation failures:** A typo like `publsher` or a missing required property can invalidate your structured data without any warning during development or build time.
+- ❌ **Fragmented data silos:** Managing entities across independent JSON-LD blocks makes identity reuse, deduplication, and explicit relationships harder to maintain across your authors, articles, organization, and products.
 - ❌ **Subtle XSS vulnerabilities:** Using standard `JSON.stringify()` in HTML templates exposes your site to script breakout injections whenever untrusted user or CMS content contains `</script>`.
 
-**`unschema-graph` solves this completely.** It provides **51 Schema.org builders** validated at runtime by **Zod**, an automatic relational engine that resolves `#id` references into a **single, unified `@graph`**, and native components for **Astro**, **Svelte 5**, and **vanilla TypeScript**.
+**`unschema-graph` provides a typed and validated workflow for the parts it models.** It offers **51 Schema.org builders** validated at runtime by **Zod**, an automatic relational engine that resolves `#id` references into a **single, unified `@graph`**, and native components for **Astro**, **Svelte 5**, and **vanilla TypeScript**.
 
 ---
 
@@ -46,7 +46,7 @@ However, writing JSON-LD by hand or using basic type definitions is a minefield:
 | **Astro Dev Toolbar Inspector** | ❌ | ❌ | ❌ | **✅ Live in-browser debug panel** |
 | **Svelte 5 Runes Integration** | ❌ | ❌ | ❌ | **✅ Reactive `$derived` & `$props`** |
 | **Static HTML Audit CLI (CI/CD)** | ❌ | ❌ | ❌ | **✅ Zero-setup build verification** |
-| **Client Bundle Overhead** | 0 kB | 0 kB | 0–15 kB | **0 kB (100% build-time / SSR)** |
+| **Client Bundle Overhead** | 0 kB | 0 kB | 0–15 kB | **Astro: 0 kB / Svelte: native runtime** |
 
 ---
 
@@ -111,7 +111,7 @@ const jsonLd = serializeJsonLd(graph, { pretty: true });
 The curated builder catalog targets the Schema.org 30.1 vocabulary baseline and validates inputs synchronously. Explicitly named profiles such as `GoogleArticle` and `GoogleRecipe` add library-maintained Google constraints without implying rich-result eligibility.
 
 ### 2. 🕸️ Relational Graph Engine (`@graph`)
-Search engines love connected knowledge graphs. Pass entities directly as nested objects (`publisher: organization`) or reference them via `#id` fragments. `unschema-graph` automatically crawls the object graph, hoists shared nodes to the top level, resolves relative `#id` fragments against your canonical `baseUrl`, and merges duplicate entities deterministically into a single `@graph`.
+Connected knowledge graphs make relationships explicit. Pass entities directly as nested objects (`publisher: organization`) or reference them via `#id` fragments. `unschema-graph` automatically crawls the object graph, hoists shared nodes to the top level, resolves relative `#id` fragments against your canonical `baseUrl`, and merges duplicate entities deterministically into a single `@graph`.
 
 Relationship strings are explicit: fragments, paths, and absolute URIs become `@id`
 references. Plain names expand only when the relationship defines an unambiguous fallback type;
@@ -120,11 +120,11 @@ otherwise, pass a typed entity or an explicit `@id` reference.
 ### 3. 🔒 Zero-Trust Anti-XSS Protection
 Never inject unescaped JSON into your HTML. Our serializer substitutes `<` and `>` with Unicode escapes (`\u003c`, `\u003e`), guaranteeing that untrusted CMS fields or comments cannot break out of `<script>` blocks or execute arbitrary JavaScript.
 
-### 4. 🪶 0 kB Client JavaScript
-Structured data is exclusively parsed and rendered at compile time (SSG) or during server-side rendering (SSR). It adds **exactly zero bytes** to your client-side JavaScript bundles.
+### 4. 🪶 Server-First Rendering with Zero Client JS in Astro
+Structured data is processed server-side or during static build. In Astro, the `<Schema />` component renders static HTML with no client directive and adds **0 kB** of client JavaScript. Core has no client runtime requirement when used during build/SSR. In Svelte, the component integrates with native reactivity and participates in standard hydration and client-side navigation.
 
 ### 5. 🔍 Built-in CI/CD Audit CLI
-Run `npx @unschema-graph/core audit dist` in your deployment pipeline. The CLI crawls your generated HTML, extracts JSON-LD blocks, verifies graph integrity, checks for broken references, and validates Schema.org semantics before you deploy. In this repository, `pnpm run audit` is the warning-friendly development check, while CI and `pnpm run release:check` use `pnpm run audit:strict` so every warning blocks publication.
+Run `npx @unschema-graph/core audit dist` in your deployment pipeline. The CLI discovers generated HTML files, extracts JSON-LD blocks, checks graph integrity, detects broken local references, duplicate IDs, and structural conflicts before deployment. In this repository, `pnpm run audit` is the warning-friendly development check, while CI and `pnpm run release:check` use `pnpm run audit:strict` so every warning blocks publication.
 
 ### 6. 🛠️ Astro Dev Toolbar & Svelte 5 Runes
 - **Astro:** Zero-configuration `<Schema />` component, automatic canonical URL resolution from `astro.config.mjs`, and an interactive **Dev Toolbar** app to inspect entities directly in your browser.

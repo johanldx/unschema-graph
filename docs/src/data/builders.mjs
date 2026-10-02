@@ -350,7 +350,7 @@ export const builderGroups = [
         slug: 'profile-page',
         required: ['mainEntity'],
         optional: ['dateCreated', 'dateModified', 'inLanguage'],
-        input: { mainEntity: { name: 'Ada Lovelace' } },
+        input: { mainEntity: { '@type': 'Person', name: 'Ada Lovelace' } },
         summary: 'Creates a ProfilePage for a Person or Organization.',
       },
       {
