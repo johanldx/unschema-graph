@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { builders } from '../src/data/builders.mjs';
 
-const publicDir = resolve('public');
+const publicDir = resolve(import.meta.dirname, '../public');
 const documentationOrigin = 'https://unschema-graph.jhdx.dev';
 const markdown = (path) => `${documentationOrigin}/${path}.md`;
 
@@ -13,7 +13,7 @@ const content = `# unschema-graph
 - Documentation: ${documentationOrigin}/
 - GitHub: https://github.com/johanldx/unschema-graph
 - License: MIT
-- Status: 0.9.0 (v1 stabilization candidate)
+- Status: 0.10.0 (public API freeze)
 
 ## Choose the package
 
